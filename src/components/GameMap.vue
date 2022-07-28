@@ -1,6 +1,6 @@
 <template>
     <div class="gamemap" ref="parent">
-        <canvas ref="canvas" tabindex="0"></canvas>
+        <canvas ref="canvas" tabindex="0" @contextmenu.prevent=""></canvas>
     </div>
 </template>
 
@@ -33,5 +33,9 @@ div.gamemap {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+div.gamemap > canvas {
+    outline:none;
 }
 </style>
