@@ -31,7 +31,6 @@ export class Player extends AcGameObject {
             });
             this.gamemap.currentChess = chess;
             this.gamemap.chesses.push(chess);
-            console.log(this.gamemap.chesses)
             this.gamemap.judge();
         });
     }

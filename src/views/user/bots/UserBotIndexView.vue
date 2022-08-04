@@ -12,6 +12,12 @@ export default {
     components: {
         ContentField,
     },
+    setup() {
+        
+        return {
+
+        }
+    }
 }
 </script>
 
