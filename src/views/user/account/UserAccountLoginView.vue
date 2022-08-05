@@ -45,6 +45,7 @@ export default {
                 access,
                 refresh,
             })
+            store.dispatch("refresh_access", refresh);
             store.dispatch("getinfo", {
                 success() {
                     router.push({name: "home"});
@@ -52,6 +53,7 @@ export default {
                 },
                 error() {
                     store.commit("updatePullingInfo", false);
+                    localStorage.clear();
                 }
             })
         } else {

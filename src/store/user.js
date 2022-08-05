@@ -6,9 +6,10 @@ export default {
         username: "",
         photo: "",
         access: "",
-        refresh: "",    // ToDo: 刷新Token
+        refresh: "",
         is_login: false,
         pulling_info: true, // 是否在拉取信息
+        interval_func: 0,
     },
     getters: {
     },
@@ -35,7 +36,15 @@ export default {
         },
         updatePullingInfo(state, pulling_info) {
             state.pulling_info = pulling_info;
-        }
+        },
+        setIntervalFunc(state, interval_func) {
+            let t = localStorage.getItem('interval_func');
+            if(t !== null) {
+                clearInterval(t);
+            }
+            state.interval_func = interval_func;
+            localStorage.setItem("setIntervalFunc", interval_func);
+        },
     },
     actions: {
         login(context, data) {
@@ -48,6 +57,7 @@ export default {
                 },
                 success(resp) {
                     context.commit("updateToken", resp);
+                    context.dispatch("refresh_access", resp.refresh);
                     data.success(resp);
                 },
                 error(resp) {
@@ -81,8 +91,26 @@ export default {
         logout(context) {
             localStorage.removeItem("aigame.access");
             localStorage.removeItem("aigame.refresh");
+            
+            clearInterval(localStorage.getItem("setIntervalFunc"));
             context.commit("logout");
-        }
+        },
+        refresh_access(context, refresh) {
+            // 每4.5min刷新jwt
+            let func = setInterval(() => {
+                $.ajax({
+                    url: "https://aigame.zzqahm.top/player/token/refresh/",
+                    type: "post",
+                    data: {
+                        refresh: refresh,
+                    },
+                    success(resp) {
+                        context.state.access = resp.access;
+                    }
+                });
+            }, 4.5 * 60 * 1000);
+            context.commit("setIntervalFunc", func);
+        },    
     },
     modules: {
     }
