@@ -16,6 +16,12 @@
                     <li class="nav-item">
                         <router-link :class="route_name == 'ranklist_index' ? 'nav-link active' : 'nav-link' " :to="{name: 'ranklist_index'}">排行榜</router-link>
                     </li>
+                    <li class="nav-item">
+                        <router-link :class="route_name == 'discussion_index' ? 'nav-link active' : 'nav-link' " :to="{name: 'discussion_index'}">讨论区</router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link :class="route_name == 'message_board_index' ? 'nav-link active' : 'nav-link' " :to="{name: 'message_board_index'}">留言板</router-link>
+                    </li>
                 </ul>
                 <ul class="navbar-nav" v-if="$store.state.user.is_login">
                     <li class="nav-item dropdown">
