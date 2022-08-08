@@ -46,6 +46,7 @@ export default {
                 refresh,
             })
             store.dispatch("refresh_access", refresh);
+            // TODO：虽然定时更新了Token，但是还是获取不了信息
             store.dispatch("getinfo", {
                 success() {
                     router.push({name: "home"});

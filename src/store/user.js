@@ -102,10 +102,17 @@ export default {
                     url: "https://aigame.zzqahm.top/player/token/refresh/",
                     type: "post",
                     data: {
-                        refresh: refresh,
+                        refresh,
                     },
                     success(resp) {
-                        context.state.access = resp.access;
+                        // 若直接更新state更新不成功，需要使用mutations中的方法进行更新
+                        context.commit("updateToken", {
+                            access: resp.access,
+                            refresh,
+                        });
+                    },
+                    error(resp) {
+                        console.log(resp);
                     }
                 });
             }, 4.5 * 60 * 1000);
