@@ -22,6 +22,7 @@ class GetListByGameView(APIView):
         resp = []
         for bot in bots:
             resp.append({
+                'id': bot.id,
                 'game': bot.game.name,
                 'title': bot.title,
                 'description': bot.description,
