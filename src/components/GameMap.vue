@@ -1,6 +1,6 @@
 <template>
     <div class="gamemap" ref="parent">
-        <canvas ref="canvas" tabindex="0" @contextmenu.prevent=""></canvas>
+        <canvas ref="canvas" tabindex="0" @contextmenu.prevent="" style="height: 100%;"></canvas>
     </div>
 </template>
 

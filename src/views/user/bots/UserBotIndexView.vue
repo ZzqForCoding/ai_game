@@ -1,159 +1,277 @@
 <template>
-    <div class="container">
-        <div class="row">
-            <div class="col-3">
-                <div class="card">
-                    <div class="card-body">
-                        <img :src="$store.state.user.photo" alt="" style="width: 100%;">
-                    </div>
+    <el-row style="margin-top: 40px;">
+        <el-col :span="5" :offset="2">
+            <!-- 个人信息 -->
+            <el-card class="profile-card" shadow="always">
+                <div class="background">
                 </div>
-            </div>
-            <div class="col-9">
-                <div class="card">
-                    <div class="card-header">
-                        <span style="font-size: 130%;">我的Bot</span>
-                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#add-bot">
-                            创建Bot
-                        </button>
-                        <!-- Modal -->
-                        <div class="modal fade" id="add-bot" tabindex="-1">
-                            <div class="modal-dialog modal-xl">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">创建Bot</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label for="add-bot-title" class="form-label">名称</label>
-                                            <input v-model="bot.title" type="text" class="form-control" id="add-bot-title" placeholder="请输入Bot名称">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="add-bot-game" class="form-label">游戏</label>
-                                            <select v-model="bot.game" id="add-bot-game" class="form-select">
-                                                <option value="0" selected>请选择游戏</option>
-                                                <option :key="game.id" :value="game.id" v-for="game in games">{{ game.name }}</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="add-bot-description" class="form-label">简介</label>
-                                            <input v-model="bot.description" type="text" class="form-control" id="add-bot-description" placeholder="请输入Bot简介">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">代码</label>
-                                            <VAceEditor
-                                                v-model:value="bot.content"
-                                                @init="editorInit"
-                                                lang="c_cpp"
-                                                theme="textmate"
-                                                style="height: 300px" />
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" @click="add_bot">创建</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                                    </div>
+                <div class="content">
+                    <el-row>
+                        <el-col :span="6" :offset="9">
+                                <div class="photo">
+                                    <img :src="$store.state.user.photo" alt="" class="">
+                                </div>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="20" :offset="2">
+                            <div class="username">
+                                {{ $store.state.user.username }}
+                            </div>
+        
+                            <div class="profession">
+                                Web Developer at Webestica
+                            </div>
+        
+                            <div class="description">
+                                I'd love to change the world, but they won’t give me the source code.
+                            </div>
+
+                            <div class="friend-num-container">
+                                <div>
+                                    <h6 class="num">256</h6>
+                                    <small class="text">Post</small>
+                                </div>
+                                <div class="vertical-divider"></div>
+                                <div>
+                                    <h6 class="num">2.5K</h6>
+                                    <small class="text">Followers</small>
+                                </div>
+                                <div class="vertical-divider"></div>
+                                <div>
+                                    <h6 class="num">365</h6>
+                                    <small class="text">Following</small>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>名称</th>
-                                    <th class="select-column">
-                                        <select class="game-selects" v-model="game_select">
-                                            <option value="0" selected>全部</option>
-                                            <option :key="game.id" :value="game.id" v-for="game in games">{{ game.name }}</option>
-                                        </select>
-                                    </th>
-                                    <th>创建时间</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="b in bots" :key="b.id">
-                                    <td>{{ b.title }}</td>
-                                    <td>{{ b.game }}</td>
-                                    <td>{{ b.createtime }}</td>
-                                    <td>
-                                        <button type="button" class="btn btn-secondary" style="margin-right: 10px;" data-bs-toggle="modal" :data-bs-target="'#update-bot-modal-' + b.id">修改</button>
 
-                                        <!-- Modal -->
-                                        <div class="modal fade" :id="'update-bot-modal-' + b.id" tabindex="-1">
-                                            <div class="modal-dialog modal-xl">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">修改Bot</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <label for="update-bot-title" class="form-label">名称</label>
-                                                            <input v-model="b.title" type="text" class="form-control" id="add-bot-title" placeholder="请输入Bot名称">
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="update-bot-description" class="form-label">简介</label>
-                                                            <input v-model="b.description" type="text" class="form-control" id="add-bot-description" placeholder="请输入Bot简介">
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">代码</label>
-                                                            <VAceEditor
-                                                                v-model:value="b.content"
-                                                                @init="editorInit"
-                                                                lang="c_cpp"
-                                                                theme="textmate"
-                                                                style="height: 300px" />
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" @click="update_bot(b)">保存修改</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" :data-bs-target="'#delete-bot-modal-' + b.id">删除</button>
-
-                                        <!-- Modal -->
-                                        <div class="modal fade" :id="'delete-bot-modal-' + b.id" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">删除Bot</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        确认删除名称为 {{ b.title }} 的Bot吗?
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-danger" @click="remove_bot(b)">确认删除</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                            <div class="horizontal-divider"></div>
+                        </el-col>
+                    </el-row>
                 </div>
-            </div>
-        </div>
-    </div>
+            </el-card>
+        </el-col>
+        <el-col :span="14" :offset="1">
+
+            <el-card shadow="always" class="bot-card">
+                <template #header>
+                    <div class="card-header">
+                        <span style="font-weight: 700; font-size: 18px;">我的Bot</span>
+                        <el-button type="primary" class="button" style="float: right;" size="small" plain @click="showCreateDialog = true">创造Bot</el-button>
+                        <!-- 创建模态框 -->
+                        <el-dialog v-model="showCreateDialog" title="创建Bot" @opened="openCodeDialog('-create')">
+                            <el-form
+                                label-position="top"
+                                label-width="100px"
+                                :model="formLabelAlign"
+                                style="max-width: 100%"
+                            > 
+                                <el-form-item label="名称">
+                                    <el-input v-model="bot.title" placeholder="请输入Bot名称" clearable />
+                                </el-form-item>
+                                <el-form-item label="游戏">
+                                    <el-radio-group v-model="bot.game">
+                                        <el-radio-button v-for="game in games" :key="game.id" :label="game.id">{{ game.name }}</el-radio-button>
+                                    </el-radio-group>
+                                </el-form-item>
+                    
+                                <el-form-item label="简介">
+                                    <el-input
+                                        v-model="bot.description"
+                                        :autosize="{ minRows: 3 }"
+                                        type="textarea"
+                                        placeholder="请输入Bot简介"
+                                    />
+                                </el-form-item>
+
+                                <el-form-item label="代码">
+                                    <div style="flex-grow: 1;" />
+                                    <span class="refresh" @click="refreshEditor">
+                                        <el-icon :size="25"><Refresh /></el-icon>
+                                    </span>
+
+                                    <el-dropdown>
+                                        <span class="gear">
+                                            <el-icon :size="25"><Tools /></el-icon>
+                                        </span>
+                                        <template #dropdown>
+                                            <el-dropdown-menu>
+                                                <el-form-item label="界面风格" style="margin: 15px 15px;">
+                                                    <el-radio-group v-model="skin" @change="changeEditSkin">
+                                                        <el-radio-button label="chrome">chrome</el-radio-button>
+                                                        <el-radio-button label="monokai">monokai</el-radio-button>
+                                                    </el-radio-group>
+                                                </el-form-item>
+                                                <el-form-item label="编辑类型" style="margin: 15px 15px;">
+                                                    <el-radio-group v-model="editor_mode" @change="changeEditMode">
+                                                        <el-radio-button label="vscode">Standard</el-radio-button>
+                                                        <el-radio-button label="vim">Vim</el-radio-button>
+                                                        <el-radio-button label="emacs">Emacs</el-radio-button>
+                                                    </el-radio-group>
+                                                </el-form-item>
+                                                <el-form-item label="缩进长度" style="margin: 15px 15px;">
+                                                    <el-radio-group v-model="editor_space" @change="changeEditorSpace">
+                                                        <el-radio-button label="2">2</el-radio-button>
+                                                        <el-radio-button label="4">4</el-radio-button>
+                                                        <el-radio-button label="8">8</el-radio-button>
+                                                    </el-radio-group>
+                                                </el-form-item>
+                                                <el-form-item label="字号" style="margin: 15px 15px;">
+                                                    <el-input-number
+                                                        v-model="fontsize"
+                                                        :min="5"
+                                                        :max="60"
+                                                        size="small"
+                                                        controls-position="right"
+                                                        @change="changeEditFont" />
+                                                </el-form-item>
+                                            </el-dropdown-menu>
+                                        </template>
+                                    </el-dropdown>
+
+                                    <VAceEditor
+                                        v-model:value="bot.content"
+                                        id="codeEditor-create"
+                                        @init="editorInit"
+                                        lang="c_cpp"
+                                        theme="textmate"
+                                        style="height: 300px; width: 100%;" />
+                                </el-form-item>
+                            </el-form>
+                            <template #footer>
+                                <span class="dialog-footer">
+                                    <el-button type="primary" @click="confirmCreateBot">创建</el-button>
+                                    <el-button @click="cancelCreateBot">取消</el-button>
+                                </span>
+                            </template>
+                        </el-dialog>
+                        <!-- 搜索框 -->
+                        <el-input style="margin-right: 10px; float: right;" v-model="search" clearable placeholder="Please search..." class="w-25" size="small" />
+                    </div>
+                </template>
+                <!-- 表格数据 -->
+                <el-table :data="filterBots"  stripe style="width: 100%" highlight-current-row border max-height="80vh">
+                    <el-table-column label="序号" type="index" width="60" />
+                    <el-table-column prop="title" label="名称" width="180" />
+                    <el-table-column prop="game" label="游戏" width="180" />
+                    <el-table-column prop="createtime" label="创建时间" sortable />
+                    
+                    <el-table-column fixed="right" label="Operations" width="200">
+                        <template #default="scope">
+                            <el-button @click="openEditBot(scope.row)" color="#626aef">修改</el-button>
+                            <el-button type="danger" @click="openDeleteBot(scope.row)">删除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                
+                <!-- 修改模态框 -->
+                <el-dialog v-model="showEditDialog" title="修改Bot" @opened="openCodeDialog('-edit')">
+                    <el-form
+                        label-position="top"
+                        label-width="100px"
+                        :model="formLabelAlign"
+                        style="max-width: 100%"
+                    > 
+                        <el-form-item label="名称">
+                            <el-input v-model="currentOpBot.title" placeholder="请输入Bot名称" clearable />
+                        </el-form-item>
+                        <el-form-item label="简介">
+                            <el-input
+                                v-model="currentOpBot.description"
+                                :autosize="{ minRows: 3 }"
+                                type="textarea"
+                                placeholder="请输入Bot简介"
+                            />
+                        </el-form-item>
+
+                        <el-form-item label="代码">
+                            <div style="flex-grow: 1;" />
+                            <span class="refresh" @click="refreshEditor">
+                                <el-icon :size="25"><Refresh /></el-icon>
+                            </span>
+
+                            <el-dropdown>
+                                <span class="gear">
+                                    <el-icon :size="25"><Tools /></el-icon>
+                                </span>
+                                <template #dropdown>
+                                    <el-dropdown-menu>
+                                        <el-form-item label="界面风格" style="margin: 15px 15px;">
+                                            <el-radio-group v-model="skin" @change="changeEditSkin">
+                                                <el-radio-button label="chrome">chrome</el-radio-button>
+                                                <el-radio-button label="monokai">monokai</el-radio-button>
+                                            </el-radio-group>
+                                        </el-form-item>
+                                        <el-form-item label="编辑类型" style="margin: 15px 15px;">
+                                            <el-radio-group v-model="editor_mode" @change="changeEditMode">
+                                                <el-radio-button label="vscode">Standard</el-radio-button>
+                                                <el-radio-button label="vim">Vim</el-radio-button>
+                                                <el-radio-button label="emacs">Emacs</el-radio-button>
+                                            </el-radio-group>
+                                        </el-form-item>
+                                        <el-form-item label="缩进长度" style="margin: 15px 15px;">
+                                            <el-radio-group v-model="editor_space" @change="changeEditorSpace">
+                                                <el-radio-button label="2">2</el-radio-button>
+                                                <el-radio-button label="4">4</el-radio-button>
+                                                <el-radio-button label="8">8</el-radio-button>
+                                            </el-radio-group>
+                                        </el-form-item>
+                                        <el-form-item label="字号" style="margin: 15px 15px;">
+                                            <el-input-number
+                                                v-model="fontsize"
+                                                :min="5"
+                                                :max="60"
+                                                size="small"
+                                                controls-position="right"
+                                                @change="changeEditFont" />
+                                        </el-form-item>
+                                    </el-dropdown-menu>
+                                </template>
+                            </el-dropdown>
+
+                            <VAceEditor
+                                v-model:value="currentOpBot.content"
+                                id="codeEditor-edit"
+                                @init="editorInit"
+                                lang="c_cpp"
+                                theme="textmate"
+                                style="height: 300px; width: 100%;" />
+                        </el-form-item>
+                    </el-form>
+                    <template #footer>
+                        <span class="dialog-footer">
+                            <el-button type="primary" @click="confirmEditBot">保存修改</el-button>
+                            <el-button @click="cancelEditBot">取消</el-button>
+                        </span>
+                    </template>
+                </el-dialog>
+
+                <!-- 删除模态框 -->
+                <el-dialog
+                    v-model="showDeleteDialog"
+                    title="删除bot"
+                    width="30%"
+                    :before-close="handleClose"
+                >
+                    <span>确认删除标题为 {{ currentOpBot.title }} 吗?</span>
+                    <template #footer>
+                    <span class="dialog-footer">
+                        <el-button type="primary" @click="confirmDeleteBot">确认删除</el-button>
+                        <el-button @click="cancelDeleteBot">取消</el-button>
+                    </span>
+                </template>
+          </el-dialog>
+            </el-card>
+        </el-col>
+    </el-row>
 </template>
 
 <script>
 import $ from 'jquery';
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
+import { ElMessage } from 'element-plus';
 import { VAceEditor } from 'vue3-ace-editor';
 import * as ace from 'ace-builds';
-import { Modal } from 'bootstrap/dist/js/bootstrap';
-import { ElMessage } from 'element-plus';
 
 export default {
     name: 'UserBotIndexView',
@@ -164,27 +282,76 @@ export default {
         ace.config.set(
             "basePath", 
             "https://cdn.jsdelivr.net/npm/ace-builds@" + require('ace-builds').version + "/src-noconflict/");
-
-        const editorInit = () => {
-            require("ace-builds/src-noconflict/ext-language_tools");
-            require("ace-builds/src-noconflict/snippets/sql");
-            require("ace-builds/src-noconflict/mode-sql");
-            require("ace-builds/src-noconflict/theme-monokai");
-            require("ace-builds/src-noconflict/mode-html");
-            require("ace-builds/src-noconflict/mode-html_elixir");
-            require("ace-builds/src-noconflict/mode-html_ruby");
-            require("ace-builds/src-noconflict/mode-javascript");
-            require("ace-builds/src-noconflict/mode-python");
-            require("ace-builds/src-noconflict/snippets/less");
-            require("ace-builds/src-noconflict/theme-chrome");
-            require("ace-builds/src-noconflict/ext-static_highlight");
-            require("ace-builds/src-noconflict/ext-beautify");
-        }
-
         const store = useStore();
         let bots = ref([]);
         let games = ref([]);
-        let game_select = ref(0);
+        let search = ref('');
+        let showCreateDialog = ref(false);
+        let showEditDialog = ref(false);
+        let showDeleteDialog = ref(false);
+        let currentOpBot = ref(null);
+        let editor = null;
+        let skin = ref('chrome');
+        let fontsize = ref(11);
+        let editor_mode = ref('vscode');
+        let editor_space = ref(4);
+        
+        const editorInit = (editor) => {
+            editor.renderer.setShowPrintMargin(false);
+        }
+
+        const initModal = () => {
+            if(localStorage.getItem("editor_skin_for_" + store.state.user.username) !== null) {
+                skin.value = localStorage.getItem("editor_skin_for_" + store.state.user.username);
+            }
+
+            if(localStorage.getItem("editor_fontsize_for_" + store.state.user.username) !== null) {
+                fontsize.value = parseInt(localStorage.getItem("editor_fontsize_for_" + store.state.user.username));
+            }
+
+            if(localStorage.getItem("editor_mode_for_" + store.state.user.username) !== null) {
+                editor_mode.value = localStorage.getItem("editor_mode_for_" + store.state.user.username);
+            }
+
+            if(localStorage.getItem("editor_space_for_" + store.state.user.username) !== null) {
+                editor_space.value = localStorage.getItem("editor_space_for_" + store.state.user.username)
+            }
+
+            editor.setOptions({
+                'fontSize': `${fontsize.value}pt`,
+                'tabSize': parseInt(editor_space.value),
+            });
+            editor.setKeyboardHandler("ace/keyboard/" + editor_mode.value);
+            editor.setTheme("ace/theme/" + skin.value);
+        }
+
+        const changeEditSkin = () => {
+            editor.setTheme("ace/theme/" + skin.value);
+            localStorage.setItem("editor_skin_for_" + store.state.user.username, skin.value);
+        }
+
+        const changeEditFont = num => {
+            editor.setOptions({
+                'fontSize': `${num}pt`,
+            })
+            localStorage.setItem("editor_fontsize_for_" + store.state.user.username, num);
+        }
+
+        const changeEditMode = () => {
+            editor.setKeyboardHandler("ace/keyboard/" + editor_mode.value);
+            localStorage.setItem("editor_mode_for_" + store.state.user.username, editor_mode.value);
+        }
+
+        const changeEditorSpace = () => {
+            editor.setOptions({
+                'tabSize': parseInt(editor_space.value),
+            })
+            localStorage.setItem("editor_space_for_" + store.state.user.username, editor_space.value);
+        }
+
+        const refreshEditor = () => {
+            editor.setValue("");
+        }
 
         const bot = reactive({
             title: "",
@@ -207,7 +374,6 @@ export default {
         };
 
         const refresh_games = () => {
-            console.log(123);
             $.ajax({
                 url: "https://aigame.zzqahm.top/game/getlist/",
                 type: "get",
@@ -245,14 +411,11 @@ export default {
                         bot.game = 0;
                         bot.description = "";
                         bot.content = "";
-                        Modal.getInstance("#add-bot").hide();
                         refresh_bots();
-
                         ElMessage({
-                            showClose: true,
-                            message: '添加成功',
+                            message: '创建成功',
                             type: 'success',
-                        });
+                        })
                     } else {
                         ElMessage.error(resp.result);
                     }
@@ -274,9 +437,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    console.log(resp)
                     if(resp.result === "success") {
-                        Modal.getInstance('#delete-bot-modal-' + bot.id).hide();
                         refresh_bots();
                         ElMessage({
                             showClose: true,
@@ -303,7 +464,6 @@ export default {
                 },
                 success(resp) {
                     if(resp.result === 'success') {
-                        Modal.getInstance('#update-bot-modal-' + bot.id).hide();
                         refresh_bots();
                         ElMessage({
                             showClose: true,
@@ -316,56 +476,208 @@ export default {
                 },
             });
         };
-        
-        const getlist_game = () => {
-            console.log(456);
-            $.ajax({
-                url: "https://aigame.zzqahm.top/player/bot/getlist_game/",
-                type: "get",
-                data: {
-                    game_id: game_select.value,
-                },
-                headers: {
-                    "Authorization": "Bearer " + store.state.user.access,
-                },
-                success(resp) {
-                    bots.value = resp;
-                },
-            });
-        };
 
-        watch(() => game_select.value, (userRecover) => {
-            if(userRecover == 0) {
-                refresh_bots();
-            } else {
-                getlist_game();
-            }
-        });
+        const filterBots = computed(() => 
+            bots.value.filter(
+                bot => 
+                !search.value ||
+                bot.game.toLowerCase().includes(search.value.toLowerCase()) ||
+                bot.title.toLowerCase().includes(search.value.toLowerCase()) ||
+                bot.createtime.includes(search.value)
+            )
+        );
+
+        const openCodeDialog = flag => {
+            editor = ace.edit('codeEditor' + flag);
+            initModal();
+        }
+
+        const openEditBot = row => {
+            currentOpBot.value = row;
+            showEditDialog.value = true;
+        }
+
+        const openDeleteBot = row => {
+            showDeleteDialog.value = true;
+            currentOpBot.value = row;
+        }
+
+        const confirmCreateBot = () => {
+            showCreateDialog.value = false;
+            add_bot();
+        }
+
+        const cancelCreateBot = () => {
+            showCreateDialog.value = false;
+            ElMessage('取消创建');
+        }
+        
+        const confirmEditBot = () => {
+            showEditDialog.value = false;
+            update_bot(currentOpBot.value);
+        }
+
+        const cancelEditBot = () => {
+            showEditDialog.value = false;
+            ElMessage('取消修改');
+        }
+
+        const confirmDeleteBot = () => {
+            showDeleteDialog.value = false;
+            remove_bot(currentOpBot.value);
+        }
+
+        const cancelDeleteBot = () => {
+            showDeleteDialog.value = false;
+            ElMessage('取消删除');
+        }
 
         return {
             bots,
             games,
             bot,
-            add_bot,
-            remove_bot,
-            update_bot,
+            search,
+            filterBots,
+            showCreateDialog,
+            showEditDialog,
+            showDeleteDialog,
+            openCodeDialog,
+            openEditBot,
+            openDeleteBot,
+            confirmCreateBot,
+            cancelCreateBot,
+            confirmEditBot,
+            cancelEditBot,
+            confirmDeleteBot,
+            cancelDeleteBot,
+            currentOpBot,
             editorInit,
-            game_select,
+            initModal,
+            changeEditSkin,
+            changeEditFont,
+            changeEditMode,
+            changeEditorSpace,
+            skin,
+            fontsize,
+            editor_mode,
+            editor_space,
+            refreshEditor,
         }
     }
 }
 </script>
 
 <style scoped>
-div.card {
-    margin-top: 20px;
+.el-card /deep/  .el-card__body  {
+    padding: 0 0 !important;
 }
 
-.game-selects {
-    font-weight: bolder;
+.profile-card {
+    border: none !important;
+}
+    
+.profile-card .background {
+    background-image: url('@/assets/images/01.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 50px;
 }
 
-.game-selects > option {
-    font-weight: bolder; 
+.profile-card .photo > img {
+    margin-top: -40px;
+    border-radius: 10px 10px 0 0;
+    border: 3px solid white;
+    width: 100%;
+    height: 100%;
+}
+
+.profile-card .username {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    height: 20px;
+    line-height: 20px;
+    margin-top: 18px;
+}
+
+.profile-card .profession {
+    margin-top: 5px;
+    color: #676A79;
+    font-size: 12px;
+    text-align: center;
+}
+
+.profile-card .description {
+    color: #676A79;
+    font-size: 13px;
+    text-align: center;
+    width: 90%;
+    margin: 15px auto;
+}
+
+.profile-card .friend-num-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.profile-card .friend-num-container div:nth-child(1) {
+    margin-left: 10px;
+}
+
+.profile-card .friend-num-container div:last-child {
+    margin-right: 10px;
+}
+
+.profile-card .friend-num-container .num {
+    text-align: center;
+    height: 12px !important;
+    line-height: 12px !important;
+    margin-bottom: 0px;
+}
+
+.profile-card .friend-num-container .text {
+    font-size: 8px;
+    color: #676A79;
+}
+
+.profile-card .vertical-divider {
+    height: 40px;
+    border-left: 1px solid #CCCCCC;
+    margin: 0 5px;
+    padding: 8px 0;
+}
+
+.profile-card .horizontal-divider {
+    width: 100%;
+    border-top: 1px solid #CCCCCC;
+    margin: 10px 0px;
+    padding: 0 10px;
+    margin-bottom: 15px;
+}
+
+.bot-card .card-header {
+    align-items: center;
+}
+
+.refresh {
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.refresh:hover {
+    transform: scale(1.2);
+    transition: 100ms;
+}
+
+.gear {
+    cursor: pointer;
+    position: relative;
+    bottom: 4px;
+}
+
+.gear:hover {
+    transform: scale(1.2);
+    transition: 100ms;
 }
 </style>

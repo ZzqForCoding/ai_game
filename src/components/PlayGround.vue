@@ -20,6 +20,7 @@ div.playground {
     width: 80vw;
     height: 80vh;
     margin: 40px auto;
+    margin-bottom: 0px;
 }
 
 </style>

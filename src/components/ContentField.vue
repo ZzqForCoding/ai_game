@@ -1,10 +1,12 @@
 <template>
-    <div class="container content-field">
-        <div class="card">
-            <div class="card-body">
-                <slot></slot>
-            </div>
-        </div>
+    <div class="content-field">
+        <el-row>
+            <el-col :span="18" :offset="3">
+                <el-card shadow="always" class="card">
+                    <slot></slot>
+                </el-card>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
@@ -17,6 +19,10 @@
 <style scoped>
 
 div.content-field {
-    margin-top: 20px;
+    margin-top: 40px;
+}
+
+.card {
+    background-color: #FAFAFA;
 }
 </style>

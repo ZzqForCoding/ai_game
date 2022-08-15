@@ -14,9 +14,10 @@ const routes = [
     {
         path: '/',
         name: 'home',
-        redirect: '/pk/',
+        redirect: '/record/',
         meta: {
             requestAuth: true,
+            description: '首页',
         }
     },
     {
@@ -25,14 +26,7 @@ const routes = [
         component: PkIndexView,
         meta: {
             requestAuth: true,
-        }
-    },
-    {
-        path: '/ranklist/',
-        name: 'ranklist_index',
-        component: RankListIndexView,
-        meta: {
-            requestAuth: true,
+            description: '五子棋',
         }
     },
     {
@@ -41,6 +35,16 @@ const routes = [
         component: RecordIndexView,
         meta: {
             requestAuth: true,
+            description: '对战列表',
+        }
+    },
+    {
+        path: '/ranklist/',
+        name: 'ranklist_index',
+        component: RankListIndexView,
+        meta: {
+            requestAuth: true,
+            description: '排行榜',
         }
     },
     {
@@ -49,6 +53,7 @@ const routes = [
         component: DiscussionView,
         meta: {
             requestAuth: true,
+            description: '讨论区',
         }
     },
     {
@@ -57,6 +62,7 @@ const routes = [
         component: MessageBoardView,
         meta: {
             requestAuth: true,
+            description: '留言板',
         }
     },
     {
@@ -65,6 +71,7 @@ const routes = [
         component: UserBotIndexView,
         meta: {
             requestAuth: true,
+            description: '我的Bot',
         }
     },
     {
@@ -73,6 +80,7 @@ const routes = [
         component: UserAccountLoginView,
         meta: {
             requestAuth: false,
+            description: '登录',
         }
     },
     {
@@ -81,6 +89,7 @@ const routes = [
         component: UserAccountRegisterView,
         meta: {
             requestAuth: false,
+            description: '注册',
         }
     },
     {
@@ -89,6 +98,7 @@ const routes = [
         component: NotFound,
         meta: {
             requestAuth: false,
+            description: '',
         }
     },
     {

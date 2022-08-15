@@ -1,42 +1,48 @@
 <template>
     <ContentField v-if="!$store.state.user.pulling_info">
-        <div class="row justify-content-md-center">
-            <div class="col-3">
-                <form @submit.prevent="login">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">用户名</label>
-                        <input type="text" class="form-control" id="username" placeholder="请输入用户名" v-model="username">
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">密码</label>
-                        <input type="password" class="form-control" id="password" placeholder="请输入密码" v-model="password">
-                    </div>
-                    <div class="error-message">
-                        {{ error_message}}
-                    </div>
-                    <button type="submit" class="btn btn-primary">提交</button>
-                </form>
-            </div>
-        </div>
+        <el-row>
+            <el-col :span="8" :offset="8">
+                <el-form :model="log_info" :rules="rules" ref="ruleForm" label-width="50px" label-position="top">
+                    <el-form-item label="帐号" prop="username">
+                        <el-input v-model="log_info.username" placeholder="请输入账号" clearable />
+                    </el-form-item>
+                    <el-form-item label="密码" prop="password">
+                        <el-input type="password" v-model="log_info.password" placeholder="请输入密码" clearable />
+                    </el-form-item>
+                    <!-- <el-form-item prop="isLock"> -->
+                        <SliderVerify v-model="log_info.isLock" @change="handlerLock" class="verify" />
+                    <!-- </el-form-item> -->
+                    <el-form-item>
+                        <el-button type="primary" @click="login" style="width: 100%;">登录</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-col>
+        </el-row>
     </ContentField>
 </template>
 
 <script>
 import ContentField from '@/components/ContentField.vue'
-import { ref } from 'vue'
+import SliderVerify from '@/components/SliderVerify.vue'
+import { ref, reactive, unref } from 'vue'
 import { useStore } from 'vuex'
 import router from '@/router'
+import { ElMessage } from 'element-plus'
 
 export default {
     name: 'UserAccountLoginView',
     components: {
         ContentField,
+        SliderVerify,
     },
     setup() {
         const store = useStore();
-        let username = ref(null);
-        let password = ref(null);
-        let error_message = ref('');
+        const ruleForm = ref(null);
+        let log_info = reactive({
+            username: '',
+            password: '',
+            isLock: false,
+        });
 
         const access = localStorage.getItem("aigame.access");
         const refresh = localStorage.getItem("aigame.refresh");
@@ -54,7 +60,8 @@ export default {
                 },
                 error() {
                     store.commit("updatePullingInfo", false);
-                    localStorage.clear();
+                    localStorage.removeItem("aigame.access");
+                    localStorage.removeItem("aigame.refresh");
                 }
             })
         } else {
@@ -62,36 +69,80 @@ export default {
         }
         
 
-        const login = () => {
-            error_message.value = "";
-            store.dispatch("login", {
-                username: username.value,
-                password: password.value,
-                success() {
-                    store.dispatch("getinfo", {
+        const login = async() => {
+            const form = unref(ruleForm);
+            await form.validate((valid) => {
+                if(valid) {
+                    store.dispatch("login", {
+                        ...log_info,
                         success() {
-                            router.push({name: 'home'});
+                            store.dispatch("getinfo", {
+                                success() {
+                                    router.push({name: 'home'});
+                                }
+                            });
+                        },
+                        error() {
+                            ElMessage({
+                                showClose: true,
+                                message: '用户名或密码错误！',
+                                type: 'error',
+                            })
                         }
                     });
-                },
-                error() {
-                    error_message.value = "用户名或密码错误";
                 }
-            });
+            })
+        };
+
+        const handlerLock = async(data) => {
+            if(data) {
+                const form = unref(ruleForm);
+                await form.validateField('isLock');
+            }
+        };
+
+        const checkStatus = (rule, value, callback) => {
+            if (!value) {
+                return callback(new Error("请拖动滑块完成验证"));
+            } else {
+                if (log_info.username == '' || log_info.password == ''
+                    || !log_info.username || !log_info.password) {
+                    setTimeout(() => {
+                        log_info.isLock = false;
+                        log_info.validateField('username');
+                        log_info.validateField('password');
+                        return callback(new Error("验证未通过"));
+                    }, 1);
+                }
+                callback();
+            }
         };
 
         return {
-            username,
-            password,
-            error_message,
+            ruleForm,
+            log_info,
             login,
+            handlerLock,
+            rules: {
+                username: [
+                    { required: true, message: '用户名称不得为空！', trigger: 'blur' },
+                    // { min: 3, max: 18, message: '长度在 3 到 18 个字符', trigger: 'blur' }
+                ],
+                password: [
+                    { required: true, message: '密码不得为空！', trigger: 'blur' },
+                    // { min: 5, max: 18, message: '长度在 5 到 18 个字符', trigger: 'blur' }
+                ],
+                isLock: [
+                    { validator: checkStatus, trigger: 'blur' },
+                ],
+            },
         };
     }
 }
 </script>
 
 <style scoped>
-.error-message {
-    color: red;
+.verify {
+    margin-bottom: 15px;
 }
 </style>
