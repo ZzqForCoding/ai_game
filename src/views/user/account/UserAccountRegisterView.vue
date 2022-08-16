@@ -53,6 +53,14 @@ export default {
         const register = async() => {
             const form = unref(ruleForm);
             await form.validate((valid) => {
+                if(register_info.isLock === false) {
+                    ElMessage({
+                        showClose: true,
+                        message: '请拖动滑块完成验证',
+                        type: 'error',
+                    });
+                    return;
+                }
                 if(valid) {
                     $.ajax({
                         url: "https://aigame.zzqahm.top/player/register/",
@@ -86,6 +94,7 @@ export default {
 
         const handlerLock = async(data) => {
             if(data) {
+                register_info.isLock = true;
                 const form = unref(ruleForm);
                 await form.validateField('isLock');
             }

@@ -6,16 +6,29 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { GameMap } from '@/assets/scripts/GameMap';
+import { GameMap as SnakeGameMap } from '@/assets/scripts/Snake/GameMap';
+import { GameMap as GobangGameMap } from '@/assets/scripts/gobang/GameMap';
 
 export default {
     name: 'GameMap',
-    setup() {
+    props: {
+        game: {
+            type: String,
+            required: true,
+        }
+    },
+    setup(props) {
         let parent = ref(null);
         let canvas = ref(null);
 
         onMounted(() => {
-            new GameMap(canvas.value.getContext('2d'), parent.value);
+            if(props.game === "绕蛇") {
+                console.log(123);
+                new SnakeGameMap(canvas.value.getContext('2d'), parent.value);
+            } else if(props.game === "五子棋") {
+                console.log(456);
+                new GobangGameMap(canvas.value.getContext('2d'), parent.value);
+            }
         });
 
         return {

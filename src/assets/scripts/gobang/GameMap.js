@@ -1,4 +1,4 @@
-import { AcGameObject } from "./AcGameObject";
+import { AcGameObject } from "../AcGameObject";
 import { NoticeBoard } from "./NoticeBoard";
 import { Player } from './Player';
 

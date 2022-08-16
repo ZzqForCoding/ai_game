@@ -51,30 +51,33 @@
             </el-card>
         </el-col>
         <el-col :span="14" :offset="1">
-
             <el-card shadow="always" class="bot-card">
                 <template #header>
                     <div class="card-header">
                         <span style="font-weight: 700; font-size: 18px;">我的Bot</span>
                         <el-button type="primary" class="button" style="float: right;" size="small" plain @click="showCreateDialog = true">创造Bot</el-button>
+                        <!-- 搜索框 -->
+                        <el-input style="margin-right: 10px; float: right; width: 180px;" v-model="search" clearable placeholder="Please search..." size="small" />
                         <!-- 创建模态框 -->
                         <el-dialog v-model="showCreateDialog" title="创建Bot" @opened="openCodeDialog('-create')">
                             <el-form
                                 label-position="top"
                                 label-width="100px"
-                                :model="formLabelAlign"
+                                :model="bot"
                                 style="max-width: 100%"
+                                :rules="rules"
+                                ref="createForm"
                             > 
-                                <el-form-item label="名称">
+                                <el-form-item label="名称" prop="title">
                                     <el-input v-model="bot.title" placeholder="请输入Bot名称" clearable />
                                 </el-form-item>
-                                <el-form-item label="游戏">
+                                <el-form-item label="游戏" prop="game">
                                     <el-radio-group v-model="bot.game">
                                         <el-radio-button v-for="game in games" :key="game.id" :label="game.id">{{ game.name }}</el-radio-button>
                                     </el-radio-group>
                                 </el-form-item>
                     
-                                <el-form-item label="简介">
+                                <el-form-item label="简介" prop="description">
                                     <el-input
                                         v-model="bot.description"
                                         :autosize="{ minRows: 3 }"
@@ -144,18 +147,16 @@
                                 </span>
                             </template>
                         </el-dialog>
-                        <!-- 搜索框 -->
-                        <el-input style="margin-right: 10px; float: right;" v-model="search" clearable placeholder="Please search..." class="w-25" size="small" />
                     </div>
                 </template>
                 <!-- 表格数据 -->
-                <el-table :data="filterBots"  stripe style="width: 100%" highlight-current-row border max-height="80vh">
-                    <el-table-column label="序号" type="index" width="60" />
-                    <el-table-column prop="title" label="名称" width="180" />
-                    <el-table-column prop="game" label="游戏" width="180" />
+                <el-table :data="filterBots"  stripe style="width: 100%" highlight-current-row border max-height="73vh" table-layout="auto">
+                    <el-table-column label="序号" type="index" />
+                    <el-table-column prop="title" label="名称" />
+                    <el-table-column prop="game" label="游戏" />
                     <el-table-column prop="createtime" label="创建时间" sortable />
                     
-                    <el-table-column fixed="right" label="Operations" width="200">
+                    <el-table-column fixed="right" label="Operations" >
                         <template #default="scope">
                             <el-button @click="openEditBot(scope.row)" color="#626aef">修改</el-button>
                             <el-button type="danger" @click="openDeleteBot(scope.row)">删除</el-button>
@@ -168,13 +169,15 @@
                     <el-form
                         label-position="top"
                         label-width="100px"
-                        :model="formLabelAlign"
+                        :model="currentOpBot"
                         style="max-width: 100%"
+                        :rules="rules"
+                        ref="editForm"
                     > 
-                        <el-form-item label="名称">
+                        <el-form-item label="名称" prop="title">
                             <el-input v-model="currentOpBot.title" placeholder="请输入Bot名称" clearable />
                         </el-form-item>
-                        <el-form-item label="简介">
+                        <el-form-item label="简介" prop="description">
                             <el-input
                                 v-model="currentOpBot.description"
                                 :autosize="{ minRows: 3 }"
@@ -267,7 +270,7 @@
 
 <script>
 import $ from 'jquery';
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed, unref } from 'vue';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
 import { VAceEditor } from 'vue3-ace-editor';
@@ -289,6 +292,8 @@ export default {
         let showCreateDialog = ref(false);
         let showEditDialog = ref(false);
         let showDeleteDialog = ref(false);
+        let createForm = ref(null);
+        let editForm = ref(null);
         let currentOpBot = ref(null);
         let editor = null;
         let skin = ref('chrome');
@@ -502,24 +507,74 @@ export default {
             currentOpBot.value = row;
         }
 
-        const confirmCreateBot = () => {
-            showCreateDialog.value = false;
-            add_bot();
+        const confirmCreateBot = async() => {
+            const form = unref(createForm);
+            await form.validate(valid => {
+                if(bot.content === "") {
+                    ElMessage({
+                        showClose: true,
+                        message: '代码不能为空',
+                        type: 'error',
+                    })
+                    return;
+                } else if(bot.content.length > 10000) {
+                    ElMessage({
+                        showClose: true,
+                        message: '代码不能超过10000',
+                        type: 'error',
+                    })
+                    return;
+                }
+                if(valid) {
+                    showCreateDialog.value = false;
+                    add_bot();
+                }
+            });
+        }
+
+        const checkVal = (rule, value, callback) => {
+            if(bot.game === 0) {
+                callback(new Error('请选择游戏！'))
+            }
         }
 
         const cancelCreateBot = () => {
             showCreateDialog.value = false;
             ElMessage('取消创建');
+            const form = unref(createForm);
+            form.resetFields();
         }
         
-        const confirmEditBot = () => {
-            showEditDialog.value = false;
-            update_bot(currentOpBot.value);
+        const confirmEditBot = async() => {
+            const form = unref(editForm);
+            await form.validate(valid => {
+                if(currentOpBot.value.content === "") {
+                    ElMessage({
+                        showClose: true,
+                        message: '代码不能为空',
+                        type: 'error',
+                    })
+                    return;
+                } else if(currentOpBot.value.content.length > 10000) {
+                    ElMessage({
+                        showClose: true,
+                        message: '代码不能超过10000',
+                        type: 'error',
+                    })
+                    return;
+                }
+                if(valid) {
+                    showEditDialog.value = false;
+                    update_bot(currentOpBot.value);
+                }
+            });
         }
 
         const cancelEditBot = () => {
             showEditDialog.value = false;
             ElMessage('取消修改');
+            const form = unref(editForm);
+            form.resetFields();
         }
 
         const confirmDeleteBot = () => {
@@ -550,6 +605,8 @@ export default {
             cancelEditBot,
             confirmDeleteBot,
             cancelDeleteBot,
+            createForm,
+            editForm,
             currentOpBot,
             editorInit,
             initModal,
@@ -562,6 +619,18 @@ export default {
             editor_mode,
             editor_space,
             refreshEditor,
+            rules: {
+                title: [
+                    { required: true, message: '名称不得为空！', trigger: 'blur' },
+                    { max: 100, message: '长度在 100 个字符之内', trigger: 'blur' }
+                ],
+                game: [
+                    { validator: checkVal, required: true, message: '请选择游戏！', trigger: 'blur' },
+                ],
+                description: [
+                    { max: 300, message: '长度在 300 个字符之内', trigger: 'blur' }
+                ],
+            },
         }
     }
 }

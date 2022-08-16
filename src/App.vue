@@ -15,20 +15,20 @@
                 <el-scrollbar class="aside-scrollbar">
                     <el-sub-menu index="1">
                         <template #title>
-                          <el-icon :size="30"><Promotion /></el-icon>
-                          <span>Games</span>
+                            <el-icon :size="30"><Grid /></el-icon>
+                            <span>Apps</span>
                         </template>
                         <el-menu-item-group>
-                            <router-link class="link-text" :to="{name: 'pk_index'}">
+                            <!-- <router-link class="link-text" :to="{name: 'pk_index', params: { game: '绕蛇' }}">
                                 <el-menu-item index="1-1">
                                     <span style="margin-left: 5px;"> 贪吃蛇</span>
                                 </el-menu-item>
                             </router-link>
-                            <router-link class="link-text" :to="{name: 'pk_index'}">
+                            <router-link class="link-text" :to="{name: 'pk_index', params: { game: '五子棋' }}">
                                 <el-menu-item index="1-2">
                                     <span style="margin-left: 5px;"> 五子棋</span>
                                 </el-menu-item>
-                            </router-link>
+                            </router-link> -->
                             <el-menu-item index="1-3" disabled>敬请期待...</el-menu-item>
                         </el-menu-item-group>
                       </el-sub-menu>
@@ -145,8 +145,6 @@
 </template>
 
 <script>
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap/dist/js/bootstrap';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import router from './router/index'
@@ -202,12 +200,28 @@ export default {
 }
 
 .aside-scrollbar {
-    height: calc(100vh - 25px);
+    height: 100vh;
 }
+ /* Chrome Safari */
+/* html:-webkit-scrollbar {
+    display: none;
+}
+*/
+
+ /* firefox */
+ /* IE 10+ */
+/* html {
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
+    overflow-x: hidden;
+    overflow-y: auto;
+
+} */
 
 body {
     background-image: url('@/assets/images/background1.png');
     background-size: cover;
+    margin: 0 0;
 }
 
 .aside-header {
@@ -243,24 +257,27 @@ body {
 }
 
 .el-main {
-    height: calc(100vh - 60px - 50px) !important;
-    scrollbar-width: none; /* firefox */
-    -ms-overflow-style: none; /* IE 10+ */
+    height: calc(100vh - 60px - 40px) !important;
+    /* IE 10+ */
+    /* firefox */
+    /* scrollbar-width: none; 
+    -ms-overflow-style: none; 
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: auto; */
 }
+/* Chrome Safari */
+/* .el-main::-webkit-scrollbar {
+    display: none; 
+} */
 
-.el-main::-webkit-scrollbar {
-    display: none; /* Chrome Safari */
-}
 
 .el-footer {
-    margin-top: 20px;
+    margin-top: 10px;
     height: 30px !important;
 }
 
 .main-scrollbar {
-    height: calc(100vh - 60px - 50px - 40px) !important;
+    height: calc(100vh - 60px - 40px) !important;
 }
 
 .footer {
@@ -289,7 +306,7 @@ body {
 
 .collapse-btn {
     position: relative;
-    top: 45vh;
+    top: 42vh;
     left: 15px;
 }
 </style>

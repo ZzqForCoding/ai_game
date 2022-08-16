@@ -1,4 +1,4 @@
-import { AcGameObject } from "./AcGameObject";
+import { AcGameObject } from "../AcGameObject";
 import { Chess } from "./Chess";
 
 export class Player extends AcGameObject {

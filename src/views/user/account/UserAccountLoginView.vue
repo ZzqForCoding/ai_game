@@ -71,7 +71,15 @@ export default {
 
         const login = async() => {
             const form = unref(ruleForm);
-            await form.validate((valid) => {
+            await form.validate(valid => {
+                if(log_info.isLock === false) {
+                    ElMessage({
+                        showClose: true,
+                        message: '请拖动滑块完成验证',
+                        type: 'error',
+                    });
+                    return;
+                }
                 if(valid) {
                     store.dispatch("login", {
                         ...log_info,
@@ -87,7 +95,7 @@ export default {
                                 showClose: true,
                                 message: '用户名或密码错误！',
                                 type: 'error',
-                            })
+                            });
                         }
                     });
                 }
@@ -96,6 +104,7 @@ export default {
 
         const handlerLock = async(data) => {
             if(data) {
+                log_info.isLock = true;
                 const form = unref(ruleForm);
                 await form.validateField('isLock');
             }

@@ -21,7 +21,7 @@ const routes = [
         }
     },
     {
-        path: '/pk/',
+        path: '/pk/:game/',
         name: 'pk_index',
         component: PkIndexView,
         meta: {

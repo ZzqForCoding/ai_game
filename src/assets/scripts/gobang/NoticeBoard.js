@@ -1,4 +1,4 @@
-import { AcGameObject } from "./AcGameObject";
+import { AcGameObject } from "../AcGameObject";
 
 export class NoticeBoard extends AcGameObject {
     constructor(gamemap) {

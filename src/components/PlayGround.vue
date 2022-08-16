@@ -1,6 +1,6 @@
 <template>
     <div class="playground">
-        <GameMap></GameMap>
+        <GameMap :game="game"></GameMap>
     </div>
 </template>
 
@@ -10,8 +10,14 @@ import GameMap from './GameMap.vue'
 export default {
     name: 'PlayGround',
     components: {
-    GameMap,
-}
+        GameMap,
+    },
+    props: {
+        game: {
+            type: String,
+            required: true,
+        }
+    }
 }
 </script>
 
@@ -19,7 +25,7 @@ export default {
 div.playground {
     width: 80vw;
     height: 80vh;
-    margin: 40px auto;
+    margin: 20px auto;
     margin-bottom: 0px;
 }
 

@@ -1,4 +1,4 @@
-import { AcGameObject } from "./AcGameObject";
+import { AcGameObject } from "../AcGameObject";
 
 export class Chess extends AcGameObject {
     constructor(gamemap, info) {
