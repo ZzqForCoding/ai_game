@@ -22,7 +22,8 @@ class RegisterView(APIView):
             return Response({
                 'result': '用户名已存在'
             })
-        if not re.match(r'(?=.{6,}).*', password):
+
+        if not re.match(r'[a-zA-Z0-9]{6,}', password):
             return Response({
                 'result': '密码强度不合格'
             })

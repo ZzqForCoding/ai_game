@@ -8,7 +8,6 @@ class GetListView(APIView):
 
     def get(self, request):
         games = Game.objects.all()
-
         resp = []
         for game in games:
             resp.append({
@@ -16,4 +15,4 @@ class GetListView(APIView):
                 'name': game.name,
             })
 
-            return Response(resp)
+        return Response(resp)
