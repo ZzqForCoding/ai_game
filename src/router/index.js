@@ -26,7 +26,7 @@ const routes = [
         component: PkIndexView,
         meta: {
             requestAuth: true,
-            description: '五子棋',
+            description: 'game',
         }
     },
     {

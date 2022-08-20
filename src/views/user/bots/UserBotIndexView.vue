@@ -150,7 +150,7 @@
                     </div>
                 </template>
                 <!-- 表格数据 -->
-                <el-table :data="filterBots"  stripe style="width: 100%" highlight-current-row border max-height="73vh" table-layout="auto">
+                <el-table :data="filterBots"  stripe style="width: 100%; height: 247px" highlight-current-row border max-height="67vh" table-layout="auto">
                     <el-table-column label="序号" type="index" />
                     <el-table-column prop="title" label="名称" />
                     <el-table-column prop="game" label="游戏" />
@@ -535,6 +535,8 @@ export default {
         const checkVal = (rule, value, callback) => {
             if(bot.game === 0) {
                 callback(new Error('请选择游戏！'))
+            } else {
+                callback();
             }
         }
 

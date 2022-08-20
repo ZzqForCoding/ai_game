@@ -1,16 +1,22 @@
 <template>
     <div class="gamemap" ref="parent">
         <canvas ref="canvas" tabindex="0" @contextmenu.prevent="" style="height: 100%;"></canvas>
+        <ResultBoard v-if="$store.state.pk.loser != 'none'" />
     </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
+import ResultBoard from '@/components/ResultBoard.vue';
 import { GameMap as SnakeGameMap } from '@/assets/scripts/Snake/GameMap';
 import { GameMap as GobangGameMap } from '@/assets/scripts/gobang/GameMap';
+import { useStore } from 'vuex';
 
 export default {
     name: 'GameMap',
+    components: {
+        ResultBoard,
+    },
     props: {
         game: {
             type: String,
@@ -18,15 +24,18 @@ export default {
         }
     },
     setup(props) {
+        const store = useStore();
         let parent = ref(null);
         let canvas = ref(null);
 
         onMounted(() => {
+            store.commit("updateLoser", 'none');
             if(props.game === "绕蛇") {
-                console.log(123);
-                new SnakeGameMap(canvas.value.getContext('2d'), parent.value);
+                store.commit(
+                    "updateGameObject",
+                    new SnakeGameMap(canvas.value.getContext('2d'), parent.value, store)
+                );
             } else if(props.game === "五子棋") {
-                console.log(456);
                 new GobangGameMap(canvas.value.getContext('2d'), parent.value);
             }
         });

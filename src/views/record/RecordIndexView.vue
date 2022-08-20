@@ -167,7 +167,6 @@ export default {
         });
 
         const confirmGameDialog = game => {
-            console.log(game);
             showCreateGameDialog.value = false;
             router.push({
                 name: 'pk_index',

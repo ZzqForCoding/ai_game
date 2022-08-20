@@ -84,6 +84,11 @@ export default {
                     store.dispatch("login", {
                         ...log_info,
                         success() {
+                            ElMessage({
+                                showClose: true,
+                                message: '登录成功！',
+                                type: 'success',
+                            });
                             store.dispatch("getinfo", {
                                 success() {
                                     router.push({name: 'home'});
@@ -104,6 +109,13 @@ export default {
 
         const handlerLock = async(data) => {
             if(data) {
+                if(log_info.username === '' || log_info.password === '' || !log_info.username || !log_info.password) {
+                    ElMessage({
+                        showClose: true,
+                        message: '请先输入用户名密码！',
+                        type: 'error',
+                    });
+                }
                 log_info.isLock = true;
                 const form = unref(ruleForm);
                 await form.validateField('isLock');
@@ -114,7 +126,7 @@ export default {
             if (!value) {
                 return callback(new Error("请拖动滑块完成验证"));
             } else {
-                if (log_info.username == '' || log_info.password == ''
+                if (log_info.username === '' || log_info.password === ''
                     || !log_info.username || !log_info.password) {
                     setTimeout(() => {
                         log_info.isLock = false;

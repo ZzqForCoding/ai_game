@@ -72,6 +72,11 @@ export default {
                                     username: register_info.username,
                                     password: register_info.password,
                                     success() {
+                                        ElMessage({
+                                            showClose: true,
+                                            message: '登录成功！',
+                                            type: 'success',
+                                        });
                                         store.dispatch("getinfo", {
                                             success() {
                                                 router.push({name: 'home'});
@@ -94,6 +99,14 @@ export default {
 
         const handlerLock = async(data) => {
             if(data) {
+                if(register_info.username === '' || register_info.password === '' || register_info.password_confirm === '' ||
+                   !register_info.username || !register_info.password || !register_info.password_confirm) {
+                    ElMessage({
+                        showClose: true,
+                        message: '请先输入用户名密码！',
+                        type: 'error',
+                    });
+                }
                 register_info.isLock = true;
                 const form = unref(ruleForm);
                 await form.validateField('isLock');
@@ -104,13 +117,13 @@ export default {
             if (!value) {
                 return callback(new Error("请拖动滑块完成验证"));
             } else {
-                if (register_info.username == '' || register_info.password == ''
-                    || !register_info.username || !register_info.password) {
+                if (register_info.username === '' || register_info.password === '' || register_info.password_confirm === '' ||
+                   !register_info.username || !register_info.password || !register_info.password_confirm) {
                     setTimeout(() => {
                         register_info.isLock = false;
                         register_info.validateField('username');
                         register_info.validateField('password');
-                        register_info.validateField('password');
+                        register_info.validateField('password_confirm');
                         return callback(new Error("验证未通过"));
                     }, 1);
                 }
