@@ -111,7 +111,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         start = 0
         for i in range(start, 100000000):
             room_name = "room-%d" % (i)
-            if len(cache.get(room_name)) < 2:
+            if cache.get(room_name) != None and len(cache.get(room_name)) < 2:
                 players = cache.get(room_name)
                 if player in players:
                     players.remove(player)
@@ -123,9 +123,9 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
     # 移动
     async def move(self, direction):
         print(self.user.id, direction)
-        if self.game.playerA.id == self.user.id:
+        if MultiPlayerGame.users[self.user.id].game.playerA.id == self.user.id:
             self.game.setNextStepA(direction)
-        elif self.game.playerB.id == self.user.id:
+        elif MultiPlayerGame.users[self.user.id].game.playerB.id == self.user.id:
             self.game.setNextStepB(direction)
 
     # 辅助函数：发送给当前房间玩家信息

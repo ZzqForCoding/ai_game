@@ -25,7 +25,7 @@ class Game(threading.Thread):
         self.nextStepA = None
         self.nextStepB = None
         self.lock = threading.Lock()
-        self.status = "playing" # playing -> finished
+        self.status = "playing" # playing -> overtime/illegal
         self.loser = ""     # all: "平局", A: A输, B: B输
         self.room_name = room_name
         self.channel_layer = get_channel_layer()
@@ -122,7 +122,7 @@ class Game(threading.Thread):
         validB = self.check_valid(cellsB, cellsA)
 
         if not validA or not validB:
-            self.status = "finished"
+            self.status = "illegal"
             if not validA and not validB:
                 self.loser = "all"
             elif not validA:
@@ -149,8 +149,26 @@ class Game(threading.Thread):
     def sendResult(self):
         resp = {
             'event': "result",
-            'loser': self.loser
+            'loser': self.loser,
+            'status': self.status
         }
+        self.lock.acquire()
+        try:
+            if self.status == 'illegal':
+                resp['a_direction'] = self.nextStepA
+                self.playerA.steps.append(self.nextStepA)
+                resp['b_direction'] = self.nextStepB
+                self.playerB.steps.append(self.nextStepB)
+
+            else:
+                if self.nextStepA != None:
+                    resp['a_direction'] = self.nextStepA
+                    self.playerA.steps.append(self.nextStepA)
+                if self.nextStepB != None:
+                    resp['b_direction'] = self.nextStepB
+                    self.playerB.steps.append(self.nextStepB)
+        finally:
+            self.lock.release()
         self.saveToDataBase()
         self.sendAllMessage(resp)
 
@@ -165,7 +183,7 @@ class Game(threading.Thread):
                     self.sendResult()
                     break
             else:
-                self.status = "finished"
+                self.status = "overtime"
                 self.lock.acquire()
                 try:
                     if self.nextStepA == None and self.nextStepB == None:
