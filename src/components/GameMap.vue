@@ -29,7 +29,7 @@ export default {
         let canvas = ref(null);
 
         onMounted(() => {
-            store.commit("updateLoser", 'none');
+            store.commit("updateGameResult", {loser: 'none', status: 'none'});
             if(props.game === "绕蛇") {
                 store.commit(
                     "updateGameObject",

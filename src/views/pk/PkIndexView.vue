@@ -124,6 +124,12 @@ export default {
                     store.commit("updateSocket", socket);
                 };
 
+                const transDir = d => {
+                    if(d <= 1) d += 2;
+                    else d -= 2;
+                    return d;
+                }
+
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
                     if(data.event === "start_match" && data.game) store.commit("updateGame", data.game);
@@ -137,23 +143,31 @@ export default {
                             store.commit("updateStatus", "playing");
                         }, 200);
                     } else if(data.event === "move") {
-                        console.log(data)
                         const game = store.state.pk.gameObject;
                         const [snake0, snake1] = game.snakes;
-                        snake0.set_direction(data.a_direction);
-                        snake1.set_direction(data.b_direction);
+                        if(store.state.user.id === store.state.pk.a_id) {
+                            snake0.set_direction(data.a_direction);
+                            snake1.set_direction(data.b_direction);
+                        } else {
+                            snake0.set_direction(transDir(data.b_direction));
+                            snake1.set_direction(transDir(data.a_direction));
+                        }
                     } else if(data.event === "result") {
-                        console.log(data);
                         const game = store.state.pk.gameObject;
                         const [snake0, snake1] = game.snakes;
     
-                        if(data.loser === "all" || data.loser === "A") {
+                        if(data.loser === "all") {
+                            snake0.status = "die", snake1.status = "die";
+                        } else if(data.loser === "A" && store.state.user.id === store.state.pk.a_id || data.loser === "B" && store.state.user.id === store.state.pk.b_id) {
                             snake0.status = "die";
-                        }
-                        if(data.loser === "all" || data.loser === "B") {
+                        } else if(data.loser === "A" && store.state.user.id === store.state.pk.b_id || data.loser === "B" && store.state.user.id === store.state.pk.a_id) {
                             snake1.status = "die";
                         }
-                        store.commit("updateLoser", data.loser);
+                        store.commit("updateGameResult", {
+                            loser: data.loser,
+                            status: data.status,
+                        });
+                        console.log(data);
                     }
                 }
 

@@ -49,7 +49,7 @@ export default {
 
         const restart = () => {
             store.commit("updateStatus", "matching");
-            store.commit("updateLoser", 'none');
+            store.commit("updateGameResult", {loser: 'none', status: 'none'});
             store.commit("updateOpponent", {
                 username: "我的对手",
                 photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",
@@ -59,7 +59,7 @@ export default {
         const back = () => {
             router.push({name: 'record_index'});
             store.commit("updateStatus", "matching");
-            store.commit("updateLoser", 'none');
+            store.commit("updateGameResult", {loser: 'none', status: 'none'});
             store.commit("updateOpponent", {
                 username: "我的对手",
                 photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",

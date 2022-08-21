@@ -20,13 +20,12 @@ export class GameMap extends AcGameObject {
 
         this.inner_walls_count = 20;
         this.walls = [];
-
-        // let selfR, selfC, selfColor;
-        // let yourR, yourC, yourColor;
-        // if(store.state.user.id === )
+        let selfColor = 0, yourColor = 0;
+        if(store.state.pk.a_id == store.state.user.id) selfColor = "#4876EC", yourColor = "#F94848";
+        else selfColor = "#F94848", yourColor = "#4876EC";
         this.snakes = [
-            new Snake({id: 0, color: '#4876EC', r: this.rows - 2, c: 1}, this),
-            new Snake({id: 1, color: '#F94848', r: 1, c: this.cols - 2}, this),
+            new Snake({id: 0, color: selfColor, r: this.rows - 2, c: 1}, this),
+            new Snake({id: 1, color: yourColor, r: 1, c: this.cols - 2}, this),
         ];
     }
 
@@ -47,6 +46,12 @@ export class GameMap extends AcGameObject {
         this.add_listening_events();
     }
 
+    transDir(d) {
+        if(d <= 1) d += 2;
+        else d -= 2;
+        return d;
+    }
+
     add_listening_events() {
         this.ctx.canvas.focus();
         this.ctx.canvas.addEventListener("keydown", e => {
@@ -55,6 +60,9 @@ export class GameMap extends AcGameObject {
             else if(e.key === 'd') d = 1;
             else if(e.key === 's') d = 2;
             else if(e.key === 'a') d = 3;
+            if(this.store.state.user.id !== this.store.state.pk.a_id) {
+                d = this.transDir(d);
+            }
             // else if(e.key === 'ArrowUp') snake1.set_direction(0);
             // else if(e.key === 'ArrowRight') snake1.set_direction(1);
             // else if(e.key === 'ArrowDown') snake1.set_direction(2);
