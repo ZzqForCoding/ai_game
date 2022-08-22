@@ -3,7 +3,15 @@ from channels.db import database_sync_to_async
 import json
 from django.core.cache import cache
 from django.contrib.auth.models import User
+from player.models.player import Player
 from player.consumers.game.utils.snake.game import Game
+
+from .thrift.match_client.match.ttypes import Player as PlayerInfo
+from .thrift.match_client.match import Match
+from thrift import Thrift
+from thrift.transport import TSocket
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
 
 # 贪吃蛇游戏的ws逻辑
 class MultiPlayerGame(AsyncWebsocketConsumer):
@@ -25,8 +33,31 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         if hasattr(self, 'room_name') and self.room_name:
             await self.channel_layer.group_discard(self.room_name, self.channel_name)
 
-    # 开始匹配
+    #  开始匹配(2.0)
     async def start_match(self, data):
+        self.room_name = None
+
+        transport = TSocket.TSocket('localhost', 9090)
+        transport = TTransport.TBufferedTransport(transport)
+        protocol = TBinaryProtocol.TBinaryProtocol(transport)
+        client = Match.Client(protocol)
+
+        transport.open()
+
+        def db_get_player():
+            return Player.objects.get(user=self.user)
+
+        player = await database_sync_to_async(db_get_player)()
+
+        player_info = PlayerInfo(self.user.id, self.user.username,
+                player.rating, player.photo, self.channel_name)
+        client.add_player(player_info, "")
+
+        transport.close()
+
+
+    # 开始匹配(1.0)
+    async def start_match_old(self, data):
         print('start_match')
         self.room_name = None
         # 找房间
@@ -64,7 +95,6 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         })
         # 将玩家存入redis中
         cache.set(self.room_name, players, 3600)
-        # consumer中访问数据库需要调用函数
         def db_get_user(username):
             return User.objects.get(username=username)
         # 当当前房间人数 >= 2则匹配成功

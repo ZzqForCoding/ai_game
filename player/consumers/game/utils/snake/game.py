@@ -29,6 +29,7 @@ class Game(threading.Thread):
         self.loser = ""     # all: "平局", A: A输, B: B输
         self.room_name = room_name
         self.channel_layer = get_channel_layer()
+        self.isStart = True
 
     def getMapString(self):
         res = ""
@@ -79,7 +80,11 @@ class Game(threading.Thread):
 
     # 接收玩家输入
     def nextStep(self):
-        time.sleep(0.2)
+        if self.isStart:
+            time.sleep(2)
+            self.isStart = False
+        else:
+            time.sleep(0.2)
 
         # 接收5s内的输入
         for i in range(50):
