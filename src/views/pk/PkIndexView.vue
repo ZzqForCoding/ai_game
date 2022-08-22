@@ -141,7 +141,7 @@ export default {
                         });
                         setTimeout(() => {
                             store.commit("updateStatus", "playing");
-                        }, 200);
+                        }, 2000);
                     } else if(data.event === "move") {
                         const game = store.state.pk.gameObject;
                         const [snake0, snake1] = game.snakes;
