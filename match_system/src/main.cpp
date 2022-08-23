@@ -3,15 +3,22 @@
 
 #include "match_server/Match.h"
 #include "message_client/Message.h"
+#include <thrift/concurrency/ThreadManager.h>
+#include <thrift/concurrency/ThreadFactory.h>
+#include <thrift/server/TThreadPoolServer.h>
+#include <thrift/server/TThreadedServer.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
+#include <thrift/TToString.h>
 
 #include <iostream>
+#include <cmath>
 #include <jsoncpp/json/json.h>
+#include <unistd.h>
 #include "thread"
 #include "mutex"
 #include "condition_variable"
@@ -40,35 +47,59 @@ struct MessageQueue {
 class Pool {
     private:
         vector<Player> players;
+        vector<int> wt;     // 等待时间, 单位: s
 
     public:
         void add(Player player) {
             players.push_back(player);
+            wt.push_back(0);
         }
 
         void remove(Player player) {
             for(uint32_t i = 0; i < players.size(); i++) {
                 if(players[i].id == player.id) {
                     players.erase(players.begin() + i);
+                    wt.erase(wt.begin() + i);
                     break;
                 }
             }
         }
 
-        void match() {
-            while(players.size() > 1) {
-                auto player1 = players[0];
-                auto player2 = players[1];
-                players.erase(players.begin());
-                players.erase(players.begin());
+        bool check_match(uint32_t i, uint32_t j) {
+            auto playerA = players[i], playerB = players[j];
 
-                save_result(player1, player2);
+            int dt = abs(playerA.rating - playerB.rating);
+            // min: 若取min则代表两者分差都小于 等待时间 * 10，实力差距最接近
+            // max: 若取max则代表有一方分差小于 等待时间 * 10，实力差距可能会大
+            int waitingtime = wt[i] < wt[j] ? wt[i] : wt[j];
+            return dt <= waitingtime * 5;
+        }
+
+        void match() {
+            for(uint32_t i = 0; i < wt.size(); i++) wt[i]++;
+
+            while(players.size() > 1) {
+                bool flag = true;
+                for(uint32_t i = 0; i < players.size(); i++) {
+                    for(uint32_t j = i + 1; j < players.size(); j++) {
+                        if(check_match(i, j)) {
+                            auto playerA = players[i], playerB = players[j];
+                            players.erase(players.begin() + j);
+                            players.erase(players.begin() + i);
+                            wt.erase(wt.begin() + j);
+                            wt.erase(wt.begin() + i);
+                            save_result(playerA, playerB);
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if(!flag) break;
+                }
+                if(!flag) break;
             }
         }
 
         void save_result(Player player1, Player player2) {
-            cout << player1.id << " 和 " << player2.id << " 匹配成功" << endl;
-
             std::shared_ptr<TTransport> socket(new TSocket("localhost", 9091));
             std::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
             std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
@@ -135,7 +166,9 @@ void consume_task() {
     while(true) {
         unique_lock<mutex> lock1(message_queue.m);
         if(message_queue.q.empty()) {
-            message_queue.cv.wait(lock1);
+            lock1.unlock();
+            pool.match();
+            sleep(1);
         } else {
             auto task = message_queue.q.front();
             message_queue.q.pop();
@@ -145,20 +178,35 @@ void consume_task() {
             } else if(task.type == "remove") {
                 pool.remove(task.player);
             }
-            pool.match();
         }
     }
 }
 
-int main(int argc, char **argv) {
-    int port = 9090;
-    ::std::shared_ptr<MatchHandler> handler(new MatchHandler());
-    ::std::shared_ptr<TProcessor> processor(new MatchProcessor(handler));
-    ::std::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-    ::std::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-    ::std::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+class MatchCloneFactory : virtual public MatchIfFactory {
+    public:
+        ~MatchCloneFactory() override = default;
+        MatchIf* getHandler(const ::apache::thrift::TConnectionInfo& connInfo) override
+        {
+            std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(connInfo.transport);
+            /*cout << "Incoming connection\n";
+            cout << "\tSocketInfo: "  << sock->getSocketInfo() << "\n";
+            cout << "\tPeerHost: "    << sock->getPeerHost() << "\n";
+            cout << "\tPeerAddress: " << sock->getPeerAddress() << "\n";
+            cout << "\tPeerPort: "    << sock->getPeerPort() << "\n";*/
+            return new MatchHandler;
+        }
+        void releaseHandler(MatchIf* handler) override {
+            delete handler;
+        }
+};
 
-    TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+int main(int argc, char **argv) {
+    TThreadedServer server(
+            std::make_shared<MatchProcessorFactory>(std::make_shared<MatchCloneFactory>()),
+            std::make_shared<TServerSocket>(9090), //port
+            std::make_shared<TBufferedTransportFactory>(),
+            std::make_shared<TBinaryProtocolFactory>());
+
     printf("Starting Matching Server...\n");
 
     thread matching_thread(consume_task);
