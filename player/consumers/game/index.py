@@ -3,7 +3,7 @@ from channels.db import database_sync_to_async
 import json
 from django.core.cache import cache
 from django.contrib.auth.models import User
-from player.models.player import Player
+from player.models.player import Player as Player
 from player.consumers.game.utils.snake.game import Game
 
 from .thrift.match_client.match.ttypes import Player as PlayerInfo
@@ -35,8 +35,6 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
 
     #  开始匹配(2.0)
     async def start_match(self, data):
-        self.room_name = None
-
         transport = TSocket.TSocket('localhost', 9090)
         transport = TTransport.TBufferedTransport(transport)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
@@ -50,7 +48,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.rating, player.photo, self.channel_name)
+                player.photo, player.rating, self.channel_name)
         client.add_player(player_info, "")
 
         transport.close()
@@ -119,7 +117,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
                 'b_sy': game.playerB.sy,
                 'map': game.getG()
             }
-            # 广播给当前房间的所有1玩家
+            # 广播给当前房间的所有玩家
             await self.channel_layer.group_send(
                 self.room_name,
                 {
@@ -152,7 +150,6 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
 
     # 移动
     async def move(self, direction):
-        print(self.user.id, direction)
         if MultiPlayerGame.users[self.user.id].game.playerA.id == self.user.id:
             self.game.setNextStepA(direction)
         elif MultiPlayerGame.users[self.user.id].game.playerB.id == self.user.id:
@@ -161,6 +158,57 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
     # 辅助函数：发送给当前房间玩家信息
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
+
+    async def start_snake_game(self, data):
+        if self.user.id == data['a_id']:
+            a_id = data['a_id']
+            a_username = data['a_username']
+            a_photo = data['a_photo']
+            b_id = data['b_id']
+            b_username = data['b_username']
+            b_photo = data['b_photo']
+            room_name = data['room_name']
+            self.room_name = room_name
+
+            # 创建地图
+            game = Game(13, 14, 20, a_id, b_id, room_name)
+            game.createMap()
+            # 一局游戏一个线程
+            game.start()
+            MultiPlayerGame.users[a_id].game = game
+            MultiPlayerGame.users[b_id].game = game
+            # 返回给玩家的信息
+            resp = {
+                'a_id': game.playerA.id,
+                'a_sx': game.playerA.sx,
+                'a_sy': game.playerA.sy,
+                'b_id': game.playerB.id,
+                'b_sx': game.playerB.sx,
+                'b_sy': game.playerB.sy,
+                'map': game.getG()
+            }
+            # 广播给当前房间的所有玩家
+            await self.channel_layer.group_send(
+                self.room_name,
+                {
+                    'type': "group_send_event",
+                    'event': "start_game",
+                    'username': a_username,
+                    'photo': a_photo,
+                    'game': resp
+                }
+            )
+
+            await self.channel_layer.group_send(
+                self.room_name,
+                {
+                    'type': "group_send_event",
+                    'event': "start_game",
+                    'username': b_username,
+                    'photo': b_photo,
+                    'game': resp
+                }
+            )
 
     # 前端发送的信息
     async def receive(self, text_data):

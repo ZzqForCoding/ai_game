@@ -3,8 +3,8 @@ namespace cpp match_service
 struct Player {
     1: i32 id,
     2: string username,
-    3: i32 rating,
-    4: string photo,
+    3: string photo,
+    4: i32 rating,
     5: string channel_name,
 }
 

@@ -2,12 +2,21 @@
 // You should copy it to another filename to avoid overwriting it.
 
 #include "match_server/Match.h"
+#include "message_client/Message.h"
 #include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TTransportUtils.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
 
 #include <iostream>
+#include <jsoncpp/json/json.h>
+#include "thread"
+#include "mutex"
+#include "condition_variable"
+#include "queue"
+#include "vector"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -17,37 +26,144 @@ using namespace ::apache::thrift::server;
 using namespace  ::match_service;
 using namespace std;
 
+struct Task {
+    Player player;
+    string type;
+};
+
+struct MessageQueue {
+    queue<Task> q;
+    mutex m;
+    condition_variable cv;
+} message_queue;
+
+class Pool {
+    private:
+        vector<Player> players;
+
+    public:
+        void add(Player player) {
+            players.push_back(player);
+        }
+
+        void remove(Player player) {
+            for(uint32_t i = 0; i < players.size(); i++) {
+                if(players[i].id == player.id) {
+                    players.erase(players.begin() + i);
+                    break;
+                }
+            }
+        }
+
+        void match() {
+            while(players.size() > 1) {
+                auto player1 = players[0];
+                auto player2 = players[1];
+                players.erase(players.begin());
+                players.erase(players.begin());
+
+                save_result(player1, player2);
+            }
+        }
+
+        void save_result(Player player1, Player player2) {
+            cout << player1.id << " 和 " << player2.id << " 匹配成功" << endl;
+
+            std::shared_ptr<TTransport> socket(new TSocket("localhost", 9091));
+            std::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+            std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+            MessageClient client(protocol);
+
+            try {
+                transport->open();
+
+                Json::Value root, player;
+                root["type"] = Json::Value("match");
+                player["id"] = Json::Value(player1.id);
+                player["username"] = Json::Value(player1.username);
+                player["photo"] = Json::Value(player1.photo);
+                player["channel_name"] = Json::Value(player1.channel_name);
+                root["players"].append(player);
+
+                player["id"] = Json::Value(player2.id);
+                player["username"] = Json::Value(player2.username);
+                player["photo"] = Json::Value(player2.photo);
+                player["channel_name"] = Json::Value(player2.channel_name);
+                root["players"].append(player);
+
+                string resp = Json::FastWriter().write(root);
+                client.response(resp);
+
+                transport->close();
+            } catch (TException& tx) {
+                cout << "ERROR: " << tx.what() << endl;
+            }
+        }
+} pool;
+
 class MatchHandler : virtual public MatchIf {
- public:
-  MatchHandler() {
-    // Your initialization goes here
-  }
+    public:
+        MatchHandler() {
+            // Your initialization goes here
+        }
 
-  int32_t add_player(const Player& player, const std::string& info) {
-    // Your implementation goes here
-    printf("add_player\n");
-    return 0;
-  }
+        int32_t add_player(const Player& player, const std::string& info) {
+            // Your implementation goes here
+            printf("add_player\n");
 
-  int32_t remove_player(const Player& player, const std::string& info) {
-    // Your implementation goes here
-    printf("remove_player\n");
-    return 0;
-  }
+            unique_lock<mutex> lock1(message_queue.m);
+            message_queue.q.push({player, "add"});
+            message_queue.cv.notify_all();
+
+            return 0;
+        }
+
+        int32_t remove_player(const Player& player, const std::string& info) {
+            // Your implementation goes here
+            printf("remove_player\n");
+
+            unique_lock<mutex> lock1(message_queue.m);
+            message_queue.q.push({player, "remove"});
+            message_queue.cv.notify_all();
+
+            return 0;
+        }
 
 };
 
-int main(int argc, char **argv) {
-  int port = 9090;
-  ::std::shared_ptr<MatchHandler> handler(new MatchHandler());
-  ::std::shared_ptr<TProcessor> processor(new MatchProcessor(handler));
-  ::std::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-  ::std::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-  ::std::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+void consume_task() {
+    while(true) {
+        unique_lock<mutex> lock1(message_queue.m);
+        if(message_queue.q.empty()) {
+            message_queue.cv.wait(lock1);
+        } else {
+            auto task = message_queue.q.front();
+            message_queue.q.pop();
+            lock1.unlock();
+            if(task.type == "add") {
+                pool.add(task.player);
+            } else if(task.type == "remove") {
+                pool.remove(task.player);
+            }
+            pool.match();
+        }
+    }
+}
 
-  TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
-  printf("Starting Matching Server...\n");
-  server.serve();
-  return 0;
+int main(int argc, char **argv) {
+    int port = 9090;
+    ::std::shared_ptr<MatchHandler> handler(new MatchHandler());
+    ::std::shared_ptr<TProcessor> processor(new MatchProcessor(handler));
+    ::std::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
+    ::std::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
+    ::std::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+
+    TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+    printf("Starting Matching Server...\n");
+
+    thread matching_thread(consume_task);
+
+    server.serve();
+    return 0;
 }
 

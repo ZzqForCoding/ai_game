@@ -21,18 +21,18 @@ class Player(object):
     Attributes:
      - id
      - username
-     - rating
      - photo
+     - rating
      - channel_name
 
     """
 
 
-    def __init__(self, id=None, username=None, rating=None, photo=None, channel_name=None,):
+    def __init__(self, id=None, username=None, photo=None, rating=None, channel_name=None,):
         self.id = id
         self.username = username
-        self.rating = rating
         self.photo = photo
+        self.rating = rating
         self.channel_name = channel_name
 
     def read(self, iprot):
@@ -55,13 +55,13 @@ class Player(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.I32:
-                    self.rating = iprot.readI32()
+                if ftype == TType.STRING:
+                    self.photo = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
-                if ftype == TType.STRING:
-                    self.photo = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                if ftype == TType.I32:
+                    self.rating = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 5:
@@ -87,13 +87,13 @@ class Player(object):
             oprot.writeFieldBegin('username', TType.STRING, 2)
             oprot.writeString(self.username.encode('utf-8') if sys.version_info[0] == 2 else self.username)
             oprot.writeFieldEnd()
-        if self.rating is not None:
-            oprot.writeFieldBegin('rating', TType.I32, 3)
-            oprot.writeI32(self.rating)
-            oprot.writeFieldEnd()
         if self.photo is not None:
-            oprot.writeFieldBegin('photo', TType.STRING, 4)
+            oprot.writeFieldBegin('photo', TType.STRING, 3)
             oprot.writeString(self.photo.encode('utf-8') if sys.version_info[0] == 2 else self.photo)
+            oprot.writeFieldEnd()
+        if self.rating is not None:
+            oprot.writeFieldBegin('rating', TType.I32, 4)
+            oprot.writeI32(self.rating)
             oprot.writeFieldEnd()
         if self.channel_name is not None:
             oprot.writeFieldBegin('channel_name', TType.STRING, 5)
@@ -120,8 +120,8 @@ Player.thrift_spec = (
     None,  # 0
     (1, TType.I32, 'id', None, None, ),  # 1
     (2, TType.STRING, 'username', 'UTF8', None, ),  # 2
-    (3, TType.I32, 'rating', None, None, ),  # 3
-    (4, TType.STRING, 'photo', 'UTF8', None, ),  # 4
+    (3, TType.STRING, 'photo', 'UTF8', None, ),  # 3
+    (4, TType.I32, 'rating', None, None, ),  # 4
     (5, TType.STRING, 'channel_name', 'UTF8', None, ),  # 5
 )
 fix_spec(all_structs)

@@ -24,11 +24,11 @@ namespace match_service {
 class Player;
 
 typedef struct _Player__isset {
-  _Player__isset() : id(false), username(false), rating(false), photo(false), channel_name(false) {}
+  _Player__isset() : id(false), username(false), photo(false), rating(false), channel_name(false) {}
   bool id :1;
   bool username :1;
-  bool rating :1;
   bool photo :1;
+  bool rating :1;
   bool channel_name :1;
 } _Player__isset;
 
@@ -40,16 +40,16 @@ class Player : public virtual ::apache::thrift::TBase {
   Player() noexcept
          : id(0),
            username(),
-           rating(0),
            photo(),
+           rating(0),
            channel_name() {
   }
 
   virtual ~Player() noexcept;
   int32_t id;
   std::string username;
-  int32_t rating;
   std::string photo;
+  int32_t rating;
   std::string channel_name;
 
   _Player__isset __isset;
@@ -58,9 +58,9 @@ class Player : public virtual ::apache::thrift::TBase {
 
   void __set_username(const std::string& val);
 
-  void __set_rating(const int32_t val);
-
   void __set_photo(const std::string& val);
+
+  void __set_rating(const int32_t val);
 
   void __set_channel_name(const std::string& val);
 
@@ -70,9 +70,9 @@ class Player : public virtual ::apache::thrift::TBase {
       return false;
     if (!(username == rhs.username))
       return false;
-    if (!(rating == rhs.rating))
-      return false;
     if (!(photo == rhs.photo))
+      return false;
+    if (!(rating == rhs.rating))
       return false;
     if (!(channel_name == rhs.channel_name))
       return false;

@@ -26,12 +26,12 @@ void Player::__set_username(const std::string& val) {
   this->username = val;
 }
 
-void Player::__set_rating(const int32_t val) {
-  this->rating = val;
-}
-
 void Player::__set_photo(const std::string& val) {
   this->photo = val;
+}
+
+void Player::__set_rating(const int32_t val) {
+  this->rating = val;
 }
 
 void Player::__set_channel_name(const std::string& val) {
@@ -82,17 +82,17 @@ uint32_t Player::read(::apache::thrift::protocol::TProtocol* iprot) {
         }
         break;
       case 3:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->rating);
-          this->__isset.rating = true;
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->photo);
+          this->__isset.photo = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
       case 4:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->photo);
-          this->__isset.photo = true;
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->rating);
+          this->__isset.rating = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -130,12 +130,12 @@ uint32_t Player::write(::apache::thrift::protocol::TProtocol* oprot) const {
   xfer += oprot->writeString(this->username);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("rating", ::apache::thrift::protocol::T_I32, 3);
-  xfer += oprot->writeI32(this->rating);
+  xfer += oprot->writeFieldBegin("photo", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString(this->photo);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("photo", ::apache::thrift::protocol::T_STRING, 4);
-  xfer += oprot->writeString(this->photo);
+  xfer += oprot->writeFieldBegin("rating", ::apache::thrift::protocol::T_I32, 4);
+  xfer += oprot->writeI32(this->rating);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("channel_name", ::apache::thrift::protocol::T_STRING, 5);
@@ -151,8 +151,8 @@ void swap(Player &a, Player &b) {
   using ::std::swap;
   swap(a.id, b.id);
   swap(a.username, b.username);
-  swap(a.rating, b.rating);
   swap(a.photo, b.photo);
+  swap(a.rating, b.rating);
   swap(a.channel_name, b.channel_name);
   swap(a.__isset, b.__isset);
 }
@@ -160,16 +160,16 @@ void swap(Player &a, Player &b) {
 Player::Player(const Player& other0) {
   id = other0.id;
   username = other0.username;
-  rating = other0.rating;
   photo = other0.photo;
+  rating = other0.rating;
   channel_name = other0.channel_name;
   __isset = other0.__isset;
 }
 Player& Player::operator=(const Player& other1) {
   id = other1.id;
   username = other1.username;
-  rating = other1.rating;
   photo = other1.photo;
+  rating = other1.rating;
   channel_name = other1.channel_name;
   __isset = other1.__isset;
   return *this;
@@ -179,8 +179,8 @@ void Player::printTo(std::ostream& out) const {
   out << "Player(";
   out << "id=" << to_string(id);
   out << ", " << "username=" << to_string(username);
-  out << ", " << "rating=" << to_string(rating);
   out << ", " << "photo=" << to_string(photo);
+  out << ", " << "rating=" << to_string(rating);
   out << ", " << "channel_name=" << to_string(channel_name);
   out << ")";
 }
