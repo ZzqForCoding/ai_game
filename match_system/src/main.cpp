@@ -72,7 +72,7 @@ class Pool {
             // min: 若取min则代表两者分差都小于 等待时间 * 10，实力差距最接近
             // max: 若取max则代表有一方分差小于 等待时间 * 10，实力差距可能会大
             int waitingtime = wt[i] < wt[j] ? wt[i] : wt[j];
-            return dt <= waitingtime * 5;
+            return dt <= waitingtime * 10;
         }
 
         void match() {
@@ -95,7 +95,7 @@ class Pool {
                     }
                     if(!flag) break;
                 }
-                if(!flag) break;
+                if(flag) break;
             }
         }
 

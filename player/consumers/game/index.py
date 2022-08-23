@@ -53,6 +53,24 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
 
         transport.close()
 
+    async def stop_match(self, data):
+        transport = TSocket.TSocket('localhost', 9090)
+        transport = TTransport.TBufferedTransport(transport)
+        protocol = TBinaryProtocol.TBinaryProtocol(transport)
+        client = Match.Client(protocol)
+
+        transport.open()
+
+        def db_get_player():
+            return Player.objects.get(user=self.user)
+
+        player = await database_sync_to_async(db_get_player)()
+
+        player_info = PlayerInfo(self.user.id, self.user.username,
+                player.photo, player.rating, self.channel_name)
+        client.remove_player(player_info, "")
+
+        transport.close()
 
     # 开始匹配(1.0)
     async def start_match_old(self, data):
@@ -130,7 +148,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             )
 
     # 停止匹配
-    async def stop_match(self, data):
+    async def stop_match_old(self, data):
         print('stop_match')
         player = {
             'username': data['username'],
