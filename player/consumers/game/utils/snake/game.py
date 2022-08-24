@@ -122,7 +122,7 @@ class Game(threading.Thread):
             return
 
         # Make socket
-        transport = TSocket.TSocket('localhost', 9092)
+        transport = TSocket.TSocket('120.76.157.21', 20104)
 
         # Buffering is critical. Raw sockets are very slow
         transport = TTransport.TBufferedTransport(transport)
