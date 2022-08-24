@@ -2,7 +2,7 @@
     <el-row>
         <el-col :span="14" :offset="2">
             <PlayGround :game="game" v-if="$store.state.pk.status === 'playing'" />
-            <MatchGround v-if="$store.state.pk.status === 'matching'" />
+            <MatchGround v-if="$store.state.pk.status === 'matching'" :operate="operate" :botId="botId" />
         </el-col>
         
         <el-col :span="5" :offset="1" style="margin-top: 40px;">
@@ -108,10 +108,13 @@ export default {
     setup() {
         const route = useRoute();
         const store = useStore();
-        const game = route.params.game;
+        const game = parseInt(route.params.game);
+        const operate = route.query.operate;
+        const botId = route.query.bot_id;
         const socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/snake/?token=" + store.state.user.access;
         let socket = null;
-        if(game === "绕蛇") {
+        // 绕蛇
+        if(game === 2) {
             onMounted(() => {
                 store.commit("updateOpponent", {
                     username: "我的对手",
@@ -132,13 +135,14 @@ export default {
 
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
-                    if(data.event === "start_match" && data.game) store.commit("updateGame", data.game);
+                    console.log(data);
                     if(data.username === store.state.user.username) return;
-                    if(data.event === "start_match") {
+                    if(data.event === "start_game") {
                         store.commit("updateOpponent", {
                             username: data.username,
                             photo: data.photo,
                         });
+                        store.commit("updateGame", data.game);
                         setTimeout(() => {
                             store.commit("updateStatus", "playing");
                         }, 2000);
@@ -184,6 +188,8 @@ export default {
 
         return {
             game,
+            operate,
+            botId,
         }
     }
 }

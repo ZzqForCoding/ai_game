@@ -19,7 +19,7 @@ export default {
     },
     props: {
         game: {
-            type: String,
+            type: Number,
             required: true,
         }
     },
@@ -30,12 +30,12 @@ export default {
 
         onMounted(() => {
             store.commit("updateGameResult", {loser: 'none', status: 'none'});
-            if(props.game === "绕蛇") {
+            if(props.game === 2) {
                 store.commit(
                     "updateGameObject",
                     new SnakeGameMap(canvas.value.getContext('2d'), parent.value, store)
                 );
-            } else if(props.game === "五子棋") {
+            } else if(props.game === 1) {
                 new GobangGameMap(canvas.value.getContext('2d'), parent.value);
             }
         });

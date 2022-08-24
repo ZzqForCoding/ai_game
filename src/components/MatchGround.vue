@@ -28,10 +28,19 @@ import { useStore } from 'vuex';
 
 export default {
     name: 'MatchGround',
-    setup() {
+    props: {
+        operate: {
+            type: Number,
+            required: true,
+        },
+        botId: {
+            type: Number,
+            required: true,
+        }
+    },
+    setup(props) {
         const store = useStore();
         let match_btn_info = ref('开始匹配')
-
         const click_match = () => {
             if(match_btn_info.value === "开始匹配") {
                 match_btn_info.value = "取消匹配";
@@ -39,6 +48,8 @@ export default {
                     event: "start_match",
                     username: store.state.user.username,
                     photo: store.state.user.photo,
+                    operate: props.operate,
+                    botId: props.botId,
                 }));
             } else {
                 match_btn_info.value = "开始匹配";
@@ -46,6 +57,8 @@ export default {
                     event: "stop_match",
                     username: store.state.user.username,
                     photo: store.state.user.photo,
+                    operate: props.operate,
+                    botId: props.botId,
                 }));
             }
         }

@@ -12,25 +12,50 @@
                             <el-form
                                 label-position="top"
                                 label-width="100px"
-                                :model="currentOpBot"
+                                :model="createGameInfo"
+                                :rules="rules"
                                 style="max-width: 100%"
+                                ref="createGameForm"
                             > 
                                 <el-form-item label="操作方式">
-                                    <el-radio-group v-model="operateSelect">
+                                    <el-radio-group v-model="createGameInfo.operateSelect">
                                         <el-radio-button label="0">代码</el-radio-button>
-                                        <el-radio-button label="1">键盘</el-radio-button>
+                                        <el-radio-button label="1">亲自出马</el-radio-button>
                                     </el-radio-group>
                                 </el-form-item>
-                                    <el-form-item label="游戏">
-                                        <el-radio-group v-model="gameSelect">
-                                            <el-radio-button v-for="game in games" :key="game.id" :label="game.name">{{ game.name }}</el-radio-button>
-                                        </el-radio-group>
-                                    </el-form-item>
-                                    <!-- 选择Bot，可查看Bot代码，不可编辑 -->
-                                </el-form>
+                                
+                                <el-form-item label="游戏">
+                                    <el-radio-group v-model="createGameInfo.gameSelect">
+                                        <el-radio-button v-for="game in games" :key="game.id" :label="game.id">{{ game.name }}</el-radio-button>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item label="选择Bot" v-if="parseInt(createGameInfo.operateSelect) === 0" prop="botSelect">
+                                    <el-select v-model="createGameInfo.botSelect" class="m-2" placeholder="Select">
+                                        <el-option
+                                          v-for="bot in bots"
+                                          :key="bot.id"
+                                          :label="bot.title"
+                                          :value="bot.id"
+                                          @click="selectBotCode(bot)"
+                                        />
+                                    </el-select>
+                                    <el-popover
+                                        v-if="createGameInfo.botSelect"
+                                        placement="right"
+                                        :width="270"
+                                        trigger="click"
+                                    >
+                                        <template #reference>
+                                            <el-icon :size="15" class="zoom"><ZoomIn /></el-icon>
+                                        </template>
+                                        <div class="popover-code-title">查看代码</div>
+                                        <pre class="popover-content">{{ botContent }}</pre>
+                                    </el-popover>
+                                </el-form-item>
+                            </el-form>
                             <template #footer>
                                 <span class="dialog-footer">
-                                    <el-button type="primary" @click="confirmGameDialog(gameSelect)">进入游戏</el-button>
+                                    <el-button type="primary" @click="confirmGameDialog(createGameInfo.gameSelect)">进入游戏</el-button>
                                     <el-button @click="showCreateGameDialog = false">取消</el-button>
                                 </span>
                             </template>
@@ -128,7 +153,7 @@
 </template>
 
 <script>
-import { onMounted, h, ref } from 'vue';
+import { onMounted, h, ref, unref, reactive, watch } from 'vue';
 import { ElNotification } from 'element-plus'
 import $ from 'jquery';
 import { useStore } from 'vuex';
@@ -139,10 +164,16 @@ export default {
     setup() {
         const store = useStore();
         let games = ref([]);
+        let bots = ref([]);
         let message = ref('');
+        let createGameForm = ref(null);
         let showCreateGameDialog = ref(false);
-        let operateSelect = ref(0);
-        let gameSelect = ref('五子棋'); 
+        let createGameInfo = reactive({
+            operateSelect: 0,
+            gameSelect: 1,
+            botSelect: null,
+        });
+        let botContent = ref('');
 
         const get_games = () => {
             $.ajax({
@@ -157,6 +188,34 @@ export default {
             });
         };
 
+        const refresh_bots = () => {
+            $.ajax({
+                url: "https://aigame.zzqahm.top/player/bot/getlist_game/",
+                type: "get",
+                data: {
+                    game_id: createGameInfo.gameSelect,
+                },
+                headers: {
+                    "Authorization": "Bearer " + store.state.user.access,
+                },
+                success(resp) {
+                    bots.value = resp;
+                },
+            });
+        };
+
+        refresh_bots();
+
+        watch(() => createGameInfo.gameSelect, () => {
+            refresh_bots();
+            createGameInfo.botSelect = null;
+            botContent.value = '';
+        });
+
+        const selectBotCode = bot => {
+            botContent.value = bot.content;
+        }
+
         onMounted(() => {
             ElNotification({
                 title: 'Welcome',
@@ -166,23 +225,41 @@ export default {
             get_games();
         });
 
-        const confirmGameDialog = game => {
-            showCreateGameDialog.value = false;
-            router.push({
-                name: 'pk_index',
-                params: {
-                    game,
+        const confirmGameDialog = async(game) => {
+            const form = unref(createGameForm);
+            await form.validate(valid => {
+                if(valid) {
+                    showCreateGameDialog.value = false;
+                    if(createGameInfo.operateSelect == 1) createGameInfo.botSelect = -1;
+                    router.push({
+                        name: 'pk_index',
+                        params: {
+                            game,
+                        },
+                        query: {
+                            operate: createGameInfo.operateSelect,
+                            bot_id: createGameInfo.botSelect,
+                        }
+                    });
                 }
             })
-        }
+        };
 
         return {
             message,
             games,
             showCreateGameDialog,
             confirmGameDialog,
-            operateSelect,
-            gameSelect,
+            createGameInfo,
+            bots,
+            selectBotCode,
+            botContent,
+            createGameForm,
+            rules: {
+                botSelect: [
+                    { required: true, message: '请选择Bot！', trigger: 'blur' },
+                ],
+            },
         }
     }
 }
@@ -252,5 +329,20 @@ export default {
 
 .message-send .message-input {
     margin-top: 30px;
+}
+
+.zoom {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.popover-code-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 10px 10px;
+}
+
+.popover-content {
+    margin: 0 10px;
 }
 </style>
