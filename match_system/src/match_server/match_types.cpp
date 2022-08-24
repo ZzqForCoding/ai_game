@@ -37,6 +37,14 @@ void Player::__set_rating(const int32_t val) {
 void Player::__set_channel_name(const std::string& val) {
   this->channel_name = val;
 }
+
+void Player::__set_operate(const int32_t val) {
+  this->operate = val;
+}
+
+void Player::__set_bot_id(const int32_t val) {
+  this->bot_id = val;
+}
 std::ostream& operator<<(std::ostream& out, const Player& obj)
 {
   obj.printTo(out);
@@ -105,6 +113,22 @@ uint32_t Player::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 6:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->operate);
+          this->__isset.operate = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 7:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->bot_id);
+          this->__isset.bot_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -142,6 +166,14 @@ uint32_t Player::write(::apache::thrift::protocol::TProtocol* oprot) const {
   xfer += oprot->writeString(this->channel_name);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("operate", ::apache::thrift::protocol::T_I32, 6);
+  xfer += oprot->writeI32(this->operate);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("bot_id", ::apache::thrift::protocol::T_I32, 7);
+  xfer += oprot->writeI32(this->bot_id);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -154,6 +186,8 @@ void swap(Player &a, Player &b) {
   swap(a.photo, b.photo);
   swap(a.rating, b.rating);
   swap(a.channel_name, b.channel_name);
+  swap(a.operate, b.operate);
+  swap(a.bot_id, b.bot_id);
   swap(a.__isset, b.__isset);
 }
 
@@ -163,6 +197,8 @@ Player::Player(const Player& other0) {
   photo = other0.photo;
   rating = other0.rating;
   channel_name = other0.channel_name;
+  operate = other0.operate;
+  bot_id = other0.bot_id;
   __isset = other0.__isset;
 }
 Player& Player::operator=(const Player& other1) {
@@ -171,6 +207,8 @@ Player& Player::operator=(const Player& other1) {
   photo = other1.photo;
   rating = other1.rating;
   channel_name = other1.channel_name;
+  operate = other1.operate;
+  bot_id = other1.bot_id;
   __isset = other1.__isset;
   return *this;
 }
@@ -182,6 +220,8 @@ void Player::printTo(std::ostream& out) const {
   out << ", " << "photo=" << to_string(photo);
   out << ", " << "rating=" << to_string(rating);
   out << ", " << "channel_name=" << to_string(channel_name);
+  out << ", " << "operate=" << to_string(operate);
+  out << ", " << "bot_id=" << to_string(bot_id);
   out << ")";
 }
 

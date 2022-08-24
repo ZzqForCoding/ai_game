@@ -24,16 +24,20 @@ class Player(object):
      - photo
      - rating
      - channel_name
+     - operate
+     - bot_id
 
     """
 
 
-    def __init__(self, id=None, username=None, photo=None, rating=None, channel_name=None,):
+    def __init__(self, id=None, username=None, photo=None, rating=None, channel_name=None, operate=None, bot_id=None,):
         self.id = id
         self.username = username
         self.photo = photo
         self.rating = rating
         self.channel_name = channel_name
+        self.operate = operate
+        self.bot_id = bot_id
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -69,6 +73,16 @@ class Player(object):
                     self.channel_name = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.operate = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.bot_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -99,6 +113,14 @@ class Player(object):
             oprot.writeFieldBegin('channel_name', TType.STRING, 5)
             oprot.writeString(self.channel_name.encode('utf-8') if sys.version_info[0] == 2 else self.channel_name)
             oprot.writeFieldEnd()
+        if self.operate is not None:
+            oprot.writeFieldBegin('operate', TType.I32, 6)
+            oprot.writeI32(self.operate)
+            oprot.writeFieldEnd()
+        if self.bot_id is not None:
+            oprot.writeFieldBegin('bot_id', TType.I32, 7)
+            oprot.writeI32(self.bot_id)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -123,6 +145,8 @@ Player.thrift_spec = (
     (3, TType.STRING, 'photo', 'UTF8', None, ),  # 3
     (4, TType.I32, 'rating', None, None, ),  # 4
     (5, TType.STRING, 'channel_name', 'UTF8', None, ),  # 5
+    (6, TType.I32, 'operate', None, None, ),  # 6
+    (7, TType.I32, 'bot_id', None, None, ),  # 7
 )
 fix_spec(all_structs)
 del all_structs

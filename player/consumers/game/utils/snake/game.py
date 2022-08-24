@@ -8,20 +8,41 @@ import random
 import threading
 import time
 
+from player.consumers.game.thrift.code_running_client.code_running import CodeRunning
+from player.consumers.game.thrift.code_running_client.code_running.ttypes import Bot
+from thrift import Thrift
+from thrift.transport import TSocket
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
+
 # 一局游戏一个线程
 class Game(threading.Thread):
     # 上右下左四个方向偏移量
     dx = [-1, 0, 1, 0];
     dy = [0, 1, 0, -1];
 
-    def __init__(self, rows, cols, inner_walls_count, idA, idB, room_name):
+    def __init__(self, rows, cols, inner_walls_count, idA, botA, idB, botB, room_name):
         threading.Thread.__init__(self)
         self.rows = rows
         self.cols = cols
         self.inner_walls_count = inner_walls_count
         self.g = [[0 for i in range(self.cols)] for i in range(self.rows)]
-        self.playerA = Player(idA, self.rows - 2, 1, [])
-        self.playerB = Player(idB, 1, self.cols - 2, [])
+
+        self.botIdA = -1
+        self.botCodeA = ""
+        if botA:
+            self.botIdA = botA.id
+            self.botCodeA = botA.content
+
+        self.botIdB = -1
+        self.botCodeB = ""
+        if botB:
+            self.botIdB = botB.id
+            self.botCodeB = botB.content
+
+        self.playerA = Player(idA, self.botIdA, self.botCodeA, self.rows - 2, 1, [])
+        self.playerB = Player(idB, self.botIdB, self.botCodeB, 1, self.cols - 2, [])
+
         self.nextStepA = None
         self.nextStepB = None
         self.lock = threading.Lock()
@@ -52,7 +73,7 @@ class Game(threading.Thread):
                 b_steps = self.playerB.getStepsString(),
                 map = self.getMapString(),
                 loser = self.loser
-        )
+                )
         record.save()
 
 
@@ -60,9 +81,9 @@ class Game(threading.Thread):
     def sendAllMessage(self, message):
         message['type'] = "group_send_event"
         async_to_sync(self.channel_layer.group_send)(
-            self.room_name,
-            message
-        )
+                self.room_name,
+                message
+                )
 
     def setNextStepA(self, nextStepA):
         self.lock.acquire()
@@ -78,6 +99,49 @@ class Game(threading.Thread):
         finally:
             self.lock.release()
 
+    def getInput(self, player):
+        me = None
+        you = None
+        if self.playerA.id == player.id:
+            me = self.playerA
+            you = self.playerB
+        else:
+            me = self.playerB
+            you = self.playerA
+
+        return self.getMapString() + '#' +\
+                str(me.sx) + '#' +\
+                str(me.sy) + '#(' +\
+                me.getStepsString() + ')#' +\
+                str(you.sx) + '#' +\
+                str(you.sy) + '#(' +\
+                you.getStepsString() + ')'
+
+    def sendBotCode(self, player):
+        if player.botId == -1:
+            return
+
+        # Make socket
+        transport = TSocket.TSocket('localhost', 9092)
+
+        # Buffering is critical. Raw sockets are very slow
+        transport = TTransport.TBufferedTransport(transport)
+
+        # Wrap in a protocol
+        protocol = TBinaryProtocol.TBinaryProtocol(transport)
+
+        # Create a client to use the protocol encoder
+        client = CodeRunning.Client(protocol)
+
+        # Connect!
+        transport.open()
+
+        bot = Bot(player.id, player.botCode, self.getInput(player))
+        client.add_bot_code(bot, "")
+
+        # Close!
+        transport.close()
+
     # 接收玩家输入
     def nextStep(self):
         if self.isStart:
@@ -85,6 +149,9 @@ class Game(threading.Thread):
             self.isStart = False
         else:
             time.sleep(0.2)
+
+        self.sendBotCode(self.playerA)
+        self.sendBotCode(self.playerB)
 
         # 接收5s内的输入
         for i in range(50):
@@ -140,10 +207,10 @@ class Game(threading.Thread):
         self.lock.acquire()
         try:
             resp = {
-                'event': "move",
-                'a_direction': self.nextStepA,
-                'b_direction': self.nextStepB
-            }
+                    'event': "move",
+                    'a_direction': self.nextStepA,
+                    'b_direction': self.nextStepB
+                    }
             self.sendAllMessage(resp)
             self.nextStepA = None
             self.nextStepB = None
@@ -153,10 +220,10 @@ class Game(threading.Thread):
     # 发送移动结果
     def sendResult(self):
         resp = {
-            'event': "result",
-            'loser': self.loser,
-            'status': self.status
-        }
+                'event': "result",
+                'loser': self.loser,
+                'status': self.status
+                }
         self.lock.acquire()
         try:
             if self.status == 'illegal':

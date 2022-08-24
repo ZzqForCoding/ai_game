@@ -19,7 +19,6 @@ class GetListView(APIView):
                 'title': bot.title,
                 'description': bot.description,
                 'content': bot.content,
-                'rating': bot.rating,
                 'createtime': bot.createtime.strftime("%Y-%m-%d %H:%M:%S"),
                 'modifytime': bot.modifytime.strftime("%Y-%m-%d %H:%M:%S"),
             })

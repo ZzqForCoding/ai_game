@@ -37,9 +37,13 @@ class MessageHandler:
                     'a_id': ps[0]['id'],
                     'a_username': ps[0]['username'],
                     'a_photo': ps[0]['photo'],
+                    'a_operate': ps[0]['operate'],
+                    'a_bot_id': ps[0]['bot_id'],
                     'b_id': ps[1]['id'],
                     'b_username': ps[1]['username'],
-                    'b_photo': ps[1]['photo']
+                    'b_photo': ps[1]['photo'],
+                    'b_operate': ps[1]['operate'],
+                    'b_bot_id': ps[1]['bot_id'],
                 }
             )
 
@@ -59,6 +63,5 @@ if __name__ == '__main__':
     # server = TServer.TThreadPoolServer(
     #     processor, transport, tfactory, pfactory)
 
-    print('Starting the server...')
+    print('Starting Message server...')
     server.serve()
-    print('done.')

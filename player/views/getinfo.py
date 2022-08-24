@@ -13,5 +13,6 @@ class InfoView(APIView):
             'result': 'success',
             'id': user.id,
             'username': user.username,
-            'photo': player.photo
+            'photo': player.photo,
+            'rating': player.rating,
         })

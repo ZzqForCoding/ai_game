@@ -6,6 +6,8 @@ struct Player {
     3: string photo,
     4: i32 rating,
     5: string channel_name,
+    6: i32 operate,
+    7: i32 bot_id,
 }
 
 service Match {

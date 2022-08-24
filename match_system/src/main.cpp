@@ -114,12 +114,16 @@ class Pool {
                 player["username"] = Json::Value(player1.username);
                 player["photo"] = Json::Value(player1.photo);
                 player["channel_name"] = Json::Value(player1.channel_name);
+                player["operate"] = Json::Value(player1.operate);
+                player["bot_id"] = Json::Value(player1.bot_id);
                 root["players"].append(player);
 
                 player["id"] = Json::Value(player2.id);
                 player["username"] = Json::Value(player2.username);
                 player["photo"] = Json::Value(player2.photo);
                 player["channel_name"] = Json::Value(player2.channel_name);
+                player["operate"] = Json::Value(player2.operate);
+                player["bot_id"] = Json::Value(player2.bot_id);
                 root["players"].append(player);
 
                 string resp = Json::FastWriter().write(root);
@@ -141,7 +145,6 @@ class MatchHandler : virtual public MatchIf {
         int32_t add_player(const Player& player, const std::string& info) {
             // Your implementation goes here
             printf("add_player\n");
-
             unique_lock<mutex> lock1(message_queue.m);
             message_queue.q.push({player, "add"});
             message_queue.cv.notify_all();
@@ -152,7 +155,6 @@ class MatchHandler : virtual public MatchIf {
         int32_t remove_player(const Player& player, const std::string& info) {
             // Your implementation goes here
             printf("remove_player\n");
-
             unique_lock<mutex> lock1(message_queue.m);
             message_queue.q.push({player, "remove"});
             message_queue.cv.notify_all();

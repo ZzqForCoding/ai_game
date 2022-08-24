@@ -45,7 +45,7 @@ class AddView(APIView):
             return Response(map)
 
         game = Game.objects.get(id=game_id)
-        bot = Bot.objects.create(user=user, game=game, title=title, description = description, content = content, rating = 1500)
+        bot = Bot.objects.create(user=user, game=game, title=title, description = description, content = content)
         bot.save()
         map['result'] = 'success'
 

@@ -3,7 +3,8 @@ from channels.db import database_sync_to_async
 import json
 from django.core.cache import cache
 from django.contrib.auth.models import User
-from player.models.player import Player as Player
+from player.models.player import Player
+from player.models.bot import Bot
 from player.consumers.game.utils.snake.game import Game
 
 from .thrift.match_client.match.ttypes import Player as PlayerInfo
@@ -48,7 +49,8 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.photo, player.rating, self.channel_name)
+                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']))
+
         client.add_player(player_info, "")
 
         transport.close()
@@ -67,7 +69,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.photo, player.rating, self.channel_name)
+                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']))
         client.remove_player(player_info, "")
 
         transport.close()
@@ -169,9 +171,11 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
     # 移动
     async def move(self, direction):
         if MultiPlayerGame.users[self.user.id].game.playerA.id == self.user.id:
-            self.game.setNextStepA(direction)
+            if MultiPlayerGame.users[self.user.id].game.playerA.botId == -1:
+                self.game.setNextStepA(direction)
         elif MultiPlayerGame.users[self.user.id].game.playerB.id == self.user.id:
-            self.game.setNextStepB(direction)
+            if MultiPlayerGame.users[self.user.id].game.playerB.botId == -1:
+                self.game.setNextStepB(direction)
 
     # 辅助函数：发送给当前房间玩家信息
     async def group_send_event(self, data):
@@ -179,6 +183,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
 
     async def start_snake_game(self, data):
         if self.user.id == data['a_id']:
+            print(data)
             a_id = data['a_id']
             a_username = data['a_username']
             a_photo = data['a_photo']
@@ -188,8 +193,19 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             room_name = data['room_name']
             self.room_name = room_name
 
+            def db_get_bot(id):
+                return Bot.objects.get(id=id)
+
+            botA = None
+            if data['a_operate'] == 0:
+                botA = await database_sync_to_async(db_get_bot)(int(data['a_bot_id']))
+
+            botB = None
+            if data['b_operate'] == 0:
+                botB = await database_sync_to_async(db_get_bot)(int(data['b_bot_id']))
+
             # 创建地图
-            game = Game(13, 14, 20, a_id, b_id, room_name)
+            game = Game(13, 14, 20, a_id, botA, b_id, botB, room_name)
             game.createMap()
             # 一局游戏一个线程
             game.start()
