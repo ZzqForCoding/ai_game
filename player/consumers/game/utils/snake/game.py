@@ -62,18 +62,18 @@ class Game(threading.Thread):
     def saveToDataBase(self):
         game = GameModel.objects.get(name='绕蛇')
         record = Record.objects.create(
-                game = game,
-                a_id = self.playerA.id,
-                a_sx = self.playerA.sx,
-                a_sy = self.playerA.sy,
-                b_id = self.playerB.id,
-                b_sx = self.playerB.sx,
-                b_sy = self.playerB.sy,
-                a_steps = self.playerA.getStepsString(),
-                b_steps = self.playerB.getStepsString(),
-                map = self.getMapString(),
-                loser = self.loser
-                )
+            game = game,
+            a_id = self.playerA.id,
+            a_sx = self.playerA.sx,
+            a_sy = self.playerA.sy,
+            b_id = self.playerB.id,
+            b_sx = self.playerB.sx,
+            b_sy = self.playerB.sy,
+            a_steps = self.playerA.getStepsString(),
+            b_steps = self.playerB.getStepsString(),
+            map = self.getMapString(),
+            loser = self.loser
+        )
         record.save()
 
 
@@ -81,9 +81,9 @@ class Game(threading.Thread):
     def sendAllMessage(self, message):
         message['type'] = "group_send_event"
         async_to_sync(self.channel_layer.group_send)(
-                self.room_name,
-                message
-                )
+            self.room_name,
+            message
+        )
 
     def setNextStepA(self, nextStepA):
         self.lock.acquire()
@@ -136,7 +136,7 @@ class Game(threading.Thread):
         # Connect!
         transport.open()
 
-        bot = Bot(player.id, player.botCode, self.getInput(player))
+        bot = Bot(player.id, player.botCode, self.getInput(player), "cpp", self.room_name)
         client.add_bot_code(bot, "")
 
         # Close!
@@ -207,10 +207,10 @@ class Game(threading.Thread):
         self.lock.acquire()
         try:
             resp = {
-                    'event': "move",
-                    'a_direction': self.nextStepA,
-                    'b_direction': self.nextStepB
-                    }
+                'event': "move",
+                'a_direction': self.nextStepA,
+                'b_direction': self.nextStepB
+            }
             self.sendAllMessage(resp)
             self.nextStepA = None
             self.nextStepB = None

@@ -22,14 +22,18 @@ class Bot(object):
      - userId
      - botCode
      - input
+     - language
+     - room_name
 
     """
 
 
-    def __init__(self, userId=None, botCode=None, input=None,):
+    def __init__(self, userId=None, botCode=None, input=None, language=None, room_name=None,):
         self.userId = userId
         self.botCode = botCode
         self.input = input
+        self.language = language
+        self.room_name = room_name
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -55,6 +59,16 @@ class Bot(object):
                     self.input = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.language = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.room_name = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -76,6 +90,14 @@ class Bot(object):
         if self.input is not None:
             oprot.writeFieldBegin('input', TType.STRING, 3)
             oprot.writeString(self.input.encode('utf-8') if sys.version_info[0] == 2 else self.input)
+            oprot.writeFieldEnd()
+        if self.language is not None:
+            oprot.writeFieldBegin('language', TType.STRING, 4)
+            oprot.writeString(self.language.encode('utf-8') if sys.version_info[0] == 2 else self.language)
+            oprot.writeFieldEnd()
+        if self.room_name is not None:
+            oprot.writeFieldBegin('room_name', TType.STRING, 5)
+            oprot.writeString(self.room_name.encode('utf-8') if sys.version_info[0] == 2 else self.room_name)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -99,6 +121,8 @@ Bot.thrift_spec = (
     (1, TType.I32, 'userId', None, None, ),  # 1
     (2, TType.STRING, 'botCode', 'UTF8', None, ),  # 2
     (3, TType.STRING, 'input', 'UTF8', None, ),  # 3
+    (4, TType.STRING, 'language', 'UTF8', None, ),  # 4
+    (5, TType.STRING, 'room_name', 'UTF8', None, ),  # 5
 )
 fix_spec(all_structs)
 del all_structs

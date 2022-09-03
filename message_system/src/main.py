@@ -16,6 +16,7 @@ from player.consumers.game.utils.snake.game import Game
 
 class MessageHandler:
     def response(self, info):
+        print(info)
         info = eval(info)
         if info['type'] == "match":
             ps = info['players']
@@ -46,13 +47,24 @@ class MessageHandler:
                     'b_bot_id': ps[1]['bot_id'],
                 }
             )
+        elif info['type'] == "bot_move":
+            async_to_sync(channel_layer.group_send) (
+                info['room_name'],
+                {
+                    'type': "receive_bot_move",
+                    'user_id': info["user_id"],
+                    'compile': info["compile"],
+                    'output': info["output"],
+                    'status': info["status"],
+                }
+            )
 
         return 0
 
 if __name__ == '__main__':
     handler = MessageHandler()
     processor = Message.Processor(handler)
-    transport = TSocket.TServerSocket(host='127.0.0.1', port=9091)
+    transport = TSocket.TServerSocket(host='172.17.0.3', port=9091)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 

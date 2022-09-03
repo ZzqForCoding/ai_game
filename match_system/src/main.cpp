@@ -100,7 +100,7 @@ class Pool {
         }
 
         void save_result(Player player1, Player player2) {
-            std::shared_ptr<TTransport> socket(new TSocket("localhost", 9091));
+            std::shared_ptr<TTransport> socket(new TSocket("120.76.157.21", 9091));
             std::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
             std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
             MessageClient client(protocol);

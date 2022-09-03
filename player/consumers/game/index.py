@@ -181,9 +181,14 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
 
+    async def receive_bot_move(self, data):
+        if MultiPlayerGame.users[self.user.id].game.playerA.id == data['user_id']:
+            self.game.setNextStepA(int(data['output']))
+        elif MultiPlayerGame.users[self.user.id].game.playerB.id == data['user_id']:
+            self.game.setNextStepB(int(data['output']))
+
     async def start_snake_game(self, data):
         if self.user.id == data['a_id']:
-            print(data)
             a_id = data['a_id']
             a_username = data['a_username']
             a_photo = data['a_photo']
