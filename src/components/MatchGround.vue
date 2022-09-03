@@ -1,5 +1,5 @@
 <template>
-    <el-row style="margin-top: 20px;">
+    <el-row style="margin-top: 20px; user-select: none;">
         <el-col :span="9" :offset="2">
             <div class="user-photo">
                 <img :src="$store.state.user.photo" alt="">
@@ -88,6 +88,7 @@ div.user-username {
     font-weight: 600;
     color: white;
     padding-top: 2vh;
+    user-select: text;
 }
 
 .match-btn {

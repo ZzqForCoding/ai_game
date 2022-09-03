@@ -11,6 +11,7 @@
                 text-color="#CCCCCC"
                 active-text-color="#fff"
                 :collapse="isCollapse"
+                style="user-select: none;"
             >
                 <el-scrollbar class="aside-scrollbar">
                     <el-sub-menu index="1">
@@ -95,7 +96,7 @@
                     <el-menu-item v-if="$store.state.user.is_login" index="1" style="margin-right: 20px; height: 60px;">
                         <el-dropdown>
                             <span class="el-dropdown-link">
-                                <el-avatar shape="square" :size="50" :src="$store.state.user.photo" style="margin-right: 15px;" />
+                                <el-avatar shape="square" :size="50" :src="$store.state.user.photo" style="margin-right: 15px; user-select: none;" />
                                 <span class="username">
                                     {{ $store.state.user.username }}
                                 </span>
@@ -104,7 +105,7 @@
                                 </el-icon>
                             </span>
                             <template #dropdown>
-                                <el-dropdown-menu>
+                                <el-dropdown-menu style="user-select: none;">
                                     <router-link class="link-text" :to="{name: 'user_bot_index'}">
                                         <el-dropdown-item>我的Bot</el-dropdown-item>
                                     </router-link>
@@ -116,14 +117,14 @@
                     </el-menu-item>
                     <router-link v-if="!$store.state.user.is_login && !$store.state.user.pulling_info" class="link-text" :to="{name: 'user_account_login'}">
                         <el-menu-item index="1">
-                            <span>
+                            <span style="user-select: none;">
                                 登录
                             </span>
                         </el-menu-item>
                     </router-link>
                     <router-link v-if="!$store.state.user.is_login && !$store.state.user.pulling_info" class="link-text" :to="{name: 'user_account_register'}">
                         <el-menu-item index="2">
-                            <span>
+                            <span style="user-select: none;">
                                 注册
                             </span>
                         </el-menu-item>
@@ -296,6 +297,7 @@ body {
     line-height: 60px;
     font-weight: 700;
     font-size: 17px;
+    user-select: none;
 }
 
 .current-page {
@@ -304,6 +306,7 @@ body {
     font-size: 17px;
     display: flex;
     justify-content: center;
+    user-select: none;
 }
 
 .collapse-btn {

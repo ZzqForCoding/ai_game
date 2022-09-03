@@ -2,10 +2,10 @@
     <el-row style="margin-top: 40px;">
         <!-- 图片切换栏，对战列表 -->
         <el-col :span="14" :offset="2">
-            <el-card class="box-card">
+            <el-card class="box-card" style="user-select: none;">
                 <template #header>
                     <div class="card-header">
-                        <span>最新对局</span>
+                        <span style="">最新对局</span>
                         <el-button class="button" type="primary" style="float: right;" @click="showCreateGameDialog = true">创建游戏</el-button>
 
                         <el-dialog v-model="showCreateGameDialog" title="新建游戏">
@@ -14,7 +14,7 @@
                                 label-width="100px"
                                 :model="createGameInfo"
                                 :rules="rules"
-                                style="max-width: 100%"
+                                style="max-width: 100%;"
                                 ref="createGameForm"
                             > 
                                 <el-form-item label="操作方式">
@@ -48,7 +48,7 @@
                                         <template #reference>
                                             <el-icon :size="15" class="zoom"><ZoomIn /></el-icon>
                                         </template>
-                                        <div class="popover-code-title">查看代码</div>
+                                        <div class="popover-code-title" style="user-select: none;">查看代码</div>
                                         <pre class="popover-content">{{ botContent }}</pre>
                                     </el-popover>
                                 </el-form-item>
@@ -69,7 +69,7 @@
             <el-card class="message">
                 <template #header>
                   <div class="card-header">
-                    <span>公共聊天区</span>
+                    <span style="user-select: none;">公共聊天区</span>
                   </div>
                 </template>
                 
@@ -294,18 +294,20 @@ export default {
 .message-content .message-container .username {
     color: grey;
     font-size: 8px;
-    line-height: 10px;
-    height: 10px;
+    line-height: 15px;
+    height: 15px;
     margin-bottom: 3px;
     margin-left: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 45px;
+    width: 80px;
+    user-select: text;
 }
 
 .message-content .message-container .phone {
     margin: 0 4px;
+    user-select: none;
 }
 
 .message /deep/.message-content {

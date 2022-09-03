@@ -2,7 +2,7 @@
     <ContentField>
         <el-row>
             <el-col :span="8" :offset="8">
-                <el-form :model="register_info" :rules="rules" ref="ruleForm" label-width="50px" label-position="top">
+                <el-form :model="register_info" :rules="rules" ref="ruleForm" label-width="50px" label-position="top" style="user-select: none;">
                     <el-form-item label="帐号" prop="username">
                         <el-input v-model="register_info.username" placeholder="请输入账号" clearable />
                     </el-form-item>

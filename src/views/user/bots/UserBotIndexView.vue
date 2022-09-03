@@ -9,7 +9,7 @@
                     <el-row>
                         <el-col :span="6" :offset="9">
                                 <div class="photo">
-                                    <img :src="$store.state.user.photo" alt="" class="">
+                                    <img :src="$store.state.user.photo" alt="" class="" style="user-select: none;">
                                 </div>
                         </el-col>
                     </el-row>
@@ -51,7 +51,7 @@
             </el-card>
         </el-col>
         <el-col :span="14" :offset="1">
-            <el-card shadow="always" class="bot-card">
+            <el-card shadow="always" class="bot-card" style="user-select: none;">
                 <template #header>
                     <div class="card-header">
                         <span style="font-weight: 700; font-size: 18px;">我的Bot</span>
@@ -93,11 +93,20 @@
                                     </span>
 
                                     <el-dropdown>
+                                    <!-- <el-select v-model="createGameInfo.botSelect" class="m-2" placeholder="Select">
+                                        <el-option
+                                          v-for="bot in bots"
+                                          :key="bot.id"
+                                          :label="bot.title"
+                                          :value="bot.id"
+                                          @click="selectBotCode(bot)"
+                                        />
+                                    </el-select> -->
                                         <span class="gear">
                                             <el-icon :size="25"><Tools /></el-icon>
                                         </span>
                                         <template #dropdown>
-                                            <el-dropdown-menu>
+                                            <el-dropdown-menu style="user-select: none;">
                                                 <el-form-item label="界面风格" style="margin: 15px 15px;">
                                                     <el-radio-group v-model="skin" @change="changeEditSkin">
                                                         <el-radio-button label="chrome">chrome</el-radio-button>
@@ -150,7 +159,7 @@
                     </div>
                 </template>
                 <!-- 表格数据 -->
-                <el-table :data="filterBots"  stripe style="width: 100%; height: 247px" highlight-current-row border max-height="67vh" table-layout="auto">
+                <el-table :data="filterBots"  stripe style="width: 100%;" highlight-current-row border max-height="67vh" table-layout="auto">
                     <el-table-column label="序号" type="index" />
                     <el-table-column prop="title" label="名称" />
                     <el-table-column prop="game" label="游戏" />
@@ -197,7 +206,7 @@
                                     <el-icon :size="25"><Tools /></el-icon>
                                 </span>
                                 <template #dropdown>
-                                    <el-dropdown-menu>
+                                    <el-dropdown-menu style="user-select: none;">
                                         <el-form-item label="界面风格" style="margin: 15px 15px;">
                                             <el-radio-group v-model="skin" @change="changeEditSkin">
                                                 <el-radio-button label="chrome">chrome</el-radio-button>
@@ -670,6 +679,7 @@ export default {
     height: 20px;
     line-height: 20px;
     margin-top: 18px;
+    user-select: text;
 }
 
 .profile-card .profession {
@@ -710,6 +720,7 @@ export default {
 .profile-card .friend-num-container .text {
     font-size: 8px;
     color: #676A79;
+    user-select: none;
 }
 
 .profile-card .vertical-divider {

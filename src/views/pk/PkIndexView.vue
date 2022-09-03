@@ -9,7 +9,7 @@
             <el-card class="message">
                 <template #header>
                   <div class="card-header">
-                    <span>公共聊天区</span>
+                    <span style="user-select: none;">公共聊天区</span>
                   </div>
                 </template>
                 
@@ -225,18 +225,20 @@ export default {
 .message-content .message-container .username {
     color: grey;
     font-size: 8px;
-    line-height: 10px;
-    height: 10px;
+    line-height: 14px;
+    height: 15px;
     margin-bottom: 3px;
     margin-left: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 45px;
+    width: 80px;
+    user-select: text;
 }
 
 .message-content .message-container .phone {
     margin: 0 4px;
+    user-select: none;
 }
 
 .message /deep/.message-content {

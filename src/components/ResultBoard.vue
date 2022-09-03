@@ -1,5 +1,5 @@
 <template>
-    <div class="result-board">
+    <div class="result-board" style="user-select: none;">
         <div v-if="$store.state.pk.loser === 'all'" class="all">
             <div class="user-profile">
                 <img :src="$store.state.user.photo" alt="">
@@ -32,8 +32,8 @@
             </span>
         </div>
         <div style="text-align: center;">
-            <el-button color="rgb(255, 193, 7)" round @click="restart">再来一局</el-button>
-            <el-button round @click="back">回到主页</el-button>
+            <el-button color="rgb(255, 193, 7)" round @click="restart" class="btn">再来一局</el-button>
+            <el-button round @click="back" class="btn">回到主页</el-button>
         </div>
     </div>
 </template>
@@ -102,6 +102,7 @@ div.user-profile .username {
     font-size: 12px;
     color: #cccccc;
     line-height: 12px;
+    user-select: text;
 }
 
 div.user-profile > img {
@@ -144,4 +145,7 @@ div.lose div.user-profile {
     flex-direction: column;
 }
 
+.btn {
+    width: 8vw;
+}
 </style>

@@ -6,6 +6,8 @@
 
 <script>
 import GameMap from './GameMap.vue'
+import { useStore } from 'vuex';
+import { onUnmounted } from 'vue';
 
 export default {
     name: 'PlayGround',
@@ -17,6 +19,16 @@ export default {
             type: String,
             required: true,
         }
+    },
+    setup() {
+        const store = useStore();
+
+        onUnmounted(() => {
+            store.commit("updateOpponent", {
+                username: "我的对手",
+                photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",
+            }); 
+        });
     }
 }
 </script>
