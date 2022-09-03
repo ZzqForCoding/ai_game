@@ -29,6 +29,14 @@ void Bot::__set_botCode(const std::string& val) {
 void Bot::__set_input(const std::string& val) {
   this->input = val;
 }
+
+void Bot::__set_language(const std::string& val) {
+  this->language = val;
+}
+
+void Bot::__set_room_name(const std::string& val) {
+  this->room_name = val;
+}
 std::ostream& operator<<(std::ostream& out, const Bot& obj)
 {
   obj.printTo(out);
@@ -81,6 +89,22 @@ uint32_t Bot::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->language);
+          this->__isset.language = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->room_name);
+          this->__isset.room_name = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -110,6 +134,14 @@ uint32_t Bot::write(::apache::thrift::protocol::TProtocol* oprot) const {
   xfer += oprot->writeString(this->input);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("language", ::apache::thrift::protocol::T_STRING, 4);
+  xfer += oprot->writeString(this->language);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("room_name", ::apache::thrift::protocol::T_STRING, 5);
+  xfer += oprot->writeString(this->room_name);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -120,6 +152,8 @@ void swap(Bot &a, Bot &b) {
   swap(a.userId, b.userId);
   swap(a.botCode, b.botCode);
   swap(a.input, b.input);
+  swap(a.language, b.language);
+  swap(a.room_name, b.room_name);
   swap(a.__isset, b.__isset);
 }
 
@@ -127,12 +161,16 @@ Bot::Bot(const Bot& other0) {
   userId = other0.userId;
   botCode = other0.botCode;
   input = other0.input;
+  language = other0.language;
+  room_name = other0.room_name;
   __isset = other0.__isset;
 }
 Bot& Bot::operator=(const Bot& other1) {
   userId = other1.userId;
   botCode = other1.botCode;
   input = other1.input;
+  language = other1.language;
+  room_name = other1.room_name;
   __isset = other1.__isset;
   return *this;
 }
@@ -142,6 +180,8 @@ void Bot::printTo(std::ostream& out) const {
   out << "userId=" << to_string(userId);
   out << ", " << "botCode=" << to_string(botCode);
   out << ", " << "input=" << to_string(input);
+  out << ", " << "language=" << to_string(language);
+  out << ", " << "room_name=" << to_string(room_name);
   out << ")";
 }
 

@@ -24,10 +24,12 @@ namespace code_running_service {
 class Bot;
 
 typedef struct _Bot__isset {
-  _Bot__isset() : userId(false), botCode(false), input(false) {}
+  _Bot__isset() : userId(false), botCode(false), input(false), language(false), room_name(false) {}
   bool userId :1;
   bool botCode :1;
   bool input :1;
+  bool language :1;
+  bool room_name :1;
 } _Bot__isset;
 
 class Bot : public virtual ::apache::thrift::TBase {
@@ -38,13 +40,17 @@ class Bot : public virtual ::apache::thrift::TBase {
   Bot() noexcept
       : userId(0),
         botCode(),
-        input() {
+        input(),
+        language(),
+        room_name() {
   }
 
   virtual ~Bot() noexcept;
   int32_t userId;
   std::string botCode;
   std::string input;
+  std::string language;
+  std::string room_name;
 
   _Bot__isset __isset;
 
@@ -54,6 +60,10 @@ class Bot : public virtual ::apache::thrift::TBase {
 
   void __set_input(const std::string& val);
 
+  void __set_language(const std::string& val);
+
+  void __set_room_name(const std::string& val);
+
   bool operator == (const Bot & rhs) const
   {
     if (!(userId == rhs.userId))
@@ -61,6 +71,10 @@ class Bot : public virtual ::apache::thrift::TBase {
     if (!(botCode == rhs.botCode))
       return false;
     if (!(input == rhs.input))
+      return false;
+    if (!(language == rhs.language))
+      return false;
+    if (!(room_name == rhs.room_name))
       return false;
     return true;
   }
