@@ -5,7 +5,7 @@
             <el-card class="box-card" style="user-select: none;">
                 <template #header>
                     <div class="card-header">
-                        <span style="">最新对局</span>
+                        <span>最新对局</span>
                         <el-button class="button" type="primary" style="float: right;" @click="showCreateGameDialog = true">创建游戏</el-button>
 
                         <el-dialog v-model="showCreateGameDialog" title="新建游戏">
@@ -65,11 +65,10 @@
             </el-card>
         </el-col>
         <el-col :span="5" :offset="1">
-
-            <el-card class="message">
+            <el-card class="message" style="user-select: none;">
                 <template #header>
                   <div class="card-header">
-                    <span style="user-select: none;">公共聊天区</span>
+                    <span>公共聊天区</span>
                   </div>
                 </template>
                 
@@ -307,7 +306,6 @@ export default {
 
 .message-content .message-container .phone {
     margin: 0 4px;
-    user-select: none;
 }
 
 .message /deep/.message-content {

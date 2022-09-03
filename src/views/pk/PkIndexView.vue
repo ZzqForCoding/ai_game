@@ -6,10 +6,10 @@
         </el-col>
         
         <el-col :span="5" :offset="1" style="margin-top: 40px;">
-            <el-card class="message">
+            <el-card class="message" style="user-select: none;">
                 <template #header>
                   <div class="card-header">
-                    <span style="user-select: none;">公共聊天区</span>
+                    <span>公共聊天区</span>
                   </div>
                 </template>
                 
@@ -238,7 +238,6 @@ export default {
 
 .message-content .message-container .phone {
     margin: 0 4px;
-    user-select: none;
 }
 
 .message /deep/.message-content {

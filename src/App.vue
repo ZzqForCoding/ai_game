@@ -1,9 +1,9 @@
 <template>
     <el-container>
-        <el-aside width="200px" >
-            <div class="aside-header">
+        <el-aside width="200px" style="user-select: none;">
+            <div class="aside-header" >
                     <svg t="1660362934898" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1502" width="25" height="25"><path d="M661.333333 490.666667c-36.266667 0-64 27.733333-64 64s27.733333 64 64 64 64-27.733333 64-64-27.733333-64-64-64M362.666667 490.666667c-36.266667 0-64 27.733333-64 64s27.733333 64 64 64 64-27.733333 64-64-27.733333-64-64-64" fill="#2F3CF4" p-id="1503"></path><path d="M128 320c0-23.466667 19.2-42.666667 42.666667-42.666667h170.666666l-61.866666-155.733333c-8.533333-21.333333 2.133333-46.933333 23.466666-55.466667 21.333333-8.533333 46.933333 2.133333 55.466667 23.466667l74.666667 185.6h155.733333l74.666667-185.6c8.533333-21.333333 34.133333-32 55.466666-23.466667 21.333333 8.533333 32 34.133333 23.466667 55.466667L682.666667 277.333333h170.666666c23.466667 0 42.666667 19.2 42.666667 42.666667v597.333333c0 23.466667-19.2 42.666667-42.666667 42.666667H170.666667c-23.466667 0-42.666667-19.2-42.666667-42.666667V320z m85.333333 42.666667v512h597.333334V362.666667H213.333333zM1024 725.333333V512c0-23.466667-19.2-42.666667-42.666667-42.666667s-42.666667 19.2-42.666666 42.666667v213.333333c0 23.466667 19.2 42.666667 42.666666 42.666667s42.666667-19.2 42.666667-42.666667M42.666667 768c23.466667 0 42.666667-19.2 42.666666-42.666667V512c0-23.466667-19.2-42.666667-42.666666-42.666667s-42.666667 19.2-42.666667 42.666667v213.333333c0 23.466667 19.2 42.666667 42.666667 42.666667" fill="#2F3CF4" p-id="1504"></path></svg>
-                    <span style="margin-left: 5px; user-select: none;">King Of Bots</span>
+                    <span style="margin-left: 5px;">King Of Bots</span>
             </div>
             <el-menu
                 class="el-aside-menu" 
@@ -11,13 +11,12 @@
                 text-color="#CCCCCC"
                 active-text-color="#fff"
                 :collapse="isCollapse"
-                style="user-select: none;"
             >
                 <el-scrollbar class="aside-scrollbar">
                     <el-sub-menu index="1">
                         <template #title>
                             <el-icon :size="30"><Grid /></el-icon>
-                            <span style="user-select: none;">Apps</span>
+                            <span>Apps</span>
                         </template>
                         <el-menu-item-group>
                             <!-- <router-link class="link-text" :to="{name: 'pk_index', params: { game: '绕蛇' }}">
@@ -78,8 +77,7 @@
             </el-menu>
         </el-aside>
         <el-container>
-            <el-header>
-                
+            <el-header style="user-select: none;">
                 <el-menu
                     :default-active="activeIndex"
                     class="el-menu-demo"
@@ -96,7 +94,7 @@
                     <el-menu-item v-if="$store.state.user.is_login" index="1" style="margin-right: 20px; height: 60px;">
                         <el-dropdown>
                             <span class="el-dropdown-link">
-                                <el-avatar shape="square" :size="50" :src="$store.state.user.photo" style="margin-right: 15px; user-select: none;" />
+                                <el-avatar shape="square" :size="50" :src="$store.state.user.photo" style="margin-right: 15px;" />
                                 <span class="username">
                                     {{ $store.state.user.username }}
                                 </span>
@@ -117,14 +115,14 @@
                     </el-menu-item>
                     <router-link v-if="!$store.state.user.is_login && !$store.state.user.pulling_info" class="link-text" :to="{name: 'user_account_login'}">
                         <el-menu-item index="1">
-                            <span style="user-select: none;">
+                            <span>
                                 登录
                             </span>
                         </el-menu-item>
                     </router-link>
                     <router-link v-if="!$store.state.user.is_login && !$store.state.user.pulling_info" class="link-text" :to="{name: 'user_account_register'}">
                         <el-menu-item index="2">
-                            <span style="user-select: none;">
+                            <span>
                                 注册
                             </span>
                         </el-menu-item>
@@ -297,7 +295,6 @@ body {
     line-height: 60px;
     font-weight: 700;
     font-size: 17px;
-    user-select: none;
 }
 
 .current-page {
@@ -306,7 +303,6 @@ body {
     font-size: 17px;
     display: flex;
     justify-content: center;
-    user-select: none;
 }
 
 .collapse-btn {
