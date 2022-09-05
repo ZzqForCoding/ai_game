@@ -23,6 +23,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         user = self.scope['user']
         if user.is_authenticated:
             await self.accept()
+            self.room_name = None
             self.user = user
             MultiPlayerGame.users[self.user.id] = self
             print('accept')
@@ -182,12 +183,36 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(data))
 
     async def receive_bot_move(self, data):
+        dir = data['result']
+        try:
+            dir = int(dir)
+            if dir < 0 or dir > 3:
+                return
+        except:
+            print("illegal: ", dir)
+            return
+
         if MultiPlayerGame.users[self.user.id].game.playerA.id == data['user_id']:
-            self.game.setNextStepA(int(data['output']))
+            self.game.setNextStepA(int(data['result']))
         elif MultiPlayerGame.users[self.user.id].game.playerB.id == data['user_id']:
-            self.game.setNextStepB(int(data['output']))
+            self.game.setNextStepB(int(data['result']))
+
+    async def send_message(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_send_event",
+                'event': "pk_message",
+                'msg': {
+                    'username': data['username'],
+                    'photo': data['photo'],
+                    'text': data['text'],
+                }
+            }
+        )
 
     async def start_snake_game(self, data):
+        self.room_name = data['room_name']
         if self.user.id == data['a_id']:
             a_id = data['a_id']
             a_username = data['a_username']
@@ -196,7 +221,6 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             b_username = data['b_username']
             b_photo = data['b_photo']
             room_name = data['room_name']
-            self.room_name = room_name
 
             def db_get_bot(id):
                 return Bot.objects.get(id=id)
@@ -259,3 +283,5 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             await self.stop_match(data)
         elif event == "move":
             await self.move(data['direction'])
+        elif event == "pk_message":
+            await self.send_message(data)

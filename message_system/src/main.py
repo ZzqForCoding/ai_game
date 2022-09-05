@@ -16,7 +16,6 @@ from player.consumers.game.utils.snake.game import Game
 
 class MessageHandler:
     def response(self, info):
-        print(info)
         info = eval(info)
         if info['type'] == "match":
             ps = info['players']
@@ -55,6 +54,7 @@ class MessageHandler:
                     'user_id': info["user_id"],
                     'compile': info["compile"],
                     'output': info["output"],
+                    'result': info["result"],
                     'status': info["status"],
                 }
             )

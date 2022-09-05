@@ -19,6 +19,7 @@ class Bot(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=300)
     content = models.TextField(max_length=10000)
+    language = models.CharField(max_length=10, default='cpp')
     createtime = models.DateTimeField(default=timezone.now)
     modifytime = models.DateTimeField(auto_now=True)
 

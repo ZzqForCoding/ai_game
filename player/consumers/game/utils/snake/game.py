@@ -29,19 +29,23 @@ class Game(threading.Thread):
         self.g = [[0 for i in range(self.cols)] for i in range(self.rows)]
 
         self.botIdA = -1
+        self.languageA = ""
         self.botCodeA = ""
         if botA:
             self.botIdA = botA.id
+            self.languageA = botA.language
             self.botCodeA = botA.content
 
         self.botIdB = -1
+        self.languageB = ""
         self.botCodeB = ""
         if botB:
             self.botIdB = botB.id
+            self.languageB = botB.language
             self.botCodeB = botB.content
 
-        self.playerA = Player(idA, self.botIdA, self.botCodeA, self.rows - 2, 1, [])
-        self.playerB = Player(idB, self.botIdB, self.botCodeB, 1, self.cols - 2, [])
+        self.playerA = Player(idA, self.botIdA, self.languageA, self.botCodeA, self.rows - 2, 1, [])
+        self.playerB = Player(idB, self.botIdB, self.languageB, self.botCodeB, 1, self.cols - 2, [])
 
         self.nextStepA = None
         self.nextStepB = None
@@ -136,7 +140,7 @@ class Game(threading.Thread):
         # Connect!
         transport.open()
 
-        bot = Bot(player.id, player.botCode, self.getInput(player), "cpp", self.room_name)
+        bot = Bot(player.id, player.botCode, self.getInput(player), player.language, self.room_name)
         client.add_bot_code(bot, "")
 
         # Close!
@@ -153,8 +157,8 @@ class Game(threading.Thread):
         self.sendBotCode(self.playerA)
         self.sendBotCode(self.playerB)
 
-        # 接收5s内的输入
-        for i in range(50):
+        # 接收6s内的输入
+        for i in range(60):
             time.sleep(0.1)
             self.lock.acquire()
             try:

@@ -13,6 +13,7 @@ class UpdateView(APIView):
         bot_id = data['bot_id']
         title = data['title']
         description = data['description']
+        language = data['language']
         content = data['content']
 
         map = {}
@@ -29,6 +30,10 @@ class UpdateView(APIView):
 
         if len(description) > 300:
             map['result'] = 'Bot描述的长度不能大于300'
+            return Response(map)
+
+        if language == "":
+            map['result'] = "语言不能为空"
             return Response(map)
 
         if content == "":
@@ -53,6 +58,7 @@ class UpdateView(APIView):
         # 若调用filter的update，是直接调用sql，而不经过model层，从而modifyTime不会自动更新。需要使用save
         bot.title = title
         bot.description = description
+        bot.language = language
         bot.content = content
         bot.save()
 

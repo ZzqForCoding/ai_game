@@ -14,6 +14,7 @@ class AddView(APIView):
         game_id = int(data['game_id'])
         title = data['title']
         description = data['description']
+        language = data['language']
         content = data['content']
 
         map = {}
@@ -36,6 +37,10 @@ class AddView(APIView):
             map['result'] = 'Bot描述的长度不能大于300'
             return Response(map)
 
+        if language == '':
+            map['result'] = '请选择语言'
+            return Response(map)
+
         if content == "":
             map['result'] = '代码不能为空'
             return Response(map)
@@ -45,7 +50,7 @@ class AddView(APIView):
             return Response(map)
 
         game = Game.objects.get(id=game_id)
-        bot = Bot.objects.create(user=user, game=game, title=title, description = description, content = content)
+        bot = Bot.objects.create(user=user, game=game, title=title, description = description, language = language, content = content)
         bot.save()
         map['result'] = 'success'
 

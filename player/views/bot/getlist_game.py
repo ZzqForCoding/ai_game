@@ -26,6 +26,7 @@ class GetListByGameView(APIView):
                 'game': bot.game.name,
                 'title': bot.title,
                 'description': bot.description,
+                'language': bot.language,
                 'content': bot.content,
                 'createtime': bot.createtime.strftime("%Y-%m-%d %H:%M:%S"),
                 'modifytime': bot.modifytime.strftime("%Y-%m-%d %H:%M:%S"),
