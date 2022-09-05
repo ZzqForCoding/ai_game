@@ -175,6 +175,50 @@ Result exec(std::string command)
     return result;
 }
 
+void save_result(string info) {
+    std::shared_ptr<TTransport> socket(new TSocket("120.76.157.21", 9091));
+    std::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+    std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+    MessageClient client(protocol);
+
+    try {
+        transport->open();
+        client.response(info);
+        transport->close();
+    } catch (TException& tx) {
+        cout << "ERROR: " << tx.what() << endl;
+    }
+}
+
+void processInput(string input) {
+    // 处理输入
+    // 地图#my.sx#my.sy#my操作#you.sx#you.sy#you操作
+    vector<string> v = split(input, "#");
+    string newInput;
+    for(int i = 0, k = 0; i < 13; i++) {
+        for(int j = 0; j < 14; j++, k++) {
+            if(v[0][k] == '0') newInput += "0 ";
+            else newInput += "1 ";
+        }
+        newInput += "\n";
+    }
+    newInput += "\n";
+
+    vector<PII> aCells = getCells(stoi(v[1]), stoi(v[2]), v[3]);
+    vector<PII> bCells = getCells(stoi(v[4]), stoi(v[5]), v[6]);
+
+    newInput += to_string(aCells.size()) + "\n";
+    for(int i = 0; i < aCells.size(); i++)
+        newInput += to_string(aCells[i].first) + " " + to_string(aCells[i].second) + "\n";
+    newInput += "\n";
+
+    newInput += to_string(bCells.size()) + "\n";
+    for(int i = 0; i < aCells.size(); i++)
+        newInput += to_string(bCells[i].first) + " " + to_string(bCells[i].second) + "\n";
+    system(concatStr("echo '", newInput, "' > /tmp/input.txt").c_str());
+    system(concatStr("docker cp /tmp/input.txt ", dockerId, ":/tmp/input.txt").c_str());
+}
+
 void run(Bot bot) {
     // 新建容器
     string dockerId = "6ed0654416c4";
@@ -182,17 +226,87 @@ void run(Bot bot) {
     //dockerId = result.output.substr(0, 12);
     // 分配的不准
     //system(concatStr("docker update ", dockerId, " --memory 64MB --memory-swap -1").c_str());
+    cout << bot.language << endl;
+
+    processInput(bot.input);
 
     if(bot.language == "cpp") {
         // 处理代码
-        bot.botCode.replace(bot.botCode.find("main"), 4, "main123456789");
+        bot.botCode += "\n\n#include <thread>\n\
+#include <unistd.h>\n\n\
+void startTime() {\n\
+    sleep(2.5);\n\
+    cerr << \"Time Limit Exceeded\";\n\
+    exit(0);\n\
+}\n\n\
+int main() {\n\
+    thread t(startTime);\n\
+    t.detach();\n\
+    int x = nextStep();\n\
+    cout << endl << x;\n\
+    return 0;\n\
+}\n";
+        ofstream fon("/tmp/code.cpp");
+        fon << bot.botCode;
+        fon.close();
+
+        Result compile = exec("g++ -Wall -o /tmp/code.out /tmp/code.cpp -pthread");
+
+        if(compile.status != 0) {
+            Json::Value root;
+            root["type"] = Json::Value("bot_move");
+            root["room_name"] = Json::Value(bot.room_name);
+            root["user_id"] = Json::Value(bot.userId);
+            root["compile"] = Json::Value(compile.error);
+            root["result"] = Json::Value(-1);
+            string resp = Json::FastWriter().write(root);
+            save_result(resp);
+            return;
+        }
+
+        system(concatStr("docker cp /tmp/code.out ", dockerId, ":/tmp/code.out").c_str());
+
+        // 编译运行
+        Result codeResult;
+        try {
+            codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c  'test -e /tmp/code.out && /tmp/code.out < input.txt'"));
+        } catch(exception e) {
+            cout << "except" << endl;
+        }
+
+        // 将运行结果与输出处理
+        vector<string> output = split(codeResult.output, "\n");
+        int outputLen = output.size();
+        string output1, output2 = output[outputLen - 1];
+        for(int i = 0; i < outputLen - 1; i++) {
+            output1 += output[i];
+            if(i != outputLen - 2) output1 += "\n";
+        }
+        cout << "output1: " << output1 << ", output2: " << output2 << endl;
+        // 错误代码处理
+        if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
+
+        // 传输结果
+        Json::Value root;
+        root["type"] = Json::Value("bot_move");
+        root["room_name"] = Json::Value(bot.room_name);
+        root["user_id"] = Json::Value(bot.userId);
+        root["compile"] = Json::Value(compile.error);
+        root["output"] = Json::Value(output1);
+        root["result"] = Json::Value(output2);
+        root["status"] = Json::Value(codeResult.error);
+        string resp = Json::FastWriter().write(root);
+        save_result(resp);
+    } else if(bot.language == "java") {
+        // 处理代码
         bot.botCode += "\n\n#include <thread>\n\
 #include <unistd.h>\n\n\
 void startTime() {\n\
     int x = 0;\n\
     while(true) {\n\
-        sleep(1);\n\
-        if(++x >= 2) {\n\
+        sleep(0.5);\n\
+        x += 0.5;\n\
+        if(x >= 2.5) {\n\
             cerr << \"Time Limit Exceeded\";\n\
             exit(0);\n\
         }\n\
@@ -202,80 +316,105 @@ int main() {\n\
     freopen(\"/tmp/input.txt\", \"r\", stdin);\n\
     thread t(startTime);\n\
     t.detach();\n\
-    main123456789();\n\
+    int x = nextStep();\n\
+    cout << endl << x;\n\
     return 0;\n\
 }\n";
-        ofstream fon("/tmp/code.cpp");
+        ofstream fon("/tmp/code.java");
         fon << bot.botCode;
         fon.close();
-        system(concatStr("docker cp /tmp/code.cpp ", dockerId, ":/tmp/code.cpp").c_str());
 
-        // 处理输入
-        // 地图#my.sx#my.sy#my操作#you.sx#you.sy#you操作
-        vector<string> v = split(bot.input, "#");
-        string newInput;
-        for(int i = 0, k = 0; i < 13; i++) {
-            for(int j = 0; j < 14; j++, k++) {
-                if(v[0][k] == '0') newInput += "0 ";
-                else newInput += "1 ";
-            }
-            newInput += "\n";
-        }
-        newInput += "\n";
-
-        vector<PII> aCells = getCells(stoi(v[1]), stoi(v[2]), v[3]);
-        vector<PII> bCells = getCells(stoi(v[4]), stoi(v[5]), v[6]);
-
-        for(int i = 0; i < aCells.size(); i++)
-            newInput += to_string(aCells[i].first) + " " + to_string(aCells[i].second) + "\n";
-
-        newInput += "\n";
-
-        for(int i = 0; i < aCells.size(); i++)
-            newInput += to_string(bCells[i].first) + " " + to_string(bCells[i].second) + "\n";
-
-        system(concatStr("echo '", newInput, "' > /tmp/intput.txt").c_str());
-        system(concatStr("docker cp /tmp/input.txt ", dockerId, ":/tmp/input.txt").c_str());
+        system(concatStr("docker cp /tmp/code.java ", dockerId, ":/tmp/code.java").c_str());
 
         // 编译运行
-        Result compile, codeResult;
+        Result codeResult;
         try {
-            compile = exec(concatStr("docker exec ", dockerId, " g++ -Wall -o /tmp/code.out /tmp/code.cpp -pthread"));
-            codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c  'test -e /tmp/code.out && /tmp/code.out'"));
+            codeResult = exec(concatStr("docker exec ", dockerId, " java /tmp/code.java < input.txt'"));
         } catch(exception e) {
             cout << "except" << endl;
         }
 
-        // 将编译结果处理
-        int flag = compile.error.find("main123456789");
-        if(flag != -1)
-            compile.error.replace(flag, 13, "main");
-
+        // 将运行结果与输出处理
+        vector<string> output = split(codeResult.output, "\n");
+        int outputLen = output.size();
+        string output1, output2 = output[outputLen - 1];
+        for(int i = 0; i < outputLen - 1; i++) {
+            output1 += output[i];
+            if(i != outputLen - 2) output1 += "\n";
+        }
+        cout << "output1: " << output1 << ", output2: " << output2 << endl;
         // 错误代码处理
-        if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
+        // if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
 
         // 传输结果
-        std::shared_ptr<TTransport> socket(new TSocket("120.76.157.21", 9091));
-        std::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
-        std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-        MessageClient client(protocol);
+        Json::Value root;
+        root["type"] = Json::Value("bot_move");
+        root["room_name"] = Json::Value(bot.room_name);
+        root["user_id"] = Json::Value(bot.userId);
+        root["compile"] = Json::Value(codeResult.error);
+        root["output"] = Json::Value(output1);
+        root["result"] = Json::Value(output2);
+        root["status"] = Json::Value(codeResult.status);
+        string resp = Json::FastWriter().write(root);
+        coput << resp;
+        save_result(resp);
+    } else if(bot.language == "python") {
+        // 处理代码
+        bot.botCode += "\n\nimport sys\n\n\
+import os\n\
+import time\n\
+import threading\n\
+\n\
+def startTime():\n\
+    time.sleep(2.5)\n\
+    print(\"Time Limit Exceeded\", file=sys.stderr)\n\
+    os._exit(0)\n\
+\n\
+if __name == '__main__':\n\
+    t = threading.Thread(target=startTime)\n\
+    t.setDaemon(True)\n\
+    t.start()\n\
+    c = nextStep()\n\
+    print(c)\n";
 
+        ofstream fon("/tmp/code.py");
+        fon << bot.botCode;
+        fon.close();
+
+        system(concatStr("docker cp /tmp/code.py ", dockerId, ":/tmp/code.py").c_str());
+
+        // 编译运行
+        Result codeResult;
         try {
-            transport->open();
-
-            Json::Value root;
-            root["type"] = Json::Value("bot_move");
-            root["room_name"] = Json::Value(bot.room_name);
-            root["user_id"] = Json::Value(bot.userId);
-            root["compile"] = Json::Value(compile.error);
-            root["output"] = Json::Value(codeResult.output);
-            root["status"] = Json::Value(codeResult.error);
-            string resp = Json::FastWriter().write(root);
-            client.response(resp);
-            transport->close();
-        } catch (TException& tx) {
-            cout << "ERROR: " << tx.what() << endl;
+            codeResult = exec(concatStr("docker exec ", dockerId, " python3 /tmp/code.py < input.txt'"));
+        } catch(exception e) {
+            cout << "except" << endl;
         }
+
+        // 将运行结果与输出处理
+        vector<string> output = split(codeResult.output, "\n");
+        int outputLen = output.size();
+        string output1, output2 = output[outputLen - 1];
+        for(int i = 0; i < outputLen - 1; i++) {
+            output1 += output[i];
+            if(i != outputLen - 2) output1 += "\n";
+        }
+        cout << "output1: " << output1 << ", output2: " << output2 << endl;
+        // 错误代码处理
+        // if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
+
+        // 传输结果
+        Json::Value root;
+        root["type"] = Json::Value("bot_move");
+        root["room_name"] = Json::Value(bot.room_name);
+        root["user_id"] = Json::Value(bot.userId);
+        root["compile"] = Json::Value("");
+        root["output"] = Json::Value(output1);
+        root["result"] = Json::Value(output2);
+        root["status"] = Json::Value(codeResult.status);
+        string resp = Json::FastWriter().write(root);
+        coput << resp;
+        save_result(resp);
     }
 
     //system(concatStr("docker stop ", dockerId).c_str());
