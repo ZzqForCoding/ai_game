@@ -72,79 +72,33 @@
                   </div>
                 </template>
                 
-                <el-card class="message-content" shadow="never">
-                    <el-scrollbar max-height="320px">
-                        <div class="message-container">
+                <el-card class="messages" shadow="never">
+                    <el-scrollbar max-height="320px" ref="msgScroll">
+                        <div class="message-content" v-for="msg in $store.state.record.hall_msgs" :key="msg.id">
                             <div class="username">
-                                zzq
+                                {{ msg.username }}
                             </div>
                             <div class="main">
-                                <el-avatar class="phone" size="small" src="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg" />
-                                <el-button round >你好</el-button>
+                                <el-avatar class="photo" size="small" :src="msg.photo" />
+                                <el-button round  :type="$store.state.user.username === msg.username ? 'primary' : ''">{{ msg.text }}</el-button>
                             </div>
                         </div>
-                        
-                        <div class="message-container">
-                            <div class="username">
-                                Sam Lanson
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://social.webestica.com/assets/images/avatar/07.jpg" />
-                                <el-button type="primary" round >我不好</el-button>
-                            </div>
-                        </div>
-                        <div class="message-container">
-                            <div class="username">
-                                zzq
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg" />
-                                <el-button round >你好</el-button>
-                            </div>
-                        </div>
-                        
-                        <div class="message-container">
-                            <div class="username">
-                                Sam Lanson
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://social.webestica.com/assets/images/avatar/07.jpg" />
-                                <el-button type="primary" round >我不好</el-button>
-                            </div>
-                        </div>
-                        <div class="message-container">
-                            <div class="username">
-                                zzq
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg" />
-                                <el-button round >你好</el-button>
-                            </div>
-                        </div>
-                        
-                        <div class="message-container">
-                            <div class="username">
-                                Sam Lanson
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://social.webestica.com/assets/images/avatar/07.jpg" />
-                                <el-button type="primary" round >我不好</el-button>
-                            </div>
-                        </div>
-                        <!-- <el-button type="primary" round style="float: right;">我不好</el-button> -->
                     </el-scrollbar>
                 </el-card>
                 
                 <el-card class="message-send" shadow="never">
-                    <el-input
-                        class="message-input"
-                        :autosize="{ minRows: 6, maxRows: 6 }"
-                        type="textarea"
-                        placeholder="Please input message..."
-                        v-model="message"
-                        resize="none"
-                    />
-                    <el-button class="sendBtn" type="primary" @click="onSubmit" size="small">发送</el-button>
+                    <el-form @submit.prevent="">
+                        <el-input
+                            class="message-input"
+                            :autosize="{ minRows: 6, maxRows: 6 }"
+                            type="textarea"
+                            placeholder="Please input message..."
+                            v-model="message"
+                            resize="none"
+                            @keydown.enter="enterSendMsg"
+                        />
+                        <el-button class="sendBtn" type="primary" @click="sendMsg" size="small">发送</el-button>
+                    </el-form>
                 </el-card>
             </el-card>
         </el-col>
@@ -152,7 +106,7 @@
 </template>
 
 <script>
-import { onMounted, h, ref, unref, reactive, watch } from 'vue';
+import { onMounted, onUnmounted, h, ref, unref, reactive, watch } from 'vue';
 import { ElNotification } from 'element-plus'
 import $ from 'jquery';
 import { useStore } from 'vuex';
@@ -164,7 +118,6 @@ export default {
         const store = useStore();
         let games = ref([]);
         let bots = ref([]);
-        let message = ref('');
         let createGameForm = ref(null);
         let showCreateGameDialog = ref(false);
         let createGameInfo = reactive({
@@ -173,6 +126,12 @@ export default {
             botSelect: null,
         });
         let botContent = ref('');
+        const socketUrl = "wss://aigame.zzqahm.top/wss/hall/?token=" + store.state.user.access;
+        let message = ref('');
+        let canSendMsg = ref(false);
+        let msgScroll = ref(null);
+
+        let socket = null;
 
         const get_games = () => {
             $.ajax({
@@ -222,6 +181,29 @@ export default {
                 offset: 70,
             });
             get_games();
+            
+            socket = new WebSocket(socketUrl);
+
+            socket.onopen = () => {
+                console.log("connected!");
+                canSendMsg.value = true;
+                store.commit("updateHallSocket", socket);
+            };
+
+            socket.onmessage = msg => {
+                const data = JSON.parse(msg.data);
+                if(data.username === store.state.user.username) return;
+                if(data.event === "hall_message") {
+                    store.commit("pushHallMsg", data.msg);
+                // const scroll = unref(msgScroll);
+                // scroll.setScrollTop(5000);
+                }
+            }
+
+            socket.onclose = () => {
+                canSendMsg.value = false;
+                console.log("disconnected!");
+            }
         });
 
         const confirmGameDialog = async(game) => {
@@ -244,8 +226,37 @@ export default {
             })
         };
 
+        onUnmounted(() => {
+            socket.close();
+        });
+        
+        const sendMsg = () => {
+            if(!canSendMsg.value || message.value === "") return;
+            store.state.record.hall_socket.send(JSON.stringify({
+                event: "hall_message",
+                username: store.state.user.username,
+                photo: store.state.user.photo,
+                text: message.value,
+            }));
+            canSendMsg.value = false;
+            setTimeout(() => {
+                canSendMsg.value = true;
+            }, 1500);
+            message.value = "";
+            // const scroll = unref(msgScroll);
+            //     scroll.setScrollTop(5000);
+        };
+
+        const enterSendMsg = (e) => {
+            if(e.ctrlKey && e.keyCode === 13) {   //用户点击了ctrl+enter触发
+                message.value += '\n';
+            } else { //用户点击了enter触发
+                e.preventDefault();
+                sendMsg();
+            }  
+        };
+
         return {
-            message,
             games,
             showCreateGameDialog,
             confirmGameDialog,
@@ -259,6 +270,10 @@ export default {
                     { required: true, message: '请选择Bot！', trigger: 'blur' },
                 ],
             },
+            message,
+            sendMsg,
+            enterSendMsg,
+            msgScroll,
         }
     }
 }
@@ -273,7 +288,7 @@ export default {
     padding: 10px 10px !important;
 }
 
-.message-content /deep/.el-card__body {
+.messages /deep/.el-card__body {
     display: flex;
     flex-direction: column;
     padding: 5px 10px !important;
@@ -281,16 +296,16 @@ export default {
     padding-right: 1px;
 }
 
-.message-content .message-container {
+.messages .message-content {
     margin: 10px 0;
 }
 
-.message-content .message-container .main {
+.messages .message-content .main {
     display: flex;
     align-items: center;
 }
 
-.message-content .message-container .username {
+.messages .message-content .username {
     color: grey;
     font-size: 8px;
     line-height: 15px;
@@ -304,11 +319,11 @@ export default {
     user-select: text;
 }
 
-.message-content .message-container .phone {
+.messages .message-content .photo {
     margin: 0 4px;
 }
 
-.message /deep/.message-content {
+.message /deep/.messages {
     height: 320px;
 }
 

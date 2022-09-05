@@ -76,7 +76,6 @@
                                         <el-radio-button v-for="game in games" :key="game.id" :label="game.id">{{ game.name }}</el-radio-button>
                                     </el-radio-group>
                                 </el-form-item>
-                    
                                 <el-form-item label="简介" prop="description">
                                     <el-input
                                         v-model="bot.description"
@@ -85,7 +84,13 @@
                                         placeholder="请输入Bot简介"
                                     />
                                 </el-form-item>
-
+                                <el-form-item label="语言" prop="language">
+                                    <el-radio-group v-model="bot.language">
+                                        <el-radio-button label="cpp">cpp</el-radio-button>
+                                        <el-radio-button label="java">java</el-radio-button>
+                                        <el-radio-button label="python">python</el-radio-button>
+                                    </el-radio-group>
+                                </el-form-item>
                                 <el-form-item label="代码">
                                     <div style="flex-grow: 1;" />
                                     <span class="refresh" @click="refreshEditor">
@@ -144,6 +149,7 @@
                                         v-model:value="bot.content"
                                         id="codeEditor-create"
                                         @init="editorInit"
+                                        class="codeEditor"
                                         lang="c_cpp"
                                         theme="textmate"
                                         style="height: 300px; width: 100%;" />
@@ -163,6 +169,7 @@
                     <el-table-column label="序号" type="index" />
                     <el-table-column prop="title" label="名称" />
                     <el-table-column prop="game" label="游戏" />
+                    <el-table-column prop="language" label="语言" />
                     <el-table-column prop="createtime" label="创建时间" sortable />
                     
                     <el-table-column fixed="right" label="Operations" >
@@ -193,8 +200,14 @@
                                 type="textarea"
                                 placeholder="请输入Bot简介"
                             />
+                        </el-form-item>       
+                        <el-form-item label="语言" prop="language">
+                            <el-radio-group v-model="currentOpBot.language">
+                                <el-radio-button label="cpp">cpp</el-radio-button>
+                                <el-radio-button label="java">java</el-radio-button>
+                                <el-radio-button label="python">python</el-radio-button>
+                            </el-radio-group>
                         </el-form-item>
-
                         <el-form-item label="代码">
                             <div style="flex-grow: 1;" />
                             <span class="refresh" @click="refreshEditor">
@@ -244,6 +257,7 @@
                                 v-model:value="currentOpBot.content"
                                 id="codeEditor-edit"
                                 @init="editorInit"
+                                class="codeEditor"
                                 lang="c_cpp"
                                 theme="textmate"
                                 style="height: 300px; width: 100%;" />
@@ -348,6 +362,7 @@ export default {
             editor.setOptions({
                 'fontSize': `${num}pt`,
             })
+            fontsize.value = num;
             localStorage.setItem("editor_fontsize_for_" + store.state.user.username, num);
         }
 
@@ -371,6 +386,7 @@ export default {
             title: "",
             game: 0,
             description: "",
+            language: "",
             content: "",
         });
 
@@ -414,6 +430,7 @@ export default {
                     title: bot.title,
                     game_id: bot.game,
                     description: bot.description,
+                    language: bot.language,
                     content: bot.content,
                 },
                 headers: {
@@ -464,6 +481,7 @@ export default {
         };
 
         const update_bot = bot => {
+            console.log(bot)
             $.ajax({
                 url: "https://aigame.zzqahm.top/player/bot/update/",
                 type: "post",
@@ -471,6 +489,7 @@ export default {
                     bot_id: bot.id,
                     title: bot.title,
                     description: bot.description,
+                    language: bot.language,
                     content: bot.content,
                 },
                 headers: {
@@ -640,6 +659,9 @@ export default {
                 ],
                 description: [
                     { max: 300, message: '长度在 300 个字符之内', trigger: 'blur' }
+                ],
+                language: [
+                    { required: true, message: '请选择语言！', trigger: 'blur' },
                 ],
             },
         }

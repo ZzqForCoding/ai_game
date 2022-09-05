@@ -14,6 +14,8 @@ export default {
     gameObject: null,
     loser: "none",
     type: "none",
+    msgs: [],
+    canSendMsg: false,
   },
   getters: {
   },
@@ -44,6 +46,16 @@ export default {
         state.loser = result.loser;
         state.type = result.status;
     },
+    pushMsg(state, msg) {
+        msg.id = state.msgs.length + 1;
+        state.msgs.push(msg);
+    },
+    clearMsg(state) {
+        state.msgs = [];
+    },
+    updateCanSendMsg(state, canSendMsg) {
+        state.canSendMsg = canSendMsg;
+    }
   },
   actions: {
  

@@ -13,79 +13,33 @@
                   </div>
                 </template>
                 
-                <el-card class="message-content" shadow="never">
-                    <el-scrollbar max-height="320px">
-                        <div class="message-container">
+                <el-card class="messages" shadow="never">
+                    <el-scrollbar max-height="320px" ref="msgScroll">
+                        <div class="message-content" v-for="msg in $store.state.pk.msgs" :key="msg.id">
                             <div class="username">
-                                zzq
+                                {{ msg.username }}
                             </div>
                             <div class="main">
-                                <el-avatar class="phone" size="small" src="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg" />
-                                <el-button round >你好</el-button>
+                                <el-avatar class="photo" size="small" :src="msg.photo" />
+                                <el-button round  :type="$store.state.user.username === msg.username ? 'primary' : ''">{{ msg.text }}</el-button>
                             </div>
                         </div>
-                        
-                        <div class="message-container">
-                            <div class="username">
-                                Sam Lanson
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://social.webestica.com/assets/images/avatar/07.jpg" />
-                                <el-button type="primary" round >我不好</el-button>
-                            </div>
-                        </div>
-                        <div class="message-container">
-                            <div class="username">
-                                zzq
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg" />
-                                <el-button round >你好</el-button>
-                            </div>
-                        </div>
-                        
-                        <div class="message-container">
-                            <div class="username">
-                                Sam Lanson
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://social.webestica.com/assets/images/avatar/07.jpg" />
-                                <el-button type="primary" round >我不好</el-button>
-                            </div>
-                        </div>
-                        <div class="message-container">
-                            <div class="username">
-                                zzq
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg" />
-                                <el-button round >你好</el-button>
-                            </div>
-                        </div>
-                        
-                        <div class="message-container">
-                            <div class="username">
-                                Sam Lanson
-                            </div>
-                            <div class="main">
-                                <el-avatar class="phone" size="small" src="https://social.webestica.com/assets/images/avatar/07.jpg" />
-                                <el-button type="primary" round >我不好</el-button>
-                            </div>
-                        </div>
-                        <!-- <el-button type="primary" round style="float: right;">我不好</el-button> -->
                     </el-scrollbar>
                 </el-card>
                 
                 <el-card class="message-send" shadow="never">
-                    <el-input
-                        class="message-input"
-                        :autosize="{ minRows: 6, maxRows: 6 }"
-                        type="textarea"
-                        placeholder="Please input message..."
-                        v-model="message"
-                        resize="none"
-                    />
-                    <el-button class="sendBtn" type="primary" @click="onSubmit" size="small">发送</el-button>
+                    <el-form @submit.prevent="">
+                        <el-input
+                            class="message-input"
+                            :autosize="{ minRows: 6, maxRows: 6 }"
+                            type="textarea"
+                            placeholder="Please input message..."
+                            v-model="message"
+                            resize="none"
+                            @keydown.enter="enterSendMsg"
+                        />
+                        <el-button class="sendBtn" type="primary" @click="sendMsg" size="small">发送</el-button>
+                    </el-form>
                 </el-card>
             </el-card>
         </el-col>
@@ -95,7 +49,7 @@
 <script>
 import PlayGround from '@/components/PlayGround.vue';
 import MatchGround from '@/components/MatchGround.vue';
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -112,10 +66,14 @@ export default {
         const operate = route.query.operate;
         const botId = route.query.bot_id;
         const socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/snake/?token=" + store.state.user.access;
+        let message = ref('');
+        let msgScroll = ref(null);
+
         let socket = null;
         // 绕蛇
         if(game === 2) {
-            onMounted(() => {
+            onMounted(() => {  
+                store.commit("clearMsg");
                 store.commit("updateOpponent", {
                     username: "我的对手",
                     photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",
@@ -135,7 +93,6 @@ export default {
 
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
-                    console.log(data);
                     if(data.username === store.state.user.username) return;
                     if(data.event === "start_game") {
                         store.commit("updateOpponent", {
@@ -143,6 +100,7 @@ export default {
                             photo: data.photo,
                         });
                         store.commit("updateGame", data.game);
+                        store.commit("updateCanSendMsg", true);
                         setTimeout(() => {
                             store.commit("updateStatus", "playing");
                         }, 2000);
@@ -171,7 +129,17 @@ export default {
                             loser: data.loser,
                             status: data.status,
                         });
-                        console.log(data);
+                    } else if(data.event === "pk_message") {
+                        if(!store.state.pk.canSendMsg) return;
+                        store.commit("pushMsg", data.msg);
+                        if(data.msg.username === store.state.user.username) {
+                            store.commit("updateCanSendMsg", false);
+                            setTimeout(() => {
+                                store.commit("updateCanSendMsg", true);
+                            }, 1500);
+                        }
+                        // const scroll = unref(msgScroll);
+                        // scroll.setScrollTop(80000);
                     }
                 }
 
@@ -186,10 +154,36 @@ export default {
             });
         }
 
+        const sendMsg = () => {
+            if(!store.state.pk.canSendMsg || message.value === "") return;
+            store.state.pk.socket.send(JSON.stringify({
+                event: "pk_message",
+                username: store.state.user.username,
+                photo: store.state.user.photo,
+                text: message.value,
+            }));
+            message.value = "";
+            // const scroll = unref(msgScroll);
+            // scroll.setScrollTop(80000);
+        };
+
+        const enterSendMsg = (e) => {
+            if(e.ctrlKey && e.keyCode === 13) {   //用户点击了ctrl+enter触发
+                message.value += '\n';
+            } else { //用户点击了enter触发
+                e.preventDefault();
+                sendMsg();
+            }  
+        };
+
         return {
             game,
             operate,
             botId,
+            message,
+            sendMsg,
+            enterSendMsg,
+            msgScroll,
         }
     }
 }
@@ -205,7 +199,7 @@ export default {
     padding: 10px 10px !important;
 }
 
-.message-content /deep/.el-card__body {
+.messages /deep/.el-card__body {
     display: flex;
     flex-direction: column;
     padding: 5px 10px !important;
@@ -213,16 +207,16 @@ export default {
     padding-right: 1px;
 }
 
-.message-content .message-container {
+.messages .message-content {
     margin: 10px 0;
 }
 
-.message-content .message-container .main {
+.messages .message-content .main {
     display: flex;
     align-items: center;
 }
 
-.message-content .message-container .username {
+.messages .message-content .username {
     color: grey;
     font-size: 8px;
     line-height: 14px;
@@ -236,11 +230,11 @@ export default {
     user-select: text;
 }
 
-.message-content .message-container .phone {
+.messages .message-content .photo {
     margin: 0 4px;
 }
 
-.message /deep/.message-content {
+.message /deep/.messages {
     height: 320px;
 }
 
