@@ -157,8 +157,8 @@ class Game(threading.Thread):
         self.sendBotCode(self.playerA)
         self.sendBotCode(self.playerB)
 
-        # 接收6s内的输入
-        for i in range(60):
+        # 接收5s内的输入
+        for i in range(50):
             time.sleep(0.1)
             self.lock.acquire()
             try:
