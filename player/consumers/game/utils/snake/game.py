@@ -1,4 +1,5 @@
 from player.consumers.game.utils.snake.player import Player
+from player.models.player import Player as Player_Model
 from record.models.record import Record
 from game.models.game import Game as GameModel
 from channels.layers import get_channel_layer
@@ -63,7 +64,25 @@ class Game(threading.Thread):
                 res += str(self.g[i][j])
         return res
 
+    def updateUserRating(self, player, rating):
+        p = Player_Model.objects.get(id=player.id)
+        p.rating = rating
+        p.save()
+
     def saveToDataBase(self):
+        ratingA = Player_Model.objects.get(id=self.playerA.id).rating
+        ratingB = Player_Model.objects.get(id=self.playerB.id).rating
+
+        if self.loser == "A":
+            ratingA -= 2
+            ratingB += 5
+        elif self.loser == "B":
+            ratingA += 5
+            ratingB -= 2
+
+        self.updateUserRating(self.playerA, ratingA)
+        self.updateUserRating(self.playerB, ratingB)
+
         game = GameModel.objects.get(name='绕蛇')
         record = Record.objects.create(
             game = game,
@@ -174,7 +193,13 @@ class Game(threading.Thread):
     def check_valid(self, cellsA, cellsB):
         n = len(cellsA)
         cell = cellsA[-1]    # 取出头结点
-
+        print("cellsA: ")
+        for x in cellsA:
+            print(x, end=' ,')
+        print("cellsB: ")
+        for x in cellsB:
+            print(x, end=' ,')
+        print("g: ", self.g, "\n")
         # 若撞墙，则非法
         if self.g[cell.x][cell.y] == 1:
             return False
@@ -196,7 +221,7 @@ class Game(threading.Thread):
 
         validA = self.check_valid(cellsA, cellsB)
         validB = self.check_valid(cellsB, cellsA)
-
+        print("valid: ", validA, ", ", validB)
         if not validA or not validB:
             self.status = "illegal"
             if not validA and not validB:
@@ -224,10 +249,10 @@ class Game(threading.Thread):
     # 发送移动结果
     def sendResult(self):
         resp = {
-                'event': "result",
-                'loser': self.loser,
-                'status': self.status
-                }
+            'event': "result",
+            'loser': self.loser,
+            'status': self.status
+        }
         self.lock.acquire()
         try:
             if self.status == 'illegal':

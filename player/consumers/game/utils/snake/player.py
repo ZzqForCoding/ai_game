@@ -36,6 +36,7 @@ class Player:
             x += dx[d]
             y += dy[d]
             res.append(Cell(x, y))
-            if not self.check_tail_increasing(++step):
+            step += 1
+            if not self.check_tail_increasing(step):
                 del res[0]
         return res
