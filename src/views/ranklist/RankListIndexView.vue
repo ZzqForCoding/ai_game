@@ -52,7 +52,7 @@ export default {
 
         const pull_players = page => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/getranklist/",
+                url: "https://aigame.zzqahm.top/backend/player/getranklist/",
                 type: "get",
                 data: {
                     page,

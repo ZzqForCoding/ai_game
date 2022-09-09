@@ -392,7 +392,7 @@ export default {
 
         const refresh_bots = () => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/bot/getlist/",
+                url: "https://aigame.zzqahm.top/backend/player/bot/getlist/",
                 type: "get",
                 headers: {
                     "Authorization": "Bearer " + store.state.user.access,
@@ -405,7 +405,7 @@ export default {
 
         const refresh_games = () => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/game/getlist/",
+                url: "https://aigame.zzqahm.top/backend/game/getlist/",
                 type: "get",
                 headers: {
                     "Authorization": "Bearer " + store.state.user.access,
@@ -424,7 +424,7 @@ export default {
 
         const add_bot = () => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/bot/add/",
+                url: "https://aigame.zzqahm.top/backend/player/bot/add/",
                 type: "post",
                 data: {
                     title: bot.title,
@@ -459,7 +459,7 @@ export default {
 
         const remove_bot = bot => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/bot/remove/",
+                url: "https://aigame.zzqahm.top/backend/player/bot/remove/",
                 type: "post",
                 data: {
                     bot_id: bot.id,
@@ -483,7 +483,7 @@ export default {
         const update_bot = bot => {
             console.log(bot)
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/bot/update/",
+                url: "https://aigame.zzqahm.top/backend/player/bot/update/",
                 type: "post",
                 data: {
                     bot_id: bot.id,

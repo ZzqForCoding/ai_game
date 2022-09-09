@@ -203,7 +203,7 @@ export default {
 
         const get_games = () => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/game/getlist/",
+                url: "https://aigame.zzqahm.top/backend/game/getlist/",
                 type: "get",
                 headers: {
                     "Authorization": "Bearer " + store.state.user.access,
@@ -216,7 +216,7 @@ export default {
 
         const refresh_bots = () => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/bot/getlist_game/",
+                url: "https://aigame.zzqahm.top/backend/player/bot/getlist_game/",
                 type: "get",
                 data: {
                     game_id: createGameInfo.gameSelect,
@@ -327,7 +327,7 @@ export default {
 
         const pull_records = page => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/record/getlist/",
+                url: "https://aigame.zzqahm.top/backend/record/getlist/",
                 type: "get",
                 data: {
                     page,

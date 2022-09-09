@@ -63,7 +63,7 @@ export default {
                 }
                 if(valid) {
                     $.ajax({
-                        url: "https://aigame.zzqahm.top/player/register/",
+                        url: "https://aigame.zzqahm.top/backend/player/register/",
                         type: "post",
                         data: register_info,
                         success(resp) {

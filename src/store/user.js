@@ -49,7 +49,7 @@ export default {
     actions: {
         login(context, data) {
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/token/",
+                url: "https://aigame.zzqahm.top/backend/player/token/",
                 type: "post",
                 data: {
                     username: data.username,
@@ -67,7 +67,7 @@ export default {
         },
         getinfo(context, data) {
             $.ajax({
-                url: "https://aigame.zzqahm.top/player/getinfo/",
+                url: "https://aigame.zzqahm.top/backend/player/getinfo/",
                 type: "get",
                 headers: {
                     "Authorization": "Bearer " + context.state.access,
@@ -99,7 +99,7 @@ export default {
             // 每4.5min刷新jwt
             let func = setInterval(() => {
                 $.ajax({
-                    url: "https://aigame.zzqahm.top/player/token/refresh/",
+                    url: "https://aigame.zzqahm.top/backend/player/token/refresh/",
                     type: "post",
                     data: {
                         refresh,
