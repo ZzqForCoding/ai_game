@@ -17,8 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('player/', include("player.urls.index")),
-    path('game/', include("game.urls.index")),
-    path('record/', include("record.urls.index")),
+    path('backend/admin/', admin.site.urls),
+    path('backend/player/', include("player.urls.index")),
+    path('backend/game/', include("game.urls.index")),
+    path('backend/record/', include("record.urls.index")),
 ]
