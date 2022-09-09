@@ -231,6 +231,7 @@ void run(Bot bot, string dockerId) {
     processInput(bot.input, dockerId);
 
     string resp, infile = generate_tmpfile_name();
+    Result codeResult;
     if(bot.language == "cpp") {
         // 处理代码
         bot.botCode += "\n\n#include <thread>\n\
@@ -253,55 +254,17 @@ int main() {\n\
         fon << bot.botCode;
         fon.close();
 
-        Result compile = exec("g++ -Wall -o " + infile + " " + infile + ".cpp -pthread");
-        system(concatStr("rm ", infile, ".cpp").c_str());
-        if(compile.status != 0) {
-            Json::Value root;
-            root["type"] = Json::Value("bot_move");
-            root["room_name"] = Json::Value(bot.room_name);
-            root["user_id"] = Json::Value(bot.userId);
-            root["compile"] = Json::Value(compile.error);
-            root["result"] = Json::Value(-1);
-            resp = Json::FastWriter().write(root);
-            save_result(resp);
-            return;
-        }
-
-        system(concatStr("docker cp " + infile + " ", dockerId, ":/tmp/code.out").c_str());
-        system(concatStr("rm ", infile).c_str());
+        system(concatStr("docker cp " + infile + ".cpp ", dockerId, ":/tmp/code.cpp").c_str());
 
         // 编译运行
-        Result codeResult;
         try {
-            codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c  '/tmp/code.out < /tmp/input.txt'"));
+            codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c  'g++ -Wall -o /tmp/code.out /tmp/code.cpp -pthread && /tmp/code.out < /tmp/input.txt'"));
         } catch(exception e) {
             cout << "except" << endl;
         }
 
-        // 将运行结果与输出处理
-        vector<string> output = split(codeResult.output, "\n");
-        int outputLen = output.size();
-        string output1, output2;
-        if(outputLen != 0) {
-            output2 = output[outputLen - 1];
-            for(int i = 0; i < outputLen - 1; i++) {
-                output1 += output[i];
-                if(i != outputLen - 2) output1 += "\n";
-            }
-        }
         // 错误代码处理
         if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
-
-        // 传输结果
-        Json::Value root;
-        root["type"] = Json::Value("bot_move");
-        root["room_name"] = Json::Value(bot.room_name);
-        root["user_id"] = Json::Value(bot.userId);
-        root["compile"] = Json::Value(compile.error);
-        root["output"] = Json::Value(output1);
-        root["result"] = Json::Value(output2);
-        root["status"] = Json::Value(codeResult.error);
-        resp = Json::FastWriter().write(root);
     } else if(bot.language == "java") {
         // 处理代码
         int pos = bot.botCode.rfind("}");
@@ -330,36 +293,11 @@ int main() {\n\
         system(concatStr("docker cp " + infile  + ".java ", dockerId, ":/tmp/Main.java").c_str());
         system(concatStr("rm ", infile, ".java").c_str());
         // 编译运行
-        Result codeResult;
         try {
             codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c 'java /tmp/Main.java < /tmp/input.txt'"));
         } catch(exception e) {
             cout << "except" << endl;
         }
-        // 将运行结果与输出处理
-        vector<string> output = split(codeResult.output, "\n");
-        int outputLen = output.size();
-        string output1, output2;
-        if(outputLen != 0) {
-            output2 = output[outputLen - 1];
-            for(int i = 0; i < outputLen - 1; i++) {
-                output1 += output[i];
-                if(i != outputLen - 2) output1 += "\n";
-            }
-        }
-        // 错误代码处理
-        // if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
-
-        // 传输结果
-        Json::Value root;
-        root["type"] = Json::Value("bot_move");
-        root["room_name"] = Json::Value(bot.room_name);
-        root["user_id"] = Json::Value(bot.userId);
-        root["compile"] = Json::Value(codeResult.error);
-        root["output"] = Json::Value(output1);
-        root["result"] = Json::Value(output2);
-        root["status"] = Json::Value(codeResult.status);
-        resp = Json::FastWriter().write(root);
     } else if(bot.language == "python") {
         // 处理代码
         bot.botCode += "\n\nimport sys\n\
@@ -388,38 +326,38 @@ if __name__ == '__main__':\n\
         system(concatStr("rm ", infile, ".py").c_str());
 
         // 编译运行
-        Result codeResult;
         try {
             codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c 'python3 /tmp/code.py < /tmp/input.txt'"));
         } catch(exception e) {
             cout << "except" << endl;
         }
-        // 将运行结果与输出处理
-        vector<string> output = split(codeResult.output, "\n");
-
-        int outputLen = output.size();
-        string output1, output2;
-        if(outputLen != 0) {
-            output2 = output[outputLen - 1];
-            for(int i = 0; i < outputLen - 1; i++) {
-                output1 += output[i];
-                if(i != outputLen - 2) output1 += "\n";
-            }
+        if(codeResult.error.find("3709 Killed") != -1) {
+            codeResult.error = "IndexError: list index out of range";
         }
-        // 错误代码处理
-        // if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
-
-        // 传输结果
-        Json::Value root;
-        root["type"] = Json::Value("bot_move");
-        root["room_name"] = Json::Value(bot.room_name);
-        root["user_id"] = Json::Value(bot.userId);
-        root["compile"] = Json::Value(codeResult.error);
-        root["output"] = Json::Value(output1);
-        root["result"] = Json::Value(output2);
-        root["status"] = Json::Value(codeResult.status);
-        resp = Json::FastWriter().write(root);
     }
+    // 将运行结果与输出处理
+    vector<string> output = split(codeResult.output, "\n");
+
+    int outputLen = output.size();
+    string output1, output2;
+    if(outputLen != 0) {
+        output2 = output[outputLen - 1];
+        for(int i = 0; i < outputLen - 1; i++) {
+            output1 += output[i];
+            if(i != outputLen - 2) output1 += "\n";
+        }
+    }
+
+    // 传输结果
+    Json::Value root;
+    root["type"] = Json::Value("bot_move");
+    root["room_name"] = Json::Value(bot.room_name);
+    root["user_id"] = Json::Value(bot.userId);
+    root["compile"] = Json::Value(codeResult.error);
+    root["output"] = Json::Value(output1);
+    root["result"] = Json::Value(output2);
+    root["status"] = Json::Value(codeResult.status);
+    resp = Json::FastWriter().write(root);
     save_result(resp);
     cout << resp << endl;
 
