@@ -24,10 +24,6 @@ export default {
         const store = useStore();
 
         onUnmounted(() => {
-            store.commit("updateOpponent", {
-                username: "我的对手",
-                photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",
-            }); 
             store.commit("updateCanSendMsg", false);
         });
     }
@@ -36,8 +32,8 @@ export default {
 
 <style scoped>
 div.playground {
-    width: 92%;
-    height: 92%;
+    width: 60vw;
+    height: 70vh;
     margin: 40px auto;
     margin-bottom: 0px;
 }

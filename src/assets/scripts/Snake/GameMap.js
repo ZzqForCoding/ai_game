@@ -20,13 +20,6 @@ export class GameMap extends AcGameObject {
 
         this.inner_walls_count = 20;
         this.walls = [];
-        let selfColor = 0, yourColor = 0;
-        if(store.state.pk.a_id == store.state.user.id) selfColor = "#4876EC", yourColor = "#F94848";
-        else selfColor = "#F94848", yourColor = "#4876EC";
-        this.snakes = [
-            new Snake({id: 0, color: selfColor, r: this.rows - 2, c: 1}, this),
-            new Snake({id: 1, color: yourColor, r: 1, c: this.cols - 2}, this),
-        ];
     }
 
     create_walls() {
@@ -43,6 +36,13 @@ export class GameMap extends AcGameObject {
 
     start() {
         this.create_walls();
+        let selfColor = 0, yourColor = 0;
+        if(this.store.state.pk.a_id == this.store.state.user.id) selfColor = "#4876EC", yourColor = "#F94848";
+        else selfColor = "#F94848", yourColor = "#4876EC";
+        this.snakes = [
+            new Snake({id: 0, color: selfColor, r: this.rows - 2, c: 1}, this),
+            new Snake({id: 1, color: yourColor, r: 1, c: this.cols - 2}, this),
+        ];
         this.add_listening_events();
     }
 
@@ -53,28 +53,51 @@ export class GameMap extends AcGameObject {
     }
 
     add_listening_events() {
-        this.ctx.canvas.focus();
-        this.ctx.canvas.addEventListener("keydown", e => {
-            let d = -1;
-            if(e.key === 'w') d = 0;
-            else if(e.key === 'd') d = 1;
-            else if(e.key === 's') d = 2;
-            else if(e.key === 'a') d = 3;
-            if(this.store.state.user.id !== this.store.state.pk.a_id) {
-                d = this.transDir(d);
-            }
-            // else if(e.key === 'ArrowUp') snake1.set_direction(0);
-            // else if(e.key === 'ArrowRight') snake1.set_direction(1);
-            // else if(e.key === 'ArrowDown') snake1.set_direction(2);
-            // else if(e.key === 'ArrowLeft') snake1.set_direction(3);
-        
-            if(d >= 0) {
-                this.store.state.pk.socket.send(JSON.stringify({
-                    event: "move",
-                    direction: d,
-                }));
-            }
-        });
+        if(this.store.state.record.is_record) {
+            let k = 0;
+            const a_steps = this.store.state.record.a_steps;
+            const b_steps = this.store.state.record.b_steps;
+            const loser = this.store.state.record.record_loser;
+            const [snake0, snake1] = this.snakes;
+            const interval_id = setInterval(() => {
+                if(k >= a_steps.length - 1) {
+                    if(loser === "all" || loser === "A") {
+                        snake0.status = "die";
+                    }
+                    if(loser === "all" || loser === "B") {
+                        snake1.status = "die";
+                    }   
+                    clearInterval(interval_id);
+                } else {
+                    if(k < a_steps.length) snake0.set_direction(parseInt(a_steps[k]));
+                    if(k < b_steps.length) snake1.set_direction(parseInt(b_steps[k]));
+                }
+                k++;
+            }, 300);
+        } else {
+            this.ctx.canvas.focus();
+            this.ctx.canvas.addEventListener("keydown", e => {
+                let d = -1;
+                if(e.key === 'w') d = 0;
+                else if(e.key === 'd') d = 1;
+                else if(e.key === 's') d = 2;
+                else if(e.key === 'a') d = 3;
+                if(this.store.state.user.id !== this.store.state.pk.a_id) {
+                    d = this.transDir(d);
+                }
+                // else if(e.key === 'ArrowUp') snake1.set_direction(0);
+                // else if(e.key === 'ArrowRight') snake1.set_direction(1);
+                // else if(e.key === 'ArrowDown') snake1.set_direction(2);
+                // else if(e.key === 'ArrowLeft') snake1.set_direction(3);
+            
+                if(d >= 0) {
+                    this.store.state.pk.socket.send(JSON.stringify({
+                        event: "move",
+                        direction: d,
+                    }));
+                }
+            });
+        }
     }
 
     update_size() {

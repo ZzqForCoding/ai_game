@@ -69,15 +69,19 @@ export default {
         let message = ref('');
         let msgScroll = ref(null);
 
+
+        store.commit("updateGameResult", {loser: 'none', status: 'none'});
+        store.commit("updateOpponent", {
+            username: "我的对手",
+            photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",
+        });
+        store.commit("updateIsRecord", false);
+
         let socket = null;
         // 绕蛇
         if(game === 2) {
             onMounted(() => {  
                 store.commit("clearMsg");
-                store.commit("updateOpponent", {
-                    username: "我的对手",
-                    photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",
-                });
                 socket = new WebSocket(socketUrl);
 
                 socket.onopen = () => {
@@ -127,7 +131,7 @@ export default {
                         }
                         store.commit("updateGameResult", {
                             loser: data.loser,
-                            status: data.status,
+                            status: data.status,    // 超时还是非法操作
                         });
                     } else if(data.event === "pk_message") {
                         if(!store.state.pk.canSendMsg) return;
@@ -190,7 +194,6 @@ export default {
 </script>
 
 <style scoped>
-
 .message /deep/.el-card__body {
     padding: 0px 0px !important;
 }

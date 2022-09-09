@@ -257,7 +257,7 @@ body {
     padding: 0 0 !important;
 }
 
-.el-main {
+div.el-main {
     height: calc(100vh - 60px - 50px) !important;
     /* IE 10+ */
     /* firefox */
