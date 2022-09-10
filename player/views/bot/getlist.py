@@ -24,4 +24,7 @@ class GetListView(APIView):
                 'modifytime': bot.modifytime.strftime("%Y-%m-%d %H:%M:%S"),
             })
 
-        return Response(resp)
+        return Response({
+            'result': "success",
+            'bots': resp
+        })

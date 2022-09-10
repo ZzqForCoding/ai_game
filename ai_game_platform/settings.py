@@ -194,3 +194,5 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+player_rank_page_size = 10

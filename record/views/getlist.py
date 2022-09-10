@@ -44,8 +44,8 @@ class GetListView(APIView):
             item['createtime'] = record.createtime.strftime('%Y-%m-%d %H:%M:%S')
             item['result'] = record.loser
             items.append(item)
-        resp = {
+        return Response({
+            'result': "success",
             'records': json.dumps(items),
             'records_count': records_count
-        }
-        return Response(resp)
+        })

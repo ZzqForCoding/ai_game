@@ -15,4 +15,7 @@ class GetListView(APIView):
                 'name': game.name,
             })
 
-        return Response(resp)
+        return Response({
+            'result': "success",
+            "games": resp
+        })

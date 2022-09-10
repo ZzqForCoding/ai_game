@@ -31,5 +31,7 @@ class GetListByGameView(APIView):
                 'createtime': bot.createtime.strftime("%Y-%m-%d %H:%M:%S"),
                 'modifytime': bot.modifytime.strftime("%Y-%m-%d %H:%M:%S"),
             })
-
-        return Response(resp)
+        return Response({
+            'result': "success",
+            'bots': resp,
+        })

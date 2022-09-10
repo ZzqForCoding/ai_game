@@ -2,11 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from ai_game_platform import settings
 from player.models.player import Player
 import json
 
 class PlayerRankPagination(PageNumberPagination):
-    page_size = 10
+    page_size = settings.player_rank_page_size
     page_size_query_param = 'size'
     page_query_param = 'page'
     max_page_size = None
@@ -28,6 +29,7 @@ class GetRankListView(APIView):
             resp.append(item)
 
         return Response({
+            'result': "success",
             'players': json.dumps(resp),
             'players_count': players_count
         })
