@@ -19,6 +19,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '首页',
+            isRoot: false,
         }
     },
     {
@@ -28,6 +29,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: 'game',
+            isRoot: false,
         }
     },
     {
@@ -37,6 +39,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '对战列表',
+            isRoot: true,
         }
     },
     {
@@ -46,6 +49,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '对战界面',
+            isRoot: false,
         }
     },
     {
@@ -55,6 +59,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '排行榜',
+            isRoot: true,
         }
     },
     {
@@ -64,6 +69,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '讨论区',
+            isRoot: true,
         }
     },
     {
@@ -73,6 +79,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '留言板',
+            isRoot: true,
         }
     },
     {
@@ -82,6 +89,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '我的Bot',
+            isRoot: true,
         }
     },
     {
@@ -91,6 +99,7 @@ const routes = [
         meta: {
             requestAuth: false,
             description: '登录',
+            isRoot: true,
         }
     },
     {
@@ -100,6 +109,7 @@ const routes = [
         meta: {
             requestAuth: false,
             description: '注册',
+            isRoot: true,
         }
     },
     {
@@ -109,6 +119,7 @@ const routes = [
         meta: {
             requestAuth: false,
             description: '',
+            isRoot: true,
         }
     },
     {
@@ -123,6 +134,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+    if(to.meta.isRoot) store.commit("updateBackPage", "");
     if(to.meta.requestAuth && !store.state.user.is_login) {
         next({name: "user_account_login"});
     } else {

@@ -398,7 +398,9 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    bots.value = resp;
+                    if(resp.result === "success") {
+                        bots.value = resp.bots;
+                    }
                 },
             });
         };
@@ -411,7 +413,9 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    games.value = resp;
+                    if(resp.result === "success") {
+                        games.value = resp.games;
+                    }
                 },
             });
         };

@@ -5,10 +5,14 @@ import ModuleRecord from './record'
 
 export default createStore({
     state: {
+        backPage: "",
     },
     getters: {
     },
     mutations: {
+        updateBackPage(state, backPage) {
+            state.backPage = backPage;
+        }
     },
     actions: {
     },

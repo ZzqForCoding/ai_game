@@ -1,7 +1,7 @@
 <template>
     <el-row>
         <el-col :span="14" :offset="2">
-            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing'" />
+            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing'" flag="pk" />
             <MatchGround v-if="$store.state.pk.status === 'matching'" :operate="operate" :botId="botId" />
         </el-col>
         

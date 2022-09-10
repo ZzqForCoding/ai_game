@@ -86,8 +86,33 @@
                     @select="handleSelect"
                 >
                     <div class="current-page">
+                        <span v-if="$store.state.backPage !== ''" class="back-menu" @click="showBackDialog = true">
+                            <el-icon :size="25"><Back /></el-icon>
+                        </span>
                         {{ page }}
                     </div>
+
+                    <el-dialog
+                        v-model="showBackDialog"
+                        title="Warning"
+                        width="30%"
+                        align-center
+                        draggable
+                    >
+                        <span v-if="$store.state.pk.status === 'playing'">
+                            你确认退出游戏吗？
+                        </span>
+                        <span v-else-if="$store.state.pk.status === 'matching'">
+                            你确认退出匹配吗？
+                        </span>
+                        <template #footer>
+                            <span class="dialog-footer">
+                                <el-button @click="showBackDialog = false">取消</el-button>
+                                <el-button type="danger" @click="clickBack">确认</el-button
+                            >
+                            </span>
+                        </template>
+                    </el-dialog>
 
                     <div class="flex-grow" />
 
@@ -166,6 +191,7 @@ export default {
         const route = useRoute();
         const page = ref('');
         let isCollapse = ref(false);
+        let showBackDialog = ref(false);
 
         const logout = () => {
             store.dispatch("logout");
@@ -180,11 +206,23 @@ export default {
             isCollapse.value = !isCollapse.value;
         }
 
+        const clickBack = () => {
+            showBackDialog.value = false;
+            if(store.state.pk.status === 'playing') {
+                // 添加断线重连
+            } else if(store.state.pk.status === 'matching') {
+                // 添加取消匹配
+            }
+            router.push({name: 'record_index'});
+        }
+
         return {
             logout,
             page,
             collapse,
-            isCollapse
+            isCollapse,
+            showBackDialog,
+            clickBack,
         }
     },
 }
@@ -255,6 +293,13 @@ body {
 
 .el-header {
     padding: 0 0 !important;
+}
+
+.back-menu {
+    margin-right: 10px; 
+    display: flex;
+    align-items: center;
+    cursor: pointer;
 }
 
 div.el-main {

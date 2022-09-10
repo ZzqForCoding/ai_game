@@ -209,7 +209,9 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    games.value = resp;
+                    if(resp.result === "success") {
+                        games.value = resp.games;
+                    }
                 },
             });
         };
@@ -225,7 +227,9 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    bots.value = resp;
+                    if(resp.result === "success") {
+                        bots.value = resp.bots;
+                    }
                 },
             });
         };
@@ -281,6 +285,7 @@ export default {
                 if(valid) {
                     showCreateGameDialog.value = false;
                     if(createGameInfo.operateSelect == 1) createGameInfo.botSelect = -1;
+                    store.commit("updateBackPage", "record_index");
                     router.push({
                         name: 'pk_index',
                         params: {
@@ -336,8 +341,10 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    records.value = JSON.parse(resp.records);
-                    total_records.value = resp.records_count;
+                    if(resp.result === "success") {
+                        records.value = JSON.parse(resp.records);
+                        total_records.value = resp.records_count;
+                    }
                 },
             });
         };
@@ -374,6 +381,12 @@ export default {
                         b_steps: record.b_steps,
                     });
                     store.commit("updateRecordLoser", record.result);
+                    store.commit("updatePlayerInfo", {
+                        a_username: record.a_username,
+                        a_photo: record.a_photo,
+                        b_username: record.b_username,
+                        b_photo: record.b_photo,
+                    });
                     router.push({
                         name: 'record_content',
                         params: {

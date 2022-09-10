@@ -6,6 +6,10 @@ export default {
         a_steps: "",
         b_steps: "",
         record_loser: "",
+        a_username: "",
+        a_photo: "",
+        b_username: "",
+        b_photo: "",
     },
     getters: {
     },
@@ -26,6 +30,12 @@ export default {
         },
         updateRecordLoser(state, loser) {
             state.record_loser = loser;
+        },
+        updatePlayerInfo(state, data) {
+            state.a_username = data.a_username;
+            state.a_photo = data.a_photo;
+            state.b_username = data.b_username;
+            state.b_photo = data.b_photo;
         }
     },
     actions: {
