@@ -359,7 +359,6 @@ if __name__ == '__main__':\n\
     root["status"] = Json::Value(codeResult.status);
     resp = Json::FastWriter().write(root);
     save_result(resp);
-    cout << resp << endl;
 
     // system(concatStr("docker stop ", dockerId).c_str());
     // system(concatStr("docker rm ", dockerId).c_str());
