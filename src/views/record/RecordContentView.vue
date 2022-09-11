@@ -19,7 +19,7 @@ export default {
     },
     setup() {
         const route = useRoute();
-        const game = parseInt(route.params.game);
+        const game = parseInt(route.query.game);
 
         return {
             game,

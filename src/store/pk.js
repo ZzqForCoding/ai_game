@@ -8,9 +8,11 @@ export default {
     a_id: 0,
     a_sx: 0,
     a_sy: 0,
+    a_is_robot: false,
     b_id: 0,
     b_sx: 0,
     b_sy: 0,
+    b_is_robot: false,
     gameObject: null,
     loser: "none",
     type: "none",
@@ -35,9 +37,11 @@ export default {
         state.a_id = game.a_id;
         state.a_sx = game.a_sx;
         state.a_sy = game.a_sy;
+        state.a_is_robot = Boolean(game.a_is_robot);
         state.b_id = game.b_id;
         state.b_sx = game.b_sx;
         state.b_sy = game.b_sy;
+        state.b_is_robot = Boolean(game.b_is_robot);
     },
     updateGameObject(state, gameobject) {
         state.gameObject = gameobject;
@@ -55,7 +59,7 @@ export default {
     },
     updateCanSendMsg(state, canSendMsg) {
         state.canSendMsg = canSendMsg;
-    }
+    },
   },
   actions: {
  

@@ -10,6 +10,8 @@ export default {
         a_photo: "",
         b_username: "",
         b_photo: "",
+        a_is_robot: false,
+        b_is_robot: false,
     },
     getters: {
     },
@@ -36,6 +38,10 @@ export default {
             state.a_photo = data.a_photo;
             state.b_username = data.b_username;
             state.b_photo = data.b_photo;
+        },
+        updateIsRobot(state, data) {
+            state.a_is_robot = Boolean(data.a_is_robot);
+            state.b_is_robot = Boolean(data.b_is_robot);
         }
     },
     actions: {

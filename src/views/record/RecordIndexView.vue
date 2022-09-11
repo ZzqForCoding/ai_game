@@ -79,10 +79,10 @@
                                             </span>
                                         </el-link>
                                     </span>
-                                    <span class="player-result" v-if="scope.row.result === 'A'" style="color: #0099CC;">
+                                    <span class="player-result" v-if="scope.row.result === 'B'" style="color: #0099CC;">
                                         +5
                                     </span>
-                                    <span class="player-result" v-else-if="scope.row.result === 'B'" style="color: #FF0000;">
+                                    <span class="player-result" v-else-if="scope.row.result === 'A'" style="color: #FF0000;">
                                         -2
                                     </span>
                                     <span class="player-result" v-else-if="scope.row.result === 'all'" style="color: #0099CC;">
@@ -98,10 +98,10 @@
                                             </span>
                                         </el-link>
                                     </span>
-                                    <span class="player-result" v-if="scope.row.result === 'A'" style="color: #ff0000;">
+                                    <span class="player-result" v-if="scope.row.result === 'B'" style="color: #ff0000;">
                                         -2
                                     </span>
-                                    <span class="player-result" v-else-if="scope.row.result === 'B'" style="color: #0099CC;">
+                                    <span class="player-result" v-else-if="scope.row.result === 'A'" style="color: #0099CC;">
                                         +5
                                     </span>
                                     <span class="player-result" v-else-if="scope.row.result === 'all'" style="color: #0099CC;">
@@ -387,10 +387,16 @@ export default {
                         b_username: record.b_username,
                         b_photo: record.b_photo,
                     });
+                    store.commit("updateIsRobot", {
+                        a_is_robot: record.a_is_robot,
+                        b_is_robot: record.b_is_robot
+                    });
                     router.push({
                         name: 'record_content',
                         params: {
                             recordId,
+                        },
+                        query: {
                             game: record_game.value,
                         }
                     });

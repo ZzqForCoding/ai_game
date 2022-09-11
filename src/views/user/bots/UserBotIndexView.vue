@@ -485,7 +485,6 @@ export default {
         };
 
         const update_bot = bot => {
-            console.log(bot)
             $.ajax({
                 url: "https://aigame.zzqahm.top/backend/player/bot/update/",
                 type: "post",
