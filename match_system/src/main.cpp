@@ -144,7 +144,7 @@ class MatchHandler : virtual public MatchIf {
 
         int32_t add_player(const Player& player, const std::string& info) {
             // Your implementation goes here
-            printf("add_player\n");
+            cout << "add " << player.username << endl;
             unique_lock<mutex> lock1(message_queue.m);
             message_queue.q.push({player, "add"});
             message_queue.cv.notify_all();
@@ -154,7 +154,7 @@ class MatchHandler : virtual public MatchIf {
 
         int32_t remove_player(const Player& player, const std::string& info) {
             // Your implementation goes here
-            printf("remove_player\n");
+            cout << "remove " << player.username << endl;
             unique_lock<mutex> lock1(message_queue.m);
             message_queue.q.push({player, "remove"});
             message_queue.cv.notify_all();

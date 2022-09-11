@@ -35,9 +35,11 @@ class GetListView(APIView):
             item['a_id'] = record.a_id
             item['a_sx'] = record.a_sx
             item['a_sy'] = record.a_sy
+            item['a_is_robot'] = record.a_is_robot
             item['b_id'] = record.b_id
             item['b_sx'] = record.b_sx
             item['b_sy'] = record.b_sy
+            item['b_is_robot'] = record.b_is_robot
             item['a_steps'] = record.a_steps
             item['b_steps'] = record.b_steps
             item['map'] = record.map

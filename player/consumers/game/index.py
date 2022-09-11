@@ -245,9 +245,11 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
                 'a_id': game.playerA.id,
                 'a_sx': game.playerA.sx,
                 'a_sy': game.playerA.sy,
+                'a_is_robot': True if botA != None else False,
                 'b_id': game.playerB.id,
                 'b_sx': game.playerB.sx,
                 'b_sy': game.playerB.sy,
+                'b_is_robot': True if botB != None else False,
                 'map': game.getG()
             }
             # 广播给当前房间的所有玩家
