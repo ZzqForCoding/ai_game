@@ -3,7 +3,7 @@
         <el-aside width="200px" style="user-select: none;">
             <div class="aside-header" >
                     <svg t="1660362934898" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1502" width="25" height="25"><path d="M661.333333 490.666667c-36.266667 0-64 27.733333-64 64s27.733333 64 64 64 64-27.733333 64-64-27.733333-64-64-64M362.666667 490.666667c-36.266667 0-64 27.733333-64 64s27.733333 64 64 64 64-27.733333 64-64-27.733333-64-64-64" fill="#2F3CF4" p-id="1503"></path><path d="M128 320c0-23.466667 19.2-42.666667 42.666667-42.666667h170.666666l-61.866666-155.733333c-8.533333-21.333333 2.133333-46.933333 23.466666-55.466667 21.333333-8.533333 46.933333 2.133333 55.466667 23.466667l74.666667 185.6h155.733333l74.666667-185.6c8.533333-21.333333 34.133333-32 55.466666-23.466667 21.333333 8.533333 32 34.133333 23.466667 55.466667L682.666667 277.333333h170.666666c23.466667 0 42.666667 19.2 42.666667 42.666667v597.333333c0 23.466667-19.2 42.666667-42.666667 42.666667H170.666667c-23.466667 0-42.666667-19.2-42.666667-42.666667V320z m85.333333 42.666667v512h597.333334V362.666667H213.333333zM1024 725.333333V512c0-23.466667-19.2-42.666667-42.666667-42.666667s-42.666667 19.2-42.666666 42.666667v213.333333c0 23.466667 19.2 42.666667 42.666666 42.666667s42.666667-19.2 42.666667-42.666667M42.666667 768c23.466667 0 42.666667-19.2 42.666666-42.666667V512c0-23.466667-19.2-42.666667-42.666666-42.666667s-42.666667 19.2-42.666667 42.666667v213.333333c0 23.466667 19.2 42.666667 42.666667 42.666667" fill="#2F3CF4" p-id="1504"></path></svg>
-                    <span style="margin-left: 5px;">King Of Bots</span>
+                    <span style="margin-left: 5px;">AiGame Platform</span>
             </div>
             <el-menu
                 class="el-aside-menu" 
@@ -47,14 +47,12 @@
                         </el-menu-item>
                     </router-link>
 
-                    
                     <router-link class="link-text" :to="{name: 'discussion_index'}">
                         <el-menu-item index="4">
                             <el-icon :size="30"><Comment /></el-icon>
                             <template #title>讨论区</template>
                         </el-menu-item>
                     </router-link>
-
                     
                     <router-link class="link-text" :to="{name: 'message_board_index'}">
                         <el-menu-item index="5">
@@ -76,11 +74,10 @@
                 </el-scrollbar>
             </el-menu>
         </el-aside>
-        <el-container>
+        <el-container class="right-container">
             <el-header style="user-select: none;">
                 <el-menu
                     :default-active="activeIndex"
-                    class="el-menu-demo"
                     mode="horizontal"
                     :ellipsis="false"
                     @select="handleSelect"
@@ -154,7 +151,7 @@
                     </router-link>
                 </el-menu>
             </el-header>
-            <el-main>     
+            <el-main class="main" style="padding: 0; height: calc(100vh - 60px - 50px); ">     
                 <el-scrollbar class="main-scrollbar">
                     <router-view></router-view>
                 </el-scrollbar>
@@ -237,26 +234,23 @@ export default {
 .el-menu--collapse .el-submenu__title .el-submenu__icon-arrow{
     display: none;
 }
-
-.aside-scrollbar {
-    height: 100vh;
-}
  /* Chrome Safari */
-/* html:-webkit-scrollbar {
+html:-webkit-scrollbar {
     display: none;
 }
-*/
+
 
  /* firefox */
  /* IE 10+ */
-/* html {
+html {
     scrollbar-width: none;
     -ms-overflow-style: none; 
     overflow-x: hidden;
     overflow-y: auto;
 
-} */
+}
 
+    
 body {
     background-image: url('@/assets/images/background1.png');
     background-size: cover;
@@ -278,6 +272,10 @@ body {
     border-right: none !important;
 }
 
+.aside-scrollbar {
+    height: calc(100vh - 60px);
+}
+
 .el-aside-menu .el-menu-item.is-active {
     background-color: #1890ff !important;
 }
@@ -286,13 +284,8 @@ body {
   flex-grow: 1;
 }
 
-.el-main {
-    padding: 0px 0 !important;
-    padding-bottom: 0px !important;
-}
-
-.el-header {
-    padding: 0 0 !important;
+.right-container {
+    height: 100vh !important;
 }
 
 .back-menu {
@@ -302,20 +295,9 @@ body {
     cursor: pointer;
 }
 
-div.el-main {
-    height: calc(100vh - 60px - 50px) !important;
-    /* IE 10+ */
-    /* firefox */
-    /* scrollbar-width: none; 
-    -ms-overflow-style: none; 
-    overflow-x: hidden;
-    overflow-y: auto; */
+.el-header {
+    padding: 0 0 !important;
 }
-/* Chrome Safari */
-/* .el-main::-webkit-scrollbar {
-    display: none; 
-} */
-
 
 .el-footer {
     margin-top: 20px;
@@ -351,9 +333,7 @@ div.el-main {
 }
 
 .collapse-btn {
-    position: relative;
-    top: 42vh;
-    left: 15px;
+    margin: 15px 10px;
 }
 
 .footer-icon {
