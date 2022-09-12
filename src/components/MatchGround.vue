@@ -68,7 +68,6 @@ export default {
                     botId: props.botId,
                 }));
                 store.commit("updateIsMatch", false);
-                store.commit("updateAddMatchTime", 0);
             }
         }
 

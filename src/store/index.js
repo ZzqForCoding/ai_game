@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 import ModuleUser from './user'
 import ModulePk from './pk'
 import ModuleRecord from './record'
-import ModuleUtils from './util'
+import ModuleUtils from './utils'
 
 export default createStore({
     state: {

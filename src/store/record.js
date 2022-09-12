@@ -12,6 +12,8 @@ export default {
         b_photo: "",
         a_is_robot: false,
         b_is_robot: false,
+        a_language: "",
+        b_language: "",
     },
     getters: {
     },
@@ -36,8 +38,10 @@ export default {
         updatePlayerInfo(state, data) {
             state.a_username = data.a_username;
             state.a_photo = data.a_photo;
+            state.a_language = data.a_language;
             state.b_username = data.b_username;
             state.b_photo = data.b_photo;
+            state.b_language = data.b_language;
         },
         updateIsRobot(state, data) {
             state.a_is_robot = Boolean(data.a_is_robot);

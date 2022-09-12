@@ -110,6 +110,16 @@ export default {
                             access: resp.access,
                             refresh,
                         });
+                        $.ajax({
+                            url: "https://aigame.zzqahm.top/backend/player/token/update/",
+                            type: "post",
+                            headers: {
+                                "Authorization": "Bearer " + resp.access,
+                            },
+                            data: {
+                                token: resp.access,
+                            }
+                        });
                     },
                     error(resp) {
                         console.log(resp);

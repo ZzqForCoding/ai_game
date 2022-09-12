@@ -21,7 +21,7 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '首页',
-            isRoot: false,
+            isRoot: true,
         }
     },
     {
@@ -30,7 +30,7 @@ const routes = [
         component: PkIndexView,
         meta: {
             requestAuth: true,
-            description: 'game',
+            description: '对战界面',
             isRoot: false,
         }
     },
@@ -50,7 +50,7 @@ const routes = [
         component: RecordContentView,
         meta: {
             requestAuth: true,
-            description: '对战界面',
+            description: '回放界面',
             isRoot: false,
         }
     },

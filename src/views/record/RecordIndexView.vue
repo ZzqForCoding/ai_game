@@ -384,13 +384,16 @@ export default {
                     store.commit("updatePlayerInfo", {
                         a_username: record.a_username,
                         a_photo: record.a_photo,
+                        a_language: record.a_language,
                         b_username: record.b_username,
                         b_photo: record.b_photo,
+                        b_language: record.b_language,
                     });
                     store.commit("updateIsRobot", {
                         a_is_robot: record.a_is_robot,
                         b_is_robot: record.b_is_robot
                     });
+                    store.commit("updateBackPage", "record_index");
                     router.push({
                         name: 'record_content',
                         params: {

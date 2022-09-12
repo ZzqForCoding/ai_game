@@ -333,10 +333,10 @@ body {
 
 .current-page {
     line-height: 60px;
-    width: 100px;
+    width: 200px;
     font-size: 17px;
+    margin-left: 25px;
     display: flex;
-    justify-content: center;
 }
 
 .collapse-btn {

@@ -81,7 +81,7 @@ export default {
         // 绕蛇
         if(game === 2) {
             onMounted(() => {  
-                store.commit("updateAddMatchTime", 0);
+                store.commit("updateMatchTime", 0);
                 store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);
 
@@ -111,6 +111,7 @@ export default {
                             store.commit("updateStatus", "playing");
                         }, 2000);
                     } else if(data.event === "move") {
+                        console.log(data)
                         const game = store.state.pk.gameObject;
                         const [snake0, snake1] = game.snakes;
                         if(store.state.user.id === store.state.pk.a_id) {
