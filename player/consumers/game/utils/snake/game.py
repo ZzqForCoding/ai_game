@@ -134,7 +134,7 @@ class Game(threading.Thread):
             self.nextStepB = nextStepB
             self.compileB = compile
             self.outputB = output
-            self.resulB = result
+            self.resultB = result
         finally:
             self.lock.release()
 
