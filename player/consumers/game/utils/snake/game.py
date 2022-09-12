@@ -49,7 +49,13 @@ class Game(threading.Thread):
         self.playerB = Player(idB, self.botIdB, self.languageB, self.botCodeB, 1, self.cols - 2, [])
 
         self.nextStepA = None
+        self.compileA = None
+        self.outputA = None
+        self.resultA = None
         self.nextStepB = None
+        self.compileB = None
+        self.outputB = None
+        self.resultB = None
         self.lock = threading.Lock()
         self.status = "playing" # playing -> overtime/illegal
         self.loser = ""     # all: "平局", A: A输, B: B输
@@ -90,10 +96,12 @@ class Game(threading.Thread):
             a_sx = self.playerA.sx,
             a_sy = self.playerA.sy,
             a_is_robot = False if self.botIdA == -1 else True,
+            a_language = self.languageA,
             b_id = self.playerB.id,
             b_sx = self.playerB.sx,
             b_sy = self.playerB.sy,
             b_is_robot = False if self.botIdB == -1 else True,
+            b_language = self.languageB,
             a_steps = self.playerA.getStepsString(),
             b_steps = self.playerB.getStepsString(),
             map = self.getMapString(),
@@ -110,17 +118,23 @@ class Game(threading.Thread):
             message
         )
 
-    def setNextStepA(self, nextStepA):
+    def setNextStepA(self, nextStepA, compile, output, result):
         self.lock.acquire()
         try:
             self.nextStepA = nextStepA
+            self.compileA = compile
+            self.outputA = output
+            self.resultA = result
         finally:
             self.lock.release()
 
-    def setNextStepB(self, nextStepB):
+    def setNextStepB(self, nextStepB, compile, output, result):
         self.lock.acquire()
         try:
             self.nextStepB = nextStepB
+            self.compileB = compile
+            self.outputB = output
+            self.resulB = result
         finally:
             self.lock.release()
 
@@ -195,13 +209,6 @@ class Game(threading.Thread):
     def check_valid(self, cellsA, cellsB):
         n = len(cellsA)
         cell = cellsA[-1]    # 取出头结点
-        print("cellsA: ")
-        for x in cellsA:
-            print(x, end=' ,')
-        print("cellsB: ")
-        for x in cellsB:
-            print(x, end=' ,')
-        print("g: ", self.g, "\n")
         # 若撞墙，则非法
         if self.g[cell.x][cell.y] == 1:
             return False
@@ -223,7 +230,6 @@ class Game(threading.Thread):
 
         validA = self.check_valid(cellsA, cellsB)
         validB = self.check_valid(cellsB, cellsA)
-        print("valid: ", validA, ", ", validB)
         if not validA or not validB:
             self.status = "illegal"
             if not validA and not validB:
@@ -240,11 +246,23 @@ class Game(threading.Thread):
             resp = {
                 'event': "move",
                 'a_direction': self.nextStepA,
-                'b_direction': self.nextStepB
+                'a_compile': self.compileA,
+                'a_output': self.outputA,
+                'a_result': self.resultA,
+                'b_direction': self.nextStepB,
+                'b_compile': self.compileB,
+                'b_output': self.outputB,
+                'b_result': self.resultB
             }
             self.sendAllMessage(resp)
             self.nextStepA = None
+            self.compileA = None
+            self.outputA = None
+            self.resultA = None
             self.nextStepB = None
+            self.compileB = None
+            self.outputB = None
+            self.resultB = None
         finally:
             self.lock.release()
 

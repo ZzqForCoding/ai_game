@@ -173,10 +173,10 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
     async def move(self, direction):
         if MultiPlayerGame.users[self.user.id].game.playerA.id == self.user.id:
             if MultiPlayerGame.users[self.user.id].game.playerA.botId == -1:
-                self.game.setNextStepA(direction)
+                self.game.setNextStepA(direction, "", "", "")
         elif MultiPlayerGame.users[self.user.id].game.playerB.id == self.user.id:
             if MultiPlayerGame.users[self.user.id].game.playerB.botId == -1:
-                self.game.setNextStepB(direction)
+                self.game.setNextStepB(direction, "", "", "")
 
     # 辅助函数：发送给当前房间玩家信息
     async def group_send_event(self, data):
@@ -193,9 +193,9 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             return
 
         if MultiPlayerGame.users[self.user.id].game.playerA.id == data['user_id']:
-            self.game.setNextStepA(int(data['result']))
+            self.game.setNextStepA(int(data['result']), data['compile'], data['output'], data['result'])
         elif MultiPlayerGame.users[self.user.id].game.playerB.id == data['user_id']:
-            self.game.setNextStepB(int(data['result']))
+            self.game.setNextStepB(int(data['result']), data['compile'], data['output'], data['result'])
 
     async def send_message(self, data):
         await self.channel_layer.group_send(
@@ -245,10 +245,12 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
                 'a_id': game.playerA.id,
                 'a_sx': game.playerA.sx,
                 'a_sy': game.playerA.sy,
+                'a_language': "" if botA == None else botA.language,
                 'a_is_robot': True if botA != None else False,
                 'b_id': game.playerB.id,
                 'b_sx': game.playerB.sx,
                 'b_sy': game.playerB.sy,
+                'b_language': "" if botB == None else botB.language,
                 'b_is_robot': True if botB != None else False,
                 'map': game.getG()
             }
