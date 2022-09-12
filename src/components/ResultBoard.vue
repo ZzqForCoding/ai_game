@@ -56,6 +56,7 @@ export default {
             });
             store.commit("clearMsg");
             store.commit("updateCanSendMsg", false);
+            store.commit("clearCodeOutMsg");
         };
 
         const back = () => {
@@ -68,6 +69,7 @@ export default {
             });
             store.commit("clearMsg");
             store.commit("updateCanSendMsg", false);
+            store.commit("clearCodeOutMsg");
         };
 
         return {

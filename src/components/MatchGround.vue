@@ -58,6 +58,7 @@ export default {
                     botId: props.botId,
                 }));
                 store.commit("updateIsMatch", true);
+                store.commit("clearMatchTime", 0);
             } else {
                 match_btn_info.value = "开始匹配";
                 store.state.pk.socket.send(JSON.stringify({
@@ -68,6 +69,7 @@ export default {
                     botId: props.botId,
                 }));
                 store.commit("updateIsMatch", false);
+                store.commit("clearMatchTime", 0);
             }
         }
 

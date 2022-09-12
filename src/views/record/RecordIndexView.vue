@@ -318,7 +318,7 @@ export default {
             }, 1500);
             message.value = "";
             // const scroll = unref(msgScroll);
-            //     scroll.setScrollTop(5000);
+            // scroll.setScrollTop(scroll.scrollHeight);
         };
 
         const enterSendMsg = (e) => {
@@ -492,8 +492,6 @@ export default {
     display: flex;
     flex-direction: column;
     padding: 5px 10px !important;
-    padding-left: 1px;
-    padding-right: 1px;
 }
 
 .messages .message-content {

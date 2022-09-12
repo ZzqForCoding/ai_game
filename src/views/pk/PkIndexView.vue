@@ -14,7 +14,7 @@
                 </template>
                 
                 <el-card class="messages" shadow="never">
-                    <el-scrollbar max-height="320px" ref="msgScroll">
+                    <el-scrollbar max-height="150px" ref="msgScroll">
                         <div class="message-content" v-for="msg in $store.state.pk.msgs" :key="msg.id">
                             <div class="username">
                                 {{ msg.username }}
@@ -42,6 +42,17 @@
                     </el-form>
                 </el-card>
             </el-card>
+
+            <el-card class="code-out-card" style="margin-top: 20px;">
+                <template #header>
+                    <div class="card-header" >
+                        <span>代码输出栏</span>
+                    </div>
+                </template>
+                <el-scrollbar max-height="170px" style="height: 170px;" >
+                    <pre class="codeOutMsg">{{ $store.state.pk.codeOutMsg }}</pre>
+                </el-scrollbar>
+            </el-card>
         </el-col>
     </el-row>
 </template>
@@ -68,7 +79,7 @@ export default {
         const socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/snake/?token=" + store.state.user.access;
         let message = ref('');
         let msgScroll = ref(null);
-
+        let round = 0;
 
         store.commit("updateGameResult", {loser: 'none', status: 'none'});
         store.commit("updateOpponent", {
@@ -100,6 +111,7 @@ export default {
                     const data = JSON.parse(msg.data);
                     if(data.username === store.state.user.username) return;
                     if(data.event === "start_game") {
+                        round = 0;
                         store.commit("updateOpponent", {
                             username: data.username,
                             photo: data.photo,
@@ -109,17 +121,25 @@ export default {
                         store.commit("updateIsMatch", false);
                         setTimeout(() => {
                             store.commit("updateStatus", "playing");
+                            store.commit("clearMatchTime", 0);
                         }, 2000);
                     } else if(data.event === "move") {
-                        console.log(data)
                         const game = store.state.pk.gameObject;
                         const [snake0, snake1] = game.snakes;
                         if(store.state.user.id === store.state.pk.a_id) {
                             snake0.set_direction(data.a_direction);
                             snake1.set_direction(data.b_direction);
+                            store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
+    compile: " + data.a_compile + "\n\
+    output: " + data.a_output + "\n\
+    result: " + data.a_result + "\n");
                         } else {
                             snake0.set_direction(transDir(data.b_direction));
                             snake1.set_direction(transDir(data.a_direction));
+                            store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
+    compile: " + data.b_compile + "\n\
+    output: " + data.b_output + "\n\
+    result: " + data.b_result + "\n");
                         }
                     } else if(data.event === "result") {
                         const game = store.state.pk.gameObject;
@@ -197,6 +217,22 @@ export default {
 </script>
 
 <style scoped>
+.code-out-card /deep/.el-card__header {
+    padding: 10px 10px !important;
+}
+
+.code-out-card /deep/.el-card__body {
+    padding: 5px 5px !important;
+}
+
+.codeOutMsg {
+    color: black;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 20px;
+    margin: 5px 5px;
+}
+
 .message /deep/.el-card__body {
     padding: 0px 0px !important;
 }
@@ -209,8 +245,6 @@ export default {
     display: flex;
     flex-direction: column;
     padding: 5px 10px !important;
-    padding-left: 1px;
-    padding-right: 1px;
 }
 
 .messages .message-content {
@@ -241,11 +275,11 @@ export default {
 }
 
 .message /deep/.messages {
-    height: 320px;
+    height: 150px;
 }
 
 .message /deep/.el-card__body {
-    height: 480px !important;
+    height: 280px !important;
 }
 
 .message-send /deep/.el-card__body {

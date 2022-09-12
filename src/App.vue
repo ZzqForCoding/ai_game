@@ -83,7 +83,7 @@
                     @select="handleSelect"
                 >
                     <div class="current-page">
-                        <span v-if="$store.state.backPage !== ''" class="back-menu" @click="showBackDialog = true">
+                        <span v-if="$store.state.backPage !== ''" class="back-menu" @click="showConfirmBack">
                             <el-icon :size="25"><Back /></el-icon>
                         </span>
                         {{ page }}
@@ -204,6 +204,13 @@ export default {
             isCollapse.value = !isCollapse.value;
         }
 
+        const showConfirmBack = () => {
+            if(page.value !== "回放界面") 
+                showBackDialog.value = true
+            else 
+                router.push({name: 'record_index'});
+        }
+
         const clickBack = () => {
             showBackDialog.value = false;
             if(store.state.pk.status === 'playing') {
@@ -226,6 +233,7 @@ export default {
             collapse,
             isCollapse,
             showBackDialog,
+            showConfirmBack,
             clickBack,
         }
     },

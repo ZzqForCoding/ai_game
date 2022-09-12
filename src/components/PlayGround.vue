@@ -145,6 +145,7 @@ export default {
 
         onUnmounted(() => {
             store.commit("updateCanSendMsg", false);
+            store.commit("clearCodeOutMsg");
         });
     }
 }

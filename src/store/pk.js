@@ -20,6 +20,7 @@ export default {
     type: "none",
     msgs: [],
     canSendMsg: false,
+    codeOutMsg: "",
   },
   getters: {
   },
@@ -64,6 +65,12 @@ export default {
     updateCanSendMsg(state, canSendMsg) {
         state.canSendMsg = canSendMsg;
     },
+    addCodeOutMsg(state, codeOutMsg) {
+        state.codeOutMsg += codeOutMsg;
+    },
+    clearCodeOutMsg(state) {
+        state.codeOutMsg = "";
+    }
   },
   actions: {
  

@@ -155,7 +155,7 @@ export class GameMap extends AcGameObject {
         const color_even = "#AAD751", color_odd = "#A2D149";
         for(let r = 0; r < this.rows; r++) {
             for(let c = 0; c < this.cols; c++) {
-                if((r + c) % 2 == 0) {
+                if((r + c) % 2 === 0) {
                     this.ctx.fillStyle = color_even;
                 } else {
                     this.ctx.fillStyle = color_odd;

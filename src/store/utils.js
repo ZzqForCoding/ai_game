@@ -11,9 +11,11 @@ export default {
             state.gameUtils = gameUtils;
         },
         updateIsMatch(state, isMatch) {
-            state.matchTime = 0;
             state.gameUtils.initMatchTime();
             state.isMatch = isMatch;
+        },
+        clearMatchTime(state, matchTime) {
+            state.matchTime = matchTime;
         },
         updateMatchTime(state, matchTime) {
             state.matchTime = matchTime;

@@ -97,7 +97,7 @@
                                         <el-icon :size="25"><Refresh /></el-icon>
                                     </span>
 
-                                    <el-dropdown>
+                                    <el-dropdown trigger="click">
                                     <!-- <el-select v-model="createGameInfo.botSelect" class="m-2" placeholder="Select">
                                         <el-option
                                           v-for="bot in bots"
@@ -214,7 +214,7 @@
                                 <el-icon :size="25"><Refresh /></el-icon>
                             </span>
 
-                            <el-dropdown>
+                            <el-dropdown trigger="click">
                                 <span class="gear">
                                     <el-icon :size="25"><Tools /></el-icon>
                                 </span>
