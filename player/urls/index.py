@@ -3,6 +3,7 @@ from player.views.getinfo import InfoView
 from player.views.register import RegisterView
 from player.views.getranklist import GetRankListView
 from player.views.getplayer_page import GetPlayerPageView
+from player.views.get_token import RemTokenObtainPairView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -10,11 +11,13 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
-    path('token/', TokenObtainPairView.as_view(), name='player_login'),
+    path('token/', RemTokenObtainPairView.as_view(), name='player_login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='player_refresh'),
     path('getinfo/', InfoView.as_view(), name='player_getinfo'),
     path('register/', RegisterView.as_view(), name='player_register'),
     path('getranklist/', GetRankListView.as_view(), name='player_ranklist'),
     path('getplayerpage/', GetPlayerPageView.as_view(), name='player_page'),
     path('bot/', include('player.urls.bot.index')),
+    path('acwing/', include('player.urls.acwing.index')),
+    path('qq/', include('player.urls.qq.index')),
 ]

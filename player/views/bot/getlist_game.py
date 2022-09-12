@@ -1,11 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from player.permissions.one_user_login import OneUserLogin
 from player.models.bot import Bot
 from game.models.game import Game
 
 class GetListByGameView(APIView):
-    permission_classes = ([IsAuthenticated])
+    permission_classes = ([OneUserLogin])
 
     def get(self, request):
         user = request.user

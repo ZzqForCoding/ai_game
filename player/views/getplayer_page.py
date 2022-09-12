@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from player.permissions.one_user_login import OneUserLogin
 from ai_game_platform import settings
 from player.models.player import Player
 import json
 
 class GetPlayerPageView(APIView):
-    permission_classes = ([IsAuthenticated])
+    permission_classes = ([OneUserLogin])
 
     def get(self, request):
         user = request.user

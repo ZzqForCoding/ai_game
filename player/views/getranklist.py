@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from player.permissions.one_user_login import OneUserLogin
 from ai_game_platform import settings
 from player.models.player import Player
 import json
@@ -13,7 +13,7 @@ class PlayerRankPagination(PageNumberPagination):
     max_page_size = None
 
 class GetRankListView(APIView):
-    permission_classes = ([IsAuthenticated])
+    permission_classes = ([OneUserLogin])
 
     def get(self, request):
         players = Player.objects.all().order_by('-rating')

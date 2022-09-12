@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from player.permissions.one_user_login import OneUserLogin
 from player.models.bot import Bot
 
 class UpdateView(APIView):
-    permission_classes = ([IsAuthenticated])
+    permission_classes = ([OneUserLogin])
 
     def post(self, request):
         user = request.user

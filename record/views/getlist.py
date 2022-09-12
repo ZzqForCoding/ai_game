@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from record.models.record import Record
+from player.permissions.one_user_login import OneUserLogin
 from player.models.player import Player
 import json
 
@@ -13,7 +13,7 @@ class RecordPagination(PageNumberPagination):
     max_page_size = None
 
 class GetListView(APIView):
-    permission_classes = ([IsAuthenticated])
+    permission_classes = ([OneUserLogin])
 
     def get(self, request):
         records = Record.objects.all().order_by('-createtime')
