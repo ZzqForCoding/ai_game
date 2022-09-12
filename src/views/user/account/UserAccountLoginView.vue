@@ -12,6 +12,30 @@
                     <!-- <el-form-item prop="isLock"> -->
                         <SliderVerify v-model="log_info.isLock" @change="handlerLock" class="verify" />
                     <!-- </el-form-item> -->
+                    <!-- <div class="third-login">
+                        <el-tooltip
+                            class="box-item"
+                            effect="dark"
+                            content="AcWing一键登录"
+                            placement="bottom"
+                        >
+                            <div @click="acwing_login">
+                                <img src="https://cdn.acwing.com/media/article/image/2022/09/06/1_32f001fd2d-acwing_logo.png" alt="">
+                            </div>
+                        </el-tooltip>
+                    </div> -->
+                    <div class="third-login">
+                        <el-tooltip
+                            class="box-item"
+                            effect="dark"
+                            content="QQ一键登录"
+                            placement="bottom"
+                        >
+                            <div @click="qq_login">
+                                <img style="width: 25px;" src="https://wiki.connect.qq.com/wp-content/uploads/2013/10/03_qq_symbol-1-250x300.png" alt="">
+                            </div>
+                        </el-tooltip>
+                    </div>
                     <el-form-item>
                         <el-button type="primary" @click="login" style="width: 100%;">登录</el-button>
                     </el-form-item>
@@ -28,6 +52,7 @@ import { ref, reactive, unref } from 'vue'
 import { useStore } from 'vuex'
 import router from '@/router'
 import { ElMessage } from 'element-plus'
+import $ from 'jquery'
 
 export default {
     name: 'UserAccountLoginView',
@@ -139,6 +164,30 @@ export default {
             }
         };
 
+        const acwing_login = () => {
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/acwing/web/apply_code/",
+                type: "GET",
+                success: resp => {
+                    if(resp.result === "success") {
+                        window.location.replace(resp.apply_code_url)
+                    }
+                }
+            });
+        }
+
+        const qq_login = () => {
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/qq/apply_code/",
+                type: "GET",
+                success: resp => {
+                    if(resp.result === "success") {
+                        window.location.replace(resp.apply_code_url)
+                    }
+                }
+            });
+        }
+
         return {
             ruleForm,
             log_info,
@@ -157,13 +206,26 @@ export default {
                     { validator: checkStatus, trigger: 'blur' },
                 ],
             },
+            acwing_login,
+            qq_login,
         };
     }
 }
 </script>
 
 <style scoped>
-.verify {
-    margin-bottom: 15px;
+.third-login {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 50px;
+}
+
+.third-login div {
+    cursor: pointer;
+}
+
+.third-login /deep/.el-tooltip__trigger {
+    margin: 0 0 !important;
 }
 </style>

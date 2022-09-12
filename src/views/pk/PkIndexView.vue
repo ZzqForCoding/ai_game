@@ -81,6 +81,7 @@ export default {
         // 绕蛇
         if(game === 2) {
             onMounted(() => {  
+                store.commit("updateAddMatchTime", 0);
                 store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);
 
@@ -105,6 +106,7 @@ export default {
                         });
                         store.commit("updateGame", data.game);
                         store.commit("updateCanSendMsg", true);
+                        store.commit("updateIsMatch", false);
                         setTimeout(() => {
                             store.commit("updateStatus", "playing");
                         }, 2000);

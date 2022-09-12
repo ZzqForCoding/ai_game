@@ -171,11 +171,12 @@
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import router from './router/index'
-import { watch, ref } from 'vue';
+import { watch, ref, onMounted } from 'vue';
 import {
     Expand,
     Fold,
-} from '@element-plus/icons-vue'
+} from '@element-plus/icons-vue';
+import { GameUtils } from '@/assets/scripts/GameUtils';
 
 export default {
     name: 'App',
@@ -212,6 +213,12 @@ export default {
             }
             router.push({name: 'record_index'});
         }
+
+        onMounted(() => {
+            if(store.state.utils.gameUtils === null) {
+                store.commit("updateGameUtils", new GameUtils(store));
+            }
+        });
 
         return {
             logout,

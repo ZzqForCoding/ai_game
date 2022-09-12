@@ -9,6 +9,8 @@ import UserBotIndexView from '@/views/user/bots/UserBotIndexView'
 import NotFound from '@/views/error/NotFound'
 import UserAccountLoginView from '@/views/user/account/UserAccountLoginView'
 import UserAccountRegisterView from '@/views/user/account/UserAccountRegisterView'
+import UserAccountAcWingWebReceiveCodeView from '@/views/user/account/UserAccountAcWingWebReceiveCodeView'
+import UserAccountQQReceiveCodeView from '@/views/user/account/UserAccountQQReceiveCodeView'
 import store from '@/store'
 
 const routes = [
@@ -109,6 +111,26 @@ const routes = [
         meta: {
             requestAuth: false,
             description: '注册',
+            isRoot: true,
+        }
+    },
+    {
+        path: "/player/acwing/web/receive_code/",
+        name: 'player_acwing_web_receive_code',
+        component: UserAccountAcWingWebReceiveCodeView,
+        meta: {
+            requestAuth: false,
+            description: '',
+            isRoot: true,
+        }
+    },
+    {
+        path: "/player/qq/receive_code/",
+        name: 'player_qq_receive_code',
+        component: UserAccountQQReceiveCodeView,
+        meta: {
+            requestAuth: false,
+            description: '',
             isRoot: true,
         }
     },

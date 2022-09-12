@@ -1,5 +1,11 @@
 <template>
     <el-row style="margin-top: 20px; user-select: none;">
+        <el-col :span="6" :offset="9">
+            <div class="match-time-text">
+                匹配时间：
+                <span class="match-time">{{ $store.state.utils.matchTime }}</span>
+            </div>
+        </el-col>
         <el-col :span="9" :offset="2">
             <div class="user-photo">
                 <img :src="$store.state.user.photo" alt="">
@@ -51,6 +57,7 @@ export default {
                     operate: props.operate,
                     botId: props.botId,
                 }));
+                store.commit("updateIsMatch", true);
             } else {
                 match_btn_info.value = "开始匹配";
                 store.state.pk.socket.send(JSON.stringify({
@@ -60,6 +67,8 @@ export default {
                     operate: props.operate,
                     botId: props.botId,
                 }));
+                store.commit("updateIsMatch", false);
+                store.commit("updateAddMatchTime", 0);
             }
         }
 
@@ -72,6 +81,19 @@ export default {
 </script>
 
 <style scoped>
+div.match-time-text {
+    color: white;
+    font-size: 24px;
+    text-align: center;
+    font-weight: 600;
+}
+
+span.match-time {
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
 div.user-photo {
     text-align: center;
     padding-top: 10vh;
