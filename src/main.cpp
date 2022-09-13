@@ -106,7 +106,7 @@ vector<string> split(const string& str, const string& sep) {
     return ret;
 }
 
-string concatStr(string one, string two, string three="", string four="", string five="") {
+string concatStr(string one, string two="", string three="", string four="", string five="") {
     return one + two + three + four + five;
 }
 
@@ -225,8 +225,9 @@ void run(Bot bot, string dockerId) {
     // 新建容器
     // Result result = exec("docker run -itd code_runner:2.0 /bin/bash");
     // string dockerId = result.output.substr(0, 12);
+    system(concatStr("docker start ", dockerId).c_str());
     // 分配的不准
-    // system(concatStr("docker update ", dockerId, " --memory 64MB --memory-swap -1").c_str());
+    system(concatStr("docker update ", dockerId, " --memory 64MB --memory-swap -1").c_str());
 
     processInput(bot.input, dockerId);
 
@@ -253,18 +254,20 @@ int main() {\n\
         ofstream fon(infile + ".cpp");
         fon << bot.botCode;
         fon.close();
-
-        system(concatStr("docker cp " + infile + ".cpp ", dockerId, ":/tmp/code.cpp").c_str());
-
-        // 编译运行
-        try {
-            codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c  'g++ -Wall -o /tmp/code.out /tmp/code.cpp -pthread && /tmp/code.out < /tmp/input.txt'"));
-        } catch(exception e) {
-            cout << "except" << endl;
+        codeResult = exec(concatStr("g++ -Wall -o ", infile, ".out ", infile, ".cpp -pthread").c_str());
+        system(concatStr("rm ", infile, ".cpp").c_str());
+        if(codeResult.status == 0) {
+            system(concatStr("docker cp " + infile + ".out ", dockerId, ":/tmp/code.out").c_str());
+            system(concatStr("rm ", infile, ".out").c_str());
+            // 编译运行
+            try {
+                codeResult = exec(concatStr("docker exec ", dockerId, " /bin/bash -c  '/tmp/code.out < /tmp/input.txt'"));
+            } catch(exception e) {
+                cout << "except" << endl;
+            }
+            // 错误代码处理
+            if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
         }
-
-        // 错误代码处理
-        if(codeResult.status == 35584) codeResult.error = "Memory Limit Exceeded";
     } else if(bot.language == "java") {
         // 处理代码
         int pos = bot.botCode.rfind("}");
@@ -360,7 +363,7 @@ if __name__ == '__main__':\n\
     resp = Json::FastWriter().write(root);
     save_result(resp);
 
-    // system(concatStr("docker stop ", dockerId).c_str());
+    system(concatStr("docker kill ", dockerId).c_str());
     // system(concatStr("docker rm ", dockerId).c_str());
 }
 
