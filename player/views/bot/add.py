@@ -49,7 +49,7 @@ class AddView(APIView):
             map['result'] = '代码长度不能超过10000'
             return Response(map)
 
-        if Bot.objects.all().count() >= 10:
+        if Bot.objects.filter(user=user).count() >= 10:
             map['result'] = "每个用户最多只能创建10个Bot!"
             return Response(map)
 

@@ -104,7 +104,7 @@ class Pool {
             std::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
             std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
             MessageClient client(protocol);
-
+            cout << "Match Success: " << player1.username << " " << player2.username << endl;
             try {
                 transport->open();
 

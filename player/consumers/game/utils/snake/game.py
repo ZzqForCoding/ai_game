@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from player.consumers.game.utils.snake.player import Player
 from player.models.player import Player as Player_Model
 from record.models.record import Record
@@ -57,7 +58,7 @@ class Game(threading.Thread):
         self.outputB = None
         self.resultB = None
         self.lock = threading.Lock()
-        self.status = "playing" # playing -> overtime/illegal
+        self.status = "playing" # waiting -> playing -> overtime/illegal -> end
         self.loser = ""     # all: "平局", A: A输, B: B输
         self.room_name = room_name
         self.channel_layer = get_channel_layer()
@@ -192,8 +193,8 @@ class Game(threading.Thread):
         self.sendBotCode(self.playerA)
         self.sendBotCode(self.playerB)
 
-        # 接收5s内的输入
-        for i in range(50):
+        # 接收6s内的输入
+        for i in range(60):
             time.sleep(0.1)
             self.lock.acquire()
             try:
@@ -292,6 +293,8 @@ class Game(threading.Thread):
             self.lock.release()
         self.saveToDataBase()
         self.sendAllMessage(resp)
+        cache.delete_pattern(self.playerA.id)
+        cache.delete_pattern(self.playerB.id)
 
     # 线程入口
     def run(self):

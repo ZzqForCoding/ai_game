@@ -37,6 +37,8 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
 
     #  开始匹配(2.0)
     async def start_match(self, data):
+        if cache.get(self.user.id):
+            return
         transport = TSocket.TSocket('localhost', 9090)
         transport = TTransport.TBufferedTransport(transport)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
@@ -53,6 +55,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
                 player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']))
 
         client.add_player(player_info, "")
+        cache.set(self.user.id, True, 3600)
 
         transport.close()
 
@@ -72,6 +75,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         player_info = PlayerInfo(self.user.id, self.user.username,
                 player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']))
         client.remove_player(player_info, "")
+        cache.delete_pattern(self.user.id)
 
         transport.close()
 
