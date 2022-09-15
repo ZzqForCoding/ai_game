@@ -31,18 +31,22 @@ export class GameMap extends AcGameObject {
         ];
 
         this.chesses = [];
-
-        this.preStatus = "";
-        this.status = "waiting";  // waiting -> black/white -> judge -> win/lose
+        this.status = "waiting";  // waiting -> playing -> judge -> win/lose
+        this.currentRound = -1;  // 当前回合下棋的一方
+        this.isStartTime = false;
+        this.roundTime = 0;
+        this.loser = null;
+        
         this.currentChess = null;
-
         this.winChesses = [];
     }
 
     start() {
         new NoticeBoard(this);
-        new Player(this, "white", "zzq", "https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg");
-        new Player(this, "black", "zzq", "https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg");
+        this.players = [
+            new Player(this, 1, "white"),
+            new Player(this, 2, "black")
+        ];
     }
 
     update_size() {
@@ -52,8 +56,28 @@ export class GameMap extends AcGameObject {
     }
 
     update() {
+        if(this.isStartTime) {
+            this.roundTime += this.timedelta / 1000;
+            console.log(parseInt(this.roundTime))
+            if(this.roundTime >= 5) {
+                this.over_game(this.currentRound);
+            }
+        }
         this.update_size();
         this.render();
+    }
+
+    over_game(loseId) {
+        this.isStartTime = false;
+        this.status = "over";
+        this.currentRound = -1;
+        for(let player of this.players) {
+            if(player.id === loseId) {
+                this.loser = player;
+                break;
+            }
+        }
+        console.log(this.loser);
     }
 
     pre_judge(r, c) {
@@ -68,7 +92,7 @@ export class GameMap extends AcGameObject {
 
     get_chess(r, c) {
         for(let chess of this.chesses) {
-            if(chess.r === r && chess.c === c && this.preStatus === chess.color) {
+            if(chess.r === r && chess.c === c && this.currentChess.color === chess.color) {
                 return chess;
             }
         }
@@ -76,7 +100,6 @@ export class GameMap extends AcGameObject {
     }
 
     judge() {
-        this.preStatus = this.status;
         this.status = "judge";
 
         let cr = this.currentChess.r, cc = this.currentChess.c;
@@ -145,7 +168,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(cr, i));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 左上4个
@@ -154,7 +177,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, j));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 上4个
@@ -163,7 +186,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, cc));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 右上4个
@@ -172,7 +195,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, j));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 右4个
@@ -181,7 +204,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(cr, i));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 右下4个
@@ -190,7 +213,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, j));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 下4个
@@ -199,7 +222,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, cc));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 左下4个
@@ -208,7 +231,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, j));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 横5个
@@ -217,7 +240,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(cr, i));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 竖5个
@@ -226,7 +249,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, cc));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 正对角线5个
@@ -235,7 +258,7 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, j));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
 
         // 反对角线5个
@@ -244,13 +267,9 @@ export class GameMap extends AcGameObject {
                 this.winChesses.push(this.get_chess(i, j));
             }
             this.currentChess = null;
-            return false;
+            return true;
         }
-
-        setTimeout(() => {
-            if(this.preStatus === "black") this.status = "white";
-            else if(this.preStatus === "white") this.status = "black"
-        }, 500);
+        return false;
     }
 
     render() {

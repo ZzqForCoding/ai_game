@@ -1,7 +1,7 @@
 <template>
     <el-row>
         <el-col :span="14" :offset="2">
-            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing'" flag="pk" />
+            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing' || game === 1" flag="pk" />
             <MatchGround v-if="$store.state.pk.status === 'matching'" :operate="operate" :botId="botId" />
         </el-col>
         
@@ -42,8 +42,7 @@
                     </el-form>
                 </el-card>
             </el-card>
-
-            <el-card class="code-out-card" style="margin-top: 20px;">
+            <el-card class="code-out-card" style="margin-top: 20px;" v-if="$store.state.pk.status === 'playing' && operate === 0">
                 <template #header>
                     <div class="card-header" >
                         <span>代码输出栏</span>
@@ -74,9 +73,9 @@ export default {
         const route = useRoute();
         const store = useStore();
         const game = parseInt(route.params.game);
-        const operate = route.query.operate;
+        const operate = parseInt(route.query.operate);
         const botId = route.query.bot_id;
-        const socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/snake/?token=" + store.state.user.access;
+        let socketUrl = "";
         let message = ref('');
         let msgScroll = ref(null);
         let round = 0;
@@ -89,9 +88,43 @@ export default {
         store.commit("updateIsRecord", false);
 
         let socket = null;
+        // 五子棋
+        if(game === 1) {
+            onMounted(() => {
+                socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/gobang/?token=" + store.state.user.access;
+                socket = new WebSocket(socketUrl);
+
+                socket.onopen = () => {
+                    console.log("connected!");
+                    store.commit("updateSocket", socket);
+                    store.commit("updateCanSendMsg", true);
+                };
+                
+                socket.onmessage = msg => {
+                    const data = JSON.parse(msg.data);
+                    if(data.event === "pk_message") {
+                        if(!store.state.pk.canSendMsg) return;
+                        store.commit("pushMsg", data.msg);
+                        if(data.msg.username === store.state.user.username) {
+                            store.commit("updateCanSendMsg", false);
+                            setTimeout(() => {
+                                store.commit("updateCanSendMsg", true);
+                            }, 1500);
+                        }
+                        // const scroll = unref(msgScroll);
+                        // scroll.setScrollTop(80000);
+                    }
+                }
+
+                socket.onclose = () => {
+                    console.log("disconnected!");
+                }
+            });
+        }
         // 绕蛇
-        if(game === 2) {
-            onMounted(() => {  
+        else if(game === 2) {
+            onMounted(() => {
+                socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/snake/?token=" + store.state.user.access;
                 store.commit("updateMatchTime", 0);
                 store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);

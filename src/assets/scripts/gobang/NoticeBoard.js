@@ -18,7 +18,9 @@ export class NoticeBoard extends AcGameObject {
             this.write("即将开始：" + parseInt(this.time));
         }
         if(this.time <= 0) {
-            this.gamemap.status = "black";
+            this.gamemap.status = "playing";
+            this.gamemap.currentRound = 1;
+            this.gamemap.isStartTime = true;
             this.destroy();
         }
     }

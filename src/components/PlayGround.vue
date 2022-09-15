@@ -4,7 +4,7 @@
         <div v-if="flag === 'pk'" class="userinfo">
             <div class="userinfo-container">
                 <div class="user-profile">
-                    <img :src="$store.state.user.photo" alt="">
+                    <img :src="$store.state.user.photo" alt="" style="user-select: none;">
                     <span class="username">{{ $store.state.user.username }}</span>
                 </div>
                 <div class="body" :style="$store.state.pk.a_id == $store.state.user.id ? 'background-color: #4876EC;' : 'background-color: #F94848;'">
@@ -64,7 +64,7 @@
                     <div class="eye" />
                 </div>
                 <div class="user-profile">
-                    <img :src="$store.state.pk.opponent_photo" alt="">
+                    <img :src="$store.state.pk.opponent_photo" alt="" style="user-select: none;">
                     <span class="username">{{ $store.state.pk.opponent_username }}</span>
                 </div>
             </div>
@@ -72,7 +72,7 @@
         <div v-else-if="flag === 'record'" class="userinfo">
             <div class="userinfo-container">
                 <div class="user-profile">
-                    <img :src="$store.state.record.a_photo" alt="">
+                    <img :src="$store.state.record.a_photo" alt="" style="user-select: none;">
                     <span class="username">{{ $store.state.record.a_username }}</span>
                 </div>
                 <div class="body" style="background-color: #4876EC;">
@@ -112,7 +112,7 @@
                     <div class="eye" />
                 </div>
                 <div class="user-profile">
-                    <img :src="$store.state.record.b_photo" alt="">
+                    <img :src="$store.state.record.b_photo" alt="" style="user-select: none;">
                     <span class="username">{{ $store.state.record.b_username }}</span>
                 </div>
             </div>
