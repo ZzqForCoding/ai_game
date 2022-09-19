@@ -227,7 +227,7 @@ void run(Bot bot, string dockerId) {
     // string dockerId = result.output.substr(0, 12);
     system(concatStr("docker start ", dockerId).c_str());
     // 分配的不准
-    system(concatStr("docker update ", dockerId, " --memory 64MB --memory-swap -1").c_str());
+    // system(concatStr("docker update ", dockerId, " --memory 64MB --memory-swap -1").c_str());
 
     processInput(bot.input, dockerId);
 
@@ -367,7 +367,7 @@ if __name__ == '__main__':\n\
     // system(concatStr("docker rm ", dockerId).c_str());
 }
 
-void consume_task1() {
+void consume_task(string dockerId) {
     while(true) {
         unique_lock<mutex> lock1(message_queue.m);
         if(message_queue.q.empty()) {
@@ -376,21 +376,7 @@ void consume_task1() {
             Bot bot = message_queue.q.front();
             message_queue.q.pop();
             lock1.unlock();
-            run(bot, "6ed0654416c4");
-        }
-    }
-}
-
-void consume_task2() {
-    while(true) {
-        unique_lock<mutex> lock1(message_queue.m);
-        if(message_queue.q.empty()) {
-            message_queue.cv.wait(lock1);
-        } else {
-            Bot bot = message_queue.q.front();
-            message_queue.q.pop();
-            lock1.unlock();
-            run(bot, "ff187b4ffbf2");
+            run(bot, dockerId);
         }
     }
 }
@@ -404,8 +390,8 @@ int main(int argc, char **argv) {
 
     printf("Starting BotRunning Server...\n");
 
-    thread code_running_thread1(consume_task1);
-    thread code_running_thread2(consume_task2);
+    thread code_running_thread1(consume_task, "6ed0654416c4");
+    thread code_running_thread2(consume_task, "ff187b4ffbf2");
     server.serve();
     return 0;
 }
