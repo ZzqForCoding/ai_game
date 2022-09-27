@@ -26,11 +26,12 @@ class Player(object):
      - channel_name
      - operate
      - bot_id
+     - game_id
 
     """
 
 
-    def __init__(self, id=None, username=None, photo=None, rating=None, channel_name=None, operate=None, bot_id=None,):
+    def __init__(self, id=None, username=None, photo=None, rating=None, channel_name=None, operate=None, bot_id=None, game_id=None,):
         self.id = id
         self.username = username
         self.photo = photo
@@ -38,6 +39,7 @@ class Player(object):
         self.channel_name = channel_name
         self.operate = operate
         self.bot_id = bot_id
+        self.game_id = game_id
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -83,6 +85,11 @@ class Player(object):
                     self.bot_id = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.I32:
+                    self.game_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -121,6 +128,10 @@ class Player(object):
             oprot.writeFieldBegin('bot_id', TType.I32, 7)
             oprot.writeI32(self.bot_id)
             oprot.writeFieldEnd()
+        if self.game_id is not None:
+            oprot.writeFieldBegin('game_id', TType.I32, 8)
+            oprot.writeI32(self.game_id)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -147,6 +158,7 @@ Player.thrift_spec = (
     (5, TType.STRING, 'channel_name', 'UTF8', None, ),  # 5
     (6, TType.I32, 'operate', None, None, ),  # 6
     (7, TType.I32, 'bot_id', None, None, ),  # 7
+    (8, TType.I32, 'game_id', None, None, ),  # 8
 )
 fix_spec(all_structs)
 del all_structs

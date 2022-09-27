@@ -67,6 +67,7 @@ class Pool {
 
         bool check_match(uint32_t i, uint32_t j) {
             auto playerA = players[i], playerB = players[j];
+            if(playerA.game_id != playerB.game_id) return false;
 
             int dt = abs(playerA.rating - playerB.rating);
             // min: 若取min则代表两者分差都小于 等待时间 * 10，实力差距最接近
@@ -110,6 +111,8 @@ class Pool {
 
                 Json::Value root, player;
                 root["type"] = Json::Value("match");
+                root["game_id"] = Json::Value(player1.game_id);
+
                 player["id"] = Json::Value(player1.id);
                 player["username"] = Json::Value(player1.username);
                 player["photo"] = Json::Value(player1.photo);

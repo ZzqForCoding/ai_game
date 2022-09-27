@@ -71,7 +71,7 @@ class Game(threading.Thread):
                 res += str(self.g[i][j])
         return res
 
-    def updateUserRating(self, player, rating):
+    def updatePlayerRating(self, player, rating):
         p = Player_Model.objects.get(id=player.id)
         p.rating = rating
         p.save()
@@ -87,8 +87,8 @@ class Game(threading.Thread):
             ratingA += 5
             ratingB -= 2
 
-        self.updateUserRating(self.playerA, ratingA)
-        self.updateUserRating(self.playerB, ratingB)
+        self.updatePlayerRating(self.playerA, ratingA)
+        self.updatePlayerRating(self.playerB, ratingB)
 
         game = GameModel.objects.get(name='绕蛇')
         record = Record.objects.create(
@@ -295,6 +295,8 @@ class Game(threading.Thread):
         self.sendAllMessage(resp)
         cache.delete_pattern(self.playerA.id)
         cache.delete_pattern(self.playerB.id)
+        # del MultiPlayerSnakeGame.users[self.playerA.id]
+        # del MultiPlayerSnakeGame.users[self.playerB.id]
 
     # 线程入口
     def run(self):
@@ -343,6 +345,10 @@ class Game(threading.Thread):
 
     # 生成地图
     def draw(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.g[i][j] = 0
+
         for r in range(self.rows):
             self.g[r][0] = self.g[r][self.cols - 1] = 1
 
@@ -354,7 +360,7 @@ class Game(threading.Thread):
             for j in range(1000):
                 r = random.randint(1, self.rows - 2)
                 c = random.randint(1, self.cols - 2)
-                if self.g[r][c] == 1 or self.g[self.rows - 1 - c][self.cols - 1 - c] == 1:
+                if self.g[r][c] == 1 or self.g[self.rows - 1 - r][self.cols - 1 - c] == 1:
                     continue
                 if r == self.rows - 2 and c == 1 or r == 1 and c == self.cols - 2:
                     continue

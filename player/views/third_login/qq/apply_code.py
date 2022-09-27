@@ -11,7 +11,7 @@ def get_state():
 
 def apply_code(request):
     response_type = "code"
-    client_id = ""
+    client_id = "102024822"
     redirect_uri = quote("https://aigame.zzqahm.top/player/qq/receive_code")
     scope = "get_user_info"
     state = get_state()

@@ -20,6 +20,11 @@ class MessageHandler:
         if info['type'] == "match":
             ps = info['players']
             room_name = "room-%s-%s" % (ps[0]['id'], ps[1]['id'])
+            type = ""
+            if info['game_id'] == 1:
+                type = "start_gobang_game"
+            elif info['game_id'] == 2:
+                type = "start_snake_game"
             players = []
             for p in ps:
                 async_to_sync(channel_layer.group_add)(room_name, p['channel_name'])
@@ -32,7 +37,7 @@ class MessageHandler:
             async_to_sync(channel_layer.group_send) (
                 room_name,
                 {
-                    'type': "start_snake_game",
+                    'type': type,
                     'room_name': room_name,
                     'a_id': ps[0]['id'],
                     'a_username': ps[0]['username'],
@@ -64,7 +69,7 @@ class MessageHandler:
 if __name__ == '__main__':
     handler = MessageHandler()
     processor = Message.Processor(handler)
-    transport = TSocket.TServerSocket(host='172.17.0.4', port=9091)
+    transport = TSocket.TServerSocket(host='172.17.0.3', port=9091)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 

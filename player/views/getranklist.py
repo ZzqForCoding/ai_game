@@ -23,6 +23,7 @@ class GetRankListView(APIView):
         resp = []
         for player in page_players:
             item = {}
+            item['rank'] = Player.objects.filter(rating__gt=player.rating).count() + 1,
             item['username'] = player.user.username
             item['photo'] = player.photo
             item['rating'] = player.rating

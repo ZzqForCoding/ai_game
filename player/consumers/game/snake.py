@@ -15,7 +15,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
 # 贪吃蛇游戏的ws逻辑
-class MultiPlayerGame(AsyncWebsocketConsumer):
+class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
     users = {}
 
     # 在匹配界面会启动连接(得带token)
@@ -25,8 +25,8 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             await self.accept()
             self.room_name = None
             self.user = user
-            MultiPlayerGame.users[self.user.id] = self
-            print('accept')
+            self.game_id = 2
+            MultiPlayerSnakeGame.users[self.user.id] = self
         else:
             await self.close()
 
@@ -52,7 +52,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']))
+                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']), self.game_id)
 
         client.add_player(player_info, "")
         cache.set(self.user.id, True, 3600)
@@ -73,7 +73,7 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']))
+                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']), self.game_id)
         client.remove_player(player_info, "")
         cache.delete_pattern(self.user.id)
 
@@ -130,8 +130,8 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             game.createMap()
             # 一局游戏一个线程
             game.start()
-            MultiPlayerGame.users[a.id].game = game
-            MultiPlayerGame.users[b.id].game = game
+            MultiPlayerSnakeGame.users[a.id].game = game
+            MultiPlayerSnakeGame.users[b.id].game = game
             # 返回给玩家的信息
             resp = {
                 'a_id': game.playerA.id,
@@ -175,11 +175,11 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
 
     # 移动
     async def move(self, direction):
-        if MultiPlayerGame.users[self.user.id].game.playerA.id == self.user.id:
-            if MultiPlayerGame.users[self.user.id].game.playerA.botId == -1:
+        if MultiPlayerSnakeGame.users[self.user.id].game.playerA.id == self.user.id:
+            if MultiPlayerSnakeGame.users[self.user.id].game.playerA.botId == -1:
                 self.game.setNextStepA(direction, "", "", "")
-        elif MultiPlayerGame.users[self.user.id].game.playerB.id == self.user.id:
-            if MultiPlayerGame.users[self.user.id].game.playerB.botId == -1:
+        elif MultiPlayerSnakeGame.users[self.user.id].game.playerB.id == self.user.id:
+            if MultiPlayerSnakeGame.users[self.user.id].game.playerB.botId == -1:
                 self.game.setNextStepB(direction, "", "", "")
 
     # 辅助函数：发送给当前房间玩家信息
@@ -196,9 +196,9 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             print("illegal: ", dir)
             return
 
-        if MultiPlayerGame.users[self.user.id].game.playerA.id == data['user_id']:
+        if MultiPlayerSnakeGame.users[self.user.id].game.playerA.id == data['user_id']:
             self.game.setNextStepA(int(data['result']), data['compile'], data['output'], data['result'])
-        elif MultiPlayerGame.users[self.user.id].game.playerB.id == data['user_id']:
+        elif MultiPlayerSnakeGame.users[self.user.id].game.playerB.id == data['user_id']:
             self.game.setNextStepB(int(data['result']), data['compile'], data['output'], data['result'])
 
     async def send_message(self, data):
@@ -242,8 +242,8 @@ class MultiPlayerGame(AsyncWebsocketConsumer):
             game.createMap()
             # 一局游戏一个线程
             game.start()
-            MultiPlayerGame.users[a_id].game = game
-            MultiPlayerGame.users[b_id].game = game
+            MultiPlayerSnakeGame.users[a_id].game = game
+            MultiPlayerSnakeGame.users[b_id].game = game
             # 返回给玩家的信息
             resp = {
                 'a_id': game.playerA.id,

@@ -21,9 +21,10 @@ def receive_code(request):
     apply_access_token_url = "https://graph.qq.com/oauth2.0/token"
     params = {
         'grant_type': "authorization_code",
-        'client_id': "",
-        'client_secret': "",
-        'redirect_uri': "https://aigame.zzqahm.top/backend/player/qq/receive_code",
+        'client_id': "102024822",
+        'client_secret': "30jGZgZGiz1sUu54",
+        'code': code,
+        'redirect_uri': "https://aigame.zzqahm.top/player/qq/receive_code",
         'fmt': "json"
     }
     access_token_res = requests.get(apply_access_token_url, params=params).json()
@@ -39,17 +40,22 @@ def receive_code(request):
 
     players = Player.objects.filter(openid=openid)
     if players.exists():
-        refresh = RefreshToken.for_user(players[0].user)
+        player = players[0]
+        refresh = RefreshToken.for_user(player.user)
+        token = str(refresh.access_token)
+        refresh = str(refresh)
+        player.token = "Bearer %s" % (token)
+        player.save()
         return JsonResponse({
             'result': "success",
-            'access': str(refresh.access_token),
-            'refresh': str(refresh)
+            'access': token,
+            'refresh': refresh
         })
 
     get_userinfo_url = "https://graph.qq.com/user/get_user_info"
     params = {
         'access_token': access_token,
-        'oauth_consumer_key': "",
+        'oauth_consumer_key': "102024822",
         'openid': openid
     }
     userinfo_res = requests.get(get_userinfo_url, params=params).json()
@@ -62,9 +68,13 @@ def receive_code(request):
     user = User.objects.create(username=username)
     player = Player.objects.create(user=user, photo=photo, openid=openid)
 
-    refresh = RefreshToken.for_user(players[0].user)
+    refresh = RefreshToken.for_user(player.user)
+    token = str(refresh.access_token)
+    refresh = str(refresh)
+    player.token = "Bearer %s" % (token)
+    player.save()
     return JsonResponse({
         'result': "success",
-        'access': str(refresh.access_token),
-        'refresh': str(refresh)
+        'access': token,
+        'refresh': refresh
     })

@@ -24,7 +24,7 @@ namespace match_service {
 class Player;
 
 typedef struct _Player__isset {
-  _Player__isset() : id(false), username(false), photo(false), rating(false), channel_name(false), operate(false), bot_id(false) {}
+  _Player__isset() : id(false), username(false), photo(false), rating(false), channel_name(false), operate(false), bot_id(false), game_id(false) {}
   bool id :1;
   bool username :1;
   bool photo :1;
@@ -32,6 +32,7 @@ typedef struct _Player__isset {
   bool channel_name :1;
   bool operate :1;
   bool bot_id :1;
+  bool game_id :1;
 } _Player__isset;
 
 class Player : public virtual ::apache::thrift::TBase {
@@ -46,7 +47,8 @@ class Player : public virtual ::apache::thrift::TBase {
            rating(0),
            channel_name(),
            operate(0),
-           bot_id(0) {
+           bot_id(0),
+           game_id(0) {
   }
 
   virtual ~Player() noexcept;
@@ -57,6 +59,7 @@ class Player : public virtual ::apache::thrift::TBase {
   std::string channel_name;
   int32_t operate;
   int32_t bot_id;
+  int32_t game_id;
 
   _Player__isset __isset;
 
@@ -74,6 +77,8 @@ class Player : public virtual ::apache::thrift::TBase {
 
   void __set_bot_id(const int32_t val);
 
+  void __set_game_id(const int32_t val);
+
   bool operator == (const Player & rhs) const
   {
     if (!(id == rhs.id))
@@ -89,6 +94,8 @@ class Player : public virtual ::apache::thrift::TBase {
     if (!(operate == rhs.operate))
       return false;
     if (!(bot_id == rhs.bot_id))
+      return false;
+    if (!(game_id == rhs.game_id))
       return false;
     return true;
   }

@@ -45,6 +45,10 @@ void Player::__set_operate(const int32_t val) {
 void Player::__set_bot_id(const int32_t val) {
   this->bot_id = val;
 }
+
+void Player::__set_game_id(const int32_t val) {
+  this->game_id = val;
+}
 std::ostream& operator<<(std::ostream& out, const Player& obj)
 {
   obj.printTo(out);
@@ -129,6 +133,14 @@ uint32_t Player::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 8:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->game_id);
+          this->__isset.game_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -174,6 +186,10 @@ uint32_t Player::write(::apache::thrift::protocol::TProtocol* oprot) const {
   xfer += oprot->writeI32(this->bot_id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("game_id", ::apache::thrift::protocol::T_I32, 8);
+  xfer += oprot->writeI32(this->game_id);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -188,6 +204,7 @@ void swap(Player &a, Player &b) {
   swap(a.channel_name, b.channel_name);
   swap(a.operate, b.operate);
   swap(a.bot_id, b.bot_id);
+  swap(a.game_id, b.game_id);
   swap(a.__isset, b.__isset);
 }
 
@@ -199,6 +216,7 @@ Player::Player(const Player& other0) {
   channel_name = other0.channel_name;
   operate = other0.operate;
   bot_id = other0.bot_id;
+  game_id = other0.game_id;
   __isset = other0.__isset;
 }
 Player& Player::operator=(const Player& other1) {
@@ -209,6 +227,7 @@ Player& Player::operator=(const Player& other1) {
   channel_name = other1.channel_name;
   operate = other1.operate;
   bot_id = other1.bot_id;
+  game_id = other1.game_id;
   __isset = other1.__isset;
   return *this;
 }
@@ -222,6 +241,7 @@ void Player::printTo(std::ostream& out) const {
   out << ", " << "channel_name=" << to_string(channel_name);
   out << ", " << "operate=" << to_string(operate);
   out << ", " << "bot_id=" << to_string(bot_id);
+  out << ", " << "game_id=" << to_string(game_id);
   out << ")";
 }
 
