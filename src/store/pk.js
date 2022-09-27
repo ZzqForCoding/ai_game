@@ -21,6 +21,7 @@ export default {
     msgs: [],
     canSendMsg: false,
     codeOutMsg: "",
+    firstMove: null,
   },
   getters: {
   },
@@ -35,18 +36,26 @@ export default {
     updateStatus(state, status) {
         state.status = status;
     },
-    updateGame(state, game) {
+    updateSnakeGame(state, game) {
         state.gamemap = game.map;
-        state.a_id = game.a_id;
+        state.a_id = parseInt(game.a_id);
         state.a_sx = game.a_sx;
         state.a_sy = game.a_sy;
         state.a_language = game.a_language;
         state.a_is_robot = Boolean(game.a_is_robot);
-        state.b_id = game.b_id;
+        state.b_id = parseInt(game.b_id);
         state.b_sx = game.b_sx;
         state.b_sy = game.b_sy;
         state.b_language = game.b_language;
         state.b_is_robot = Boolean(game.b_is_robot);
+    },
+    updateGobangGame(state, game) {
+        state.a_id = parseInt(game.a_id);
+        state.b_id = parseInt(game.b_id);
+        state.firstMove = game.current_round;
+    },
+    updateFirstMove(state, firstMove) {
+        state.firstMove = firstMove;
     },
     updateGameObject(state, gameobject) {
         state.gameObject = gameobject;

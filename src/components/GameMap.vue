@@ -36,7 +36,10 @@ export default {
                     new SnakeGameMap(canvas.value.getContext('2d'), parent.value, store)
                 );
             } else if(props.game === 1) {
-                new GobangGameMap(canvas.value.getContext('2d'), parent.value);
+                store.commit(
+                    "updateGameObject",
+                    new GobangGameMap(canvas.value.getContext('2d'), parent.value, store)
+                );
             }
         });
 

@@ -15,7 +15,7 @@ export default {
     setup() {
         const myRoute = useRoute();
         const store = useStore();
-        
+
         $.ajax({
             url: "https://aigame.zzqahm.top/backend/player/qq/receive_code/", 
             type: "GET",

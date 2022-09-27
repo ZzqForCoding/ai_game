@@ -9,18 +9,21 @@
                     </div>
                 </template>
                 <el-table :data="players" style="width: 100%;" highlight-current-row max-height="720" table-layout="auto">
-                    <el-table-column label="玩家" align="center" >
+                    <el-table-column label="id" align="center" prop="rank" width="140" />
+                    <el-table-column label="玩家" align="center">
                         <template #default="scope">
                             <div class="userinfo">
                                 <el-avatar shape="square" size="small" :src="scope.row.photo" />
                                 <span class="player-card-username">
-                                    <el-link type="primary" >
+                                    <el-link type="primary">
                                         <span class="ranklist-username" style="margin-left: 8px;">
                                             {{ scope.row.username }}
                                         </span>
                                     </el-link>
                                     <span v-if="is_find && $store.state.user.username === scope.row.username" style="height: 15px;">
-                                        <el-icon :size="15"><Back /></el-icon>
+                                        <el-icon :size="15">
+                                            <Back />
+                                        </el-icon>
                                     </span>
                                 </span>
                             </div>
@@ -29,10 +32,10 @@
                     <el-table-column prop="rating" label="游戏" align="center" />
                 </el-table>
             </el-card>
-            <el-pagination 
-                class="player-pagination" 
-                background 
-                layout="total, prev, pager, next, jumper" 
+            <el-pagination
+                class="player-pagination"
+                background
+                layout="total, prev, pager, next, jumper"
                 :total="total_players"
                 :page-size="10"
                 v-model:current-page="current_page"
@@ -69,7 +72,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         players.value = JSON.parse(resp.players);
                         total_players.value = resp.players_count;
                     }
@@ -89,7 +92,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         current_page.value = resp.page;
                         pull_players(current_page.value);
                         is_find.value = true;
@@ -141,7 +144,8 @@ export default {
     margin-top: 20px;
 }
 
-.player-pagination /deep/.el-pagination__total, .player-pagination /deep/.el-pagination__jump {
+.player-pagination /deep/.el-pagination__total,
+.player-pagination /deep/.el-pagination__jump {
     color: white;
 }
 </style>

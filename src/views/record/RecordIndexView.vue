@@ -367,7 +367,7 @@ export default {
                 if(record.id === recordId) {
                     record_game.value = record.game_id;
                     store.commit("updateIsRecord", true);
-                    store.commit("updateGame", {
+                    store.commit("updateSnakeGame", {
                         map: stringTo2D(record.map),
                         a_id: record.a_id,
                         a_sx: record.a_sx,

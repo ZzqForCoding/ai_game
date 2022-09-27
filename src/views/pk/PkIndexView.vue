@@ -1,7 +1,7 @@
 <template>
     <el-row>
         <el-col :span="14" :offset="2">
-            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing' || game === 1" flag="pk" />
+            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing'" flag="pk" />
             <MatchGround v-if="$store.state.pk.status === 'matching'" :operate="operate" :botId="botId" />
         </el-col>
         
@@ -102,6 +102,7 @@ export default {
                 
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
+                    if(data.username === store.state.user.username) return;
                     if(data.event === "pk_message") {
                         if(!store.state.pk.canSendMsg) return;
                         store.commit("pushMsg", data.msg);
@@ -113,6 +114,42 @@ export default {
                         }
                         // const scroll = unref(msgScroll);
                         // scroll.setScrollTop(80000);
+                    } else if(data.event === "start_game") {
+                        round = 0;
+                        store.commit("updateOpponent", {
+                            username: data.username,
+                            photo: data.photo,
+                        });
+                        store.commit("updateGobangGame", data.game);
+                        store.commit("updateCanSendMsg", true);
+                        store.commit("updateIsMatch", false);
+                        setTimeout(() => {
+                            store.commit("updateStatus", "playing");
+                            store.commit("clearMatchTime", 0);
+                        }, 2000);
+                    } else if(data.event === "result") {
+                        console.log(parseInt(data['x']), parseInt(data['y']));
+                        store.commit("updateGameResult", {
+                            loser: data.loser,
+                            status: data.status,    // 超时还是非法操作
+                        });
+                        round = parseInt(data['round']);
+                        if(round === store.state.pk.a_id) {
+                            store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']))
+                            store.commit("updateFirstMove", store.state.pk.b_id);
+                        } else if(data['round'] === store.state.pk.b_id) {
+                            store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']))
+                            store.commit("updateFirstMove", store.state.pk.a_id);
+                        }
+                    } else if(data.event === "nextRound") {
+                        round = parseInt(data['round']);
+                        if(round === store.state.pk.a_id) {
+                            store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']))
+                            store.commit("updateFirstMove", store.state.pk.b_id);
+                        } else if(data['round'] === store.state.pk.b_id) {
+                            store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']))
+                            store.commit("updateFirstMove", store.state.pk.a_id);
+                        }
                     }
                 }
 
@@ -149,7 +186,7 @@ export default {
                             username: data.username,
                             photo: data.photo,
                         });
-                        store.commit("updateGame", data.game);
+                        store.commit("updateSnakeGame", data.game);
                         store.commit("updateCanSendMsg", true);
                         store.commit("updateIsMatch", false);
                         setTimeout(() => {
@@ -162,17 +199,21 @@ export default {
                         if(store.state.user.id === store.state.pk.a_id) {
                             snake0.set_direction(data.a_direction);
                             snake1.set_direction(data.b_direction);
-                            store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
+                            if(operate === 0) {
+                                store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
     compile: " + data.a_compile + "\n\
     output: " + data.a_output + "\n\
     result: " + data.a_result + "\n");
+                            }
                         } else {
                             snake0.set_direction(transDir(data.b_direction));
                             snake1.set_direction(transDir(data.a_direction));
-                            store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
+                            if(operate === 0) {
+                                store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
     compile: " + data.b_compile + "\n\
     output: " + data.b_output + "\n\
     result: " + data.b_result + "\n");
+                            }
                         }
                     } else if(data.event === "result") {
                         const game = store.state.pk.gameObject;
