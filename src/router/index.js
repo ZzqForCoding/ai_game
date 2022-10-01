@@ -4,6 +4,7 @@ import RankListIndexView from '@/views/ranklist/RankListIndexView'
 import RecordIndexView from '@/views/record/RecordIndexView'
 import RecordContentView from '@/views/record/RecordContentView'
 import DiscussionView from '@/views/discussion/DiscussionView'
+import FreshNewsView from '@/views/fresh_news/FreshNewsView'
 import MessageBoardView from '@/views/message_board/MessageBoardView'
 import UserBotIndexView from '@/views/user/bots/UserBotIndexView'
 import NotFound from '@/views/error/NotFound'
@@ -71,6 +72,16 @@ const routes = [
         meta: {
             requestAuth: true,
             description: '讨论区',
+            isRoot: true,
+        }
+    },
+    {
+        path: '/fresh_news/',
+        name: 'fresh_news_index',
+        component: FreshNewsView,
+        meta: {
+            requestAuth: true,
+            description: '新鲜事',
             isRoot: true,
         }
     },

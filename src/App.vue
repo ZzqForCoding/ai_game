@@ -46,16 +46,23 @@
                             <template #title>排行榜</template>
                         </el-menu-item>
                     </router-link>
+                    
+                    <router-link class="link-text" :to="{name: 'fresh_news_index'}">
+                        <el-menu-item index="4">
+                            <el-icon :size="30"><Promotion /></el-icon>
+                            <template #title>动态</template>
+                        </el-menu-item>
+                    </router-link>
 
                     <router-link class="link-text" :to="{name: 'discussion_index'}">
-                        <el-menu-item index="4">
+                        <el-menu-item index="5">
                             <el-icon :size="30"><Comment /></el-icon>
                             <template #title>讨论区</template>
                         </el-menu-item>
                     </router-link>
                     
                     <router-link class="link-text" :to="{name: 'message_board_index'}">
-                        <el-menu-item index="5">
+                        <el-menu-item index="6">
                             <el-icon :size="30">
                                 <Edit />
                             </el-icon>
