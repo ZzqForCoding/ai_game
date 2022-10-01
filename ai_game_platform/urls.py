@@ -21,4 +21,5 @@ urlpatterns = [
     path('backend/player/', include("player.urls.index")),
     path('backend/game/', include("game.urls.index")),
     path('backend/record/', include("record.urls.index")),
+    path('backend/playervoice/', include("player_voice.urls.index")),
 ]
