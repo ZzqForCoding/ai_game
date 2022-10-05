@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'record.apps.RecordConfig',
     'player_voice.apps.PlayerVoiceConfig',
     'channels',
+    'mptt',
 ]
 
 MIDDLEWARE = [
