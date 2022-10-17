@@ -318,7 +318,7 @@ class Game(threading.Thread):
                 if self.currentRound == self.playerA.id:
                     self.playerA.cells.append(self.nextCellA)
                 else:
-                    self.playerA.cells.append(self.nextCellA)
+                    self.playerB.cells.append(self.nextCellB)
         finally:
             self.lock.release()
         self.saveToDatabase()

@@ -164,5 +164,6 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
         elif event == 'pk_message':
             await self.send_message(data)
         elif event == "next_round":
+            print(data)
             await self.next_round(Cell(data['x'], data['y']))
 

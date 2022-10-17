@@ -69,7 +69,7 @@ class MessageHandler:
 if __name__ == '__main__':
     handler = MessageHandler()
     processor = Message.Processor(handler)
-    transport = TSocket.TServerSocket(host='172.17.0.4', port=9091)
+    transport = TSocket.TServerSocket(host='172.17.0.3', port=9091)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
