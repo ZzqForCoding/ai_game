@@ -77,23 +77,24 @@ export class GameMap extends AcGameObject {
         } else {
             this.ctx.canvas.focus();
             this.ctx.canvas.addEventListener("keydown", e => {
-                let d = -1;
+                let d = -1, dir;
                 if(e.key === 'w') d = 0;
                 else if(e.key === 'd') d = 1;
                 else if(e.key === 's') d = 2;
                 else if(e.key === 'a') d = 3;
                 if(this.store.state.user.id !== this.store.state.pk.a_id) {
-                    d = this.transDir(d);
+                    dir = this.transDir(d);
                 }
                 // else if(e.key === 'ArrowUp') snake1.set_direction(0);
                 // else if(e.key === 'ArrowRight') snake1.set_direction(1);
                 // else if(e.key === 'ArrowDown') snake1.set_direction(2);
                 // else if(e.key === 'ArrowLeft') snake1.set_direction(3);
             
-                if(d >= 0) {
+                if(dir >= 0) {
+                    this.store.commit("updateDir", d);
                     this.store.state.pk.socket.send(JSON.stringify({
                         event: "move",
-                        direction: d,
+                        direction: dir,
                     }));
                 }
             });

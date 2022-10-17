@@ -144,8 +144,8 @@ export default {
     margin-top: 20px;
 }
 
-.player-pagination /deep/.el-pagination__total,
-.player-pagination /deep/.el-pagination__jump {
+.player-pagination:deep(.el-pagination__total),
+.player-pagination:deep(.el-pagination__jump) {
     color: white;
 }
 </style>

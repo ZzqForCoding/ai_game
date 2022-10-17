@@ -9,7 +9,8 @@
 import { ref, onMounted } from 'vue';
 import ResultBoard from '@/components/ResultBoard.vue';
 import { GameMap as SnakeGameMap } from '@/assets/scripts/Snake/GameMap';
-import { GameMap as GobangGameMap } from '@/assets/scripts/gobang/GameMap';
+import { GameMap as GobangGameMap } from '@/assets/scripts/Gobang/GameMap';
+import { GameMap as ReversiGameMap } from '@/assets/scripts/Reversi/GameMap';
 import { useStore } from 'vuex';
 
 export default {
@@ -39,6 +40,11 @@ export default {
                 store.commit(
                     "updateGameObject",
                     new GobangGameMap(canvas.value.getContext('2d'), parent.value, store)
+                );
+            } else if(props.game === 3) {
+                store.commit(
+                    "updateGameObject",
+                    new ReversiGameMap(canvas.value.getContext('2d'), parent.value, store)
                 );
             }
         });

@@ -22,6 +22,7 @@ export default {
     canSendMsg: false,
     codeOutMsg: "",
     firstMove: null,
+    dir: -1,
   },
   getters: {
   },
@@ -79,7 +80,10 @@ export default {
     },
     clearCodeOutMsg(state) {
         state.codeOutMsg = "";
-    }
+    },
+    updateDir(state, dir) {
+        state.dir = dir;
+    },
   },
   actions: {
  

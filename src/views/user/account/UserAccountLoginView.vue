@@ -225,7 +225,7 @@ export default {
     cursor: pointer;
 }
 
-.third-login /deep/.el-tooltip__trigger {
+.third-login:deep(.el-tooltip__trigger) {
     margin: 0 0 !important;
 }
 </style>

@@ -174,6 +174,10 @@ export default {
         getFreshNews();
 
         const postFreshNews = (msg, flag) => {
+            if(msg.trim() === "") {
+                ElMessage.error("please input your mood~");
+                return;
+            }
             $.ajax({
                 url: "https://aigame.zzqahm.top/backend/playervoice/freshnews/post/",
                 headers: {
@@ -218,7 +222,7 @@ export default {
                 setTimeout(() => {
                     let element = document.getElementsByClassName('post-comment-input' + id)[0];
                     element.classList.add('post-comment-input-animation');
-                }, 10);
+                }, 1);
             }
         };
 
@@ -245,7 +249,7 @@ export default {
 .post-a-fresh-news {
     display: flex;
 }
-.post-a-fresh-news /deep/.el-textarea__inner {
+.post-a-fresh-news:deep(.el-textarea__inner) {
     background-color: #FFFFFF;
     box-shadow: 0 0 0 0;
 }
@@ -325,12 +329,17 @@ export default {
 
 .post-comment {
     margin: 10px 20px;
-    height: 60px;
+    height: auto;
 }
 
 .post-comment .btn {
     float: right;
     margin-bottom: 5px;
+}
+
+.post-comment textarea {
+    transition: width 2s;
+    transition-delay: .1s;
 }
 
 .post-comment-input-animation {
@@ -340,7 +349,6 @@ export default {
     resize: vertical;
     color: rgba(0, 0, 0, 0.87);
     box-shadow: 0 0 0 0 transparent inset;
-    transition: height 0.6s;
     font-size: 1em;
     line-height: 1.2857;
     border-radius: 4px;
@@ -415,7 +423,7 @@ export default {
     text-decoration: none;
 }
 
-.el-card /deep/  .el-card__body  {
+.el-card:deep(.el-card__body) {
     padding: 0 0 !important;
 }
 

@@ -3,7 +3,7 @@
         <el-col :span="6" :offset="9">
             <div class="match-time-text">
                 匹配时间：
-                <span class="match-time">{{ $store.state.utils.matchTime }}</span>
+                <span class="match-time">{{ $store.state.utils.matchTime }}s</span>
             </div>
         </el-col>
         <el-col :span="9" :offset="2">

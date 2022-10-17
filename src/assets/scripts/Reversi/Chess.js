@@ -19,7 +19,7 @@ export class Chess extends AcGameObject {
 
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.arc(this.r * L, this.c * L, L * 0.36, 0, Math.PI * 2);
+        ctx.arc(this.r * L + L / 2.0, this.c * L + L / 2.0, L * 0.3, 0, Math.PI * 2);
         ctx.fill();
     }
 }

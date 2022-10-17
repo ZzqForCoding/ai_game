@@ -67,7 +67,7 @@
                 <el-table :data="records" style="width: 100%;" highlight-current-row max-height="720" table-layout="auto">
                     <el-table-column prop="createtime" align="center" label="对局时间" />
                     <el-table-column prop="game" label="游戏" align="center" width="190" />
-                    <el-table-column label="玩家" align="center" width="220">
+                    <el-table-column label="玩家" align="center" width="250">
                         <template #default="scope">
                             <div class="player-container">
                                 <div class="player-card">
@@ -89,6 +89,9 @@
                                         +0
                                     </span>
                                 </div>
+                                <span class="player-desb">
+                                    VS
+                                </span>
                                 <div class="player-card">
                                     <el-avatar shape="square" size="small" :src="scope.row.b_photo" />
                                     <span class="player-card-username">
@@ -439,7 +442,6 @@ export default {
 .player-container {
     display: flex;
     align-items: center;
-    width: 200px;
     justify-content: space-around;
 }
 
@@ -451,6 +453,11 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-around;
+}
+
+.player-desb {
+    color: #FF0033;
+    font-size: 12px;
 }
 
 .player-result {
@@ -476,19 +483,19 @@ export default {
     margin-top: 20px;
 }
 
-.record-pagination /deep/.el-pagination__total, .record-pagination /deep/.el-pagination__jump {
+.record-pagination:deep(.el-pagination__total), .record-pagination:deep(.el-pagination__jump) {
     color: white;
 }
 
-.message /deep/.el-card__body {
+.message:deep(.el-card__body) {
     padding: 0px 0px !important;
 }
 
-.message /deep/.el-card__header {
+.message:deep(.el-card__header) {
     padding: 10px 10px !important;
 }
 
-.messages /deep/.el-card__body {
+.messages:deep(.el-card__body) {
     display: flex;
     flex-direction: column;
     padding: 5px 10px !important;
@@ -506,7 +513,7 @@ export default {
 .messages .message-content .username {
     color: grey;
     font-size: 8px;
-    line-height: 15px;
+    line-height: 14px;
     height: 15px;
     margin-bottom: 3px;
     margin-left: 6px;
@@ -521,15 +528,15 @@ export default {
     margin: 0 4px;
 }
 
-.message /deep/.messages {
-    height: 320px;
+.message:deep(.messages) {
+    height: 150px;
 }
 
-.message /deep/.el-card__body {
-    height: 480px !important;
+.message:deep(.el-card__body) {
+    height: 280px !important;
 }
 
-.message-send /deep/.el-card__body {
+.message-send:deep(.el-card__body) {
     padding: 0px 0px !important;
 }
 
