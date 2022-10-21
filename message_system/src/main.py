@@ -25,6 +25,8 @@ class MessageHandler:
                 type = "start_gobang_game"
             elif info['game_id'] == 2:
                 type = "start_snake_game"
+            elif info['game_id'] == 3:
+                type = "start_reversi_game"
             players = []
             for p in ps:
                 async_to_sync(channel_layer.group_add)(room_name, p['channel_name'])
@@ -69,7 +71,7 @@ class MessageHandler:
 if __name__ == '__main__':
     handler = MessageHandler()
     processor = Message.Processor(handler)
-    transport = TSocket.TServerSocket(host='172.17.0.3', port=9091)
+    transport = TSocket.TServerSocket(host='172.17.0.2', port=9091)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 

@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from player.consumers.game.utils.gobang.gobang_player import GobangPlayer
+from player.consumers.game.utils.reversi.reversi_player import ReversiPlayer
 from player.models.player import Player as Player_Model
 from record.models.record import Record
 from game.models.game import Game as GameModel
@@ -10,11 +10,16 @@ import time
 import copy
 
 class Game(threading.Thread):
+    dx = [-1, 0, 1, 0]
+    dy = [0, 1, 0, -1]
+
     def __init__(self, rows, cols, idA, botA, idB, botB, room_name):
         threading.Thread.__init__(self)
         self.rows = rows
         self.cols = cols
         self.g = [[0 for i in range(self.cols)] for i in range(self.rows)]
+        self.aCnt = 2
+        self.bCnt = 2
 
         self.botIdA = -1
         self.languageA = ""
@@ -32,13 +37,13 @@ class Game(threading.Thread):
             self.languageB = botB.language
             self.botCodeB = botB.content
 
-        self.playerA = GobangPlayer(idA, self.botIdA, self.languageA, self.botCodeA, [])
-        self.playerB = GobangPlayer(idB, self.botIdB, self.languageB, self.botCodeB, [])
+        self.playerA = ReversiPlayer(idA, self.botIdA, self.languageA, self.botCodeA, [])
+        self.playerB = ReversiPlayer(idB, self.botIdB, self.languageB, self.botCodeB, [])
 
         self.nextCellA = None
         self.nextCellB = None
         self.lock = threading.Lock()
-        self.status = "playing" # waiting -> playing -> overtime/illegal/A win -> end
+        self.status = "playing"
         self.loser = ""
         self.room_name = room_name
         self.channel_layer = get_channel_layer()
@@ -51,6 +56,7 @@ class Game(threading.Thread):
             self.nextCellA = nextCellA
         finally:
             self.lock.release()
+        self.aCnt += 1
 
     def setNextCellB(self, nextCellB):
         self.lock.acquire()
@@ -58,6 +64,7 @@ class Game(threading.Thread):
             self.nextCellB = nextCellB
         finally:
             self.lock.release()
+        self.bCnt += 1
 
     def nextStep(self):
         if self.isStart:
@@ -81,18 +88,20 @@ class Game(threading.Thread):
         return False
 
     def check_valid(self, cell):
-        if cell.x < 1 or cell.x > self.rows - 1 or cell.y < 1 or cell.y > self.cols - 1:
+        if cell.x < 0 or cell.x >= self.rows or cell.y < 0 or cell.y >= self.cols:
             return False
         if self.g[cell.x][cell.y] != 0:
             return False
         return True
 
-    # 判断是否走到非法区域和已下棋区域，并判断是否赢了游戏
     def judge(self):
         cell = None
+        enemy = -1
         if self.currentRound == self.playerA.id:
+            enemy = self.playerB.id
             cell = self.playerA.cells[-1]
         elif self.currentRound == self.playerB.id:
+            enemy = self.playerA.id
             cell = self.playerB.cells[-1]
 
         valid = self.check_valid(cell)
@@ -101,122 +110,23 @@ class Game(threading.Thread):
             self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
             return
 
-        # 标记有无输
-        flag = False
-
-        # 上
-        up = 0
-        for i in range(1, 5):
-            if self.g[cell.x][cell.y + i] == self.g[cell.x][cell.y]:
-                up += 1
-            else:
-                break
-        if up == 4:
-            flag = True
-            return
-
-        # 下
-        d = 0
-        for i in range(1, 5):
-            if self.g[cell.x][cell.y - i] == self.g[cell.x][cell.y]:
-                d += 1
-            else:
-                break
-
-        if d == 4:
-            flag = True
-            return
-
-        if up + d == 4:
-            flag = True
-            return
-
-        # 左
-        l = 0
-        for i in range(1, 5):
-            if self.g[cell.x - i][cell.y] == self.g[cell.x][cell.y]:
-                l += 1
-            else:
-                break
-
-        if l == 4:
-            flag = True
-            return
-
-        # 右
-        r = 0
-        for i in range(1, 5):
-            if self.g[cell.x + i][cell.y] == self.g[cell.x][cell.y]:
-                r += 1
-            else:
-                break
-
-        if r == 4:
-            flag = True
-            return
-
-        if l + r == 4:
-            flag = True
-            return
-
-        # 左下
-        ld = 0
-        for i in range(1, 5):
-            if self.g[cell.x - i][cell.y - i] == self.g[cell.x][cell.y]:
-                ld += 1
-            else:
-                break
-
-        if ld == 4:
-            flag = True
-            return
-
-        # 右下
-        rd = 0
-        for i in range(1, 5):
-            if self.g[cell.x + i][cell.y - i] == self.g[cell.x][cell.y]:
-                rd += 1
-            else:
-                break
-        if rd == 4:
-            flag = True
-            return
-
-        # 左上
-        lu = 0
-        for i in range(1, 5):
-            if self.g[cell.x - i][cell.y + i] == self.g[cell.x][cell.y]:
-                lu += 1
-            else:
-                break
-
-        if lu == 4:
-            flag = True
-            return
-
-        # 右上
-        ru = 0
-        for i in range(1, 5):
-            if self.g[cell.x + i][cell.y + i] == self.g[cell.x][cell.y]:
-                ru += 1
-            else:
-                break
-
-        if ru == 4:
-            flag = True
-            return
-
-        if ld + ru == 4:
-            flag = True
-            return
-
-        if lu + rd == 4:
-            flag = True
-            return
-
-        if flag:
-            self.status = 'A Win' if self.currentRound == self.playerA.id else 'B Win'
-            self.loser = 'B' if self.currentRound == self.playerA.id else 'A'
+        # 变换操作
+        for i in range(4):
+            tx = cell.x
+            ty = cell.y
+            while self.g[Game.dx[i] + tx][Game.dy[i] + ty] == enemy:
+                tx += Game.dx[i]
+                ty += Game.dy[i]
+            if tx != cell.x or ty != cell.y and self.g[Game.dx[i] + tx][Game.dy[i] + ty] == self.currentRound:
+                re_dir = i ^ 2
+                if self.currentRound == self.playerA.id:
+                    self.aCnt += abs(tx - cell.x) + abs(ty - cell.y)
+                elif self.currentRound == self.playerB.id:
+                    self.bCnt += abs(tx - cell.x) + abs(ty - cell.y)
+                while tx != cell.x or ty != cell.y:
+                    self.g[tx][ty] = self.currentRound
+                    tx += Game.dx[re_dir]
+                    ty += Game.dy[re_dir]
 
     def sendAllMessage(self, message):
         message['type'] = "group_send_event"
@@ -244,7 +154,7 @@ class Game(threading.Thread):
         self.updatePlayerRating(self.playerA, ratingA)
         self.updatePlayerRating(self.playerB, ratingB)
 
-        game = GameModel.objects.get(name="五子棋")
+        game = GameModel.objects.get(name="黑白棋")
         record = Record.objects.create(
             game = game,
             a_id = self.playerA.id,
@@ -258,7 +168,6 @@ class Game(threading.Thread):
             loser = self.loser
         )
         record.save()
-
 
     def sendNextRound(self):
         self.lock.acquire()
@@ -285,7 +194,7 @@ class Game(threading.Thread):
         resp = {
             'event': "result",
             'loser': self.loser,
-            'status': self.status
+            'status': self.status,
         }
         self.lock.acquire()
         try:
@@ -293,7 +202,7 @@ class Game(threading.Thread):
             ncb = copy.deepcopy(self.nextCellB)
         finally:
             self.lock.release()
-        if self.status == "illegal":
+        if self.status == 'illegal':
             resp['x'] = nca.x if self.currentRound == self.playerA.id else ncb.x
             resp['y'] = nca.y if self.currentRound == self.playerA.id else ncb.y
             resp['round'] = self.currentRound
@@ -301,11 +210,9 @@ class Game(threading.Thread):
         self.sendAllMessage(resp)
         cache.delete_pattern(self.playerA.id)
         cache.delete_pattern(self.playerB.id)
-        # del MultiPlayerGobangGame.users[self.playerA.id]
-        # del MultiPlayerGobangGame.users[self.playerB.id]
 
     def run(self):
-        for i in range(400):
+        for i in range(60):
             if self.nextStep():
                 self.judge()
                 if self.nextCellA != None:
@@ -322,3 +229,10 @@ class Game(threading.Thread):
                 self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
                 self.sendResult()
                 break
+        if self.aCnt > self.bCnt:
+            self.status = "A Win"
+            self.loser = "B"
+        elif self.bCnt > self.aCnt:
+            self.status = "B Win"
+            self.loser = "A"
+        self.sendResult()

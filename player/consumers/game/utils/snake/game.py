@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from player.consumers.game.utils.snake.player import Player
+from player.consumers.game.utils.snake.snake_player import SnakePlayer
 from player.models.player import Player as Player_Model
 from record.models.record import Record
 from game.models.game import Game as GameModel
@@ -20,8 +20,8 @@ from thrift.protocol import TBinaryProtocol
 # 一局游戏一个线程
 class Game(threading.Thread):
     # 上右下左四个方向偏移量
-    dx = [-1, 0, 1, 0];
-    dy = [0, 1, 0, -1];
+    dx = [-1, 0, 1, 0]
+    dy = [0, 1, 0, -1]
 
     def __init__(self, rows, cols, inner_walls_count, idA, botA, idB, botB, room_name):
         threading.Thread.__init__(self)
@@ -46,8 +46,8 @@ class Game(threading.Thread):
             self.languageB = botB.language
             self.botCodeB = botB.content
 
-        self.playerA = Player(idA, self.botIdA, self.languageA, self.botCodeA, self.rows - 2, 1, [])
-        self.playerB = Player(idB, self.botIdB, self.languageB, self.botCodeB, 1, self.cols - 2, [])
+        self.playerA = SnakePlayer(idA, self.botIdA, self.languageA, self.botCodeA, self.rows - 2, 1, [])
+        self.playerB = SnakePlayer(idB, self.botIdB, self.languageB, self.botCodeB, 1, self.cols - 2, [])
 
         self.nextStepA = None
         self.compileA = None
@@ -123,21 +123,21 @@ class Game(threading.Thread):
         self.lock.acquire()
         try:
             self.nextStepA = nextStepA
-            self.compileA = compile
-            self.outputA = output
-            self.resultA = result
         finally:
             self.lock.release()
+        self.compileA = compile
+        self.outputA = output
+        self.resultA = result
 
     def setNextStepB(self, nextStepB, compile, output, result):
         self.lock.acquire()
         try:
             self.nextStepB = nextStepB
-            self.compileB = compile
-            self.outputB = output
-            self.resultB = result
         finally:
             self.lock.release()
+        self.compileB = compile
+        self.outputB = output
+        self.resultB = result
 
     def getInput(self, player):
         me = None
@@ -244,28 +244,30 @@ class Game(threading.Thread):
     def sendMove(self):
         self.lock.acquire()
         try:
-            resp = {
-                'event': "move",
-                'a_direction': self.nextStepA,
-                'a_compile': self.compileA,
-                'a_output': self.outputA,
-                'a_result': self.resultA,
-                'b_direction': self.nextStepB,
-                'b_compile': self.compileB,
-                'b_output': self.outputB,
-                'b_result': self.resultB
-            }
-            self.sendAllMessage(resp)
+            nsa = self.nextStepA
+            nsb = self.nextStepB
             self.nextStepA = None
-            self.compileA = None
-            self.outputA = None
-            self.resultA = None
             self.nextStepB = None
-            self.compileB = None
-            self.outputB = None
-            self.resultB = None
         finally:
             self.lock.release()
+        resp = {
+            'event': "move",
+            'a_direction': nsa,
+            'a_compile': self.compileA,
+            'a_output': self.outputA,
+            'a_result': self.resultA,
+            'b_direction': nsb,
+            'b_compile': self.compileB,
+            'b_output': self.outputB,
+            'b_result': self.resultB
+        }
+        self.sendAllMessage(resp)
+        self.compileA = None
+        self.outputA = None
+        self.resultA = None
+        self.compileB = None
+        self.outputB = None
+        self.resultB = None
 
     # 发送移动结果
     def sendResult(self):
@@ -276,21 +278,25 @@ class Game(threading.Thread):
         }
         self.lock.acquire()
         try:
-            if self.status == 'illegal':
-                resp['a_direction'] = self.nextStepA
-                self.playerA.steps.append(self.nextStepA)
-                resp['b_direction'] = self.nextStepB
-                self.playerB.steps.append(self.nextStepB)
-
-            else:
-                if self.nextStepA != None:
-                    resp['a_direction'] = self.nextStepA
-                    self.playerA.steps.append(self.nextStepA)
-                if self.nextStepB != None:
-                    resp['b_direction'] = self.nextStepB
-                    self.playerB.steps.append(self.nextStepB)
+            nsa = self.nextStepA
+            nsb = self.nextStepB
         finally:
             self.lock.release()
+
+        if self.status == 'illegal':
+            resp['a_direction'] = nsa
+            self.playerA.steps.append(nsa)
+            resp['b_direction'] = nsb
+            self.playerB.steps.append(nsb)
+
+        elif self.status == "overtime":
+            if nsa != None:
+                resp['a_direction'] = nsa
+                self.playerA.steps.append(nsa)
+            if nsb != None:
+                resp['b_direction'] = nsb
+                self.playerB.steps.append(nsb)
+
         self.saveToDataBase()
         self.sendAllMessage(resp)
         cache.delete_pattern(self.playerA.id)
@@ -312,14 +318,17 @@ class Game(threading.Thread):
                 self.status = "overtime"
                 self.lock.acquire()
                 try:
-                    if self.nextStepA == None and self.nextStepB == None:
-                        self.loser = "all"
-                    elif self.nextStepA == None:
-                        self.loser = "A"
-                    else:
-                        self.loser = "B"
+                    nsa = self.nextStepA
+                    nsb = self.nextStepB
                 finally:
                     self.lock.release()
+                if nsa == None and nsb == None:
+                    self.loser = "all"
+                elif nsa == None:
+                    self.loser = "A"
+                else:
+                    self.loser = "B"
+
                 self.sendResult()
                 break
 

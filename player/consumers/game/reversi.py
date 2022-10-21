@@ -2,10 +2,11 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 import json
 from django.core.cache import cache
+from django.contrib.auth.models import User
 from player.models.player import Player
 from player.models.bot import Bot
 from player.consumers.game.utils.cell import Cell
-from player.consumers.game.utils.gobang.game import Game
+from player.consumers.game.utils.reversi.game import Game
 
 from .thrift.match_client.match.ttypes import Player as PlayerInfo
 from .thrift.match_client.match import Match
@@ -14,17 +15,17 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-class MultiPlayerGobangGame(AsyncWebsocketConsumer):
+class MultiPlayerReversiGame(AsyncWebsocketConsumer):
     users = {}
 
     async def connect(self):
         user = self.scope['user']
         if user.is_authenticated:
             await self.accept()
+            self.room_name = None
             self.user = user
-            self.game_id = 1
-            MultiPlayerGobangGame.users[self.user.id] = self
-            print("%s accept" % (self.user.username))
+            self.game_id = 3
+            MultiPlayerReversiGame.users[self.user.id] = self
         else:
             await self.close()
 
@@ -39,6 +40,7 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
         transport = TTransport.TBufferedTransport(transport)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
         client = Match.Client(protocol)
+
         transport.open()
 
         def db_get_player():
@@ -47,7 +49,7 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.photo, player.rating, self.channel_name, 1, -1, self.game_id)
+                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']), self.game_id)
 
         client.add_player(player_info, "")
         cache.set(self.user.id, True, 3600)
@@ -68,13 +70,13 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.photo, player.rating, self.channel_name, 1, -1, self.game_id)
+                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']), self.game_id)
         client.remove_player(player_info, "")
         cache.delete_pattern(self.user.id)
 
         transport.close()
 
-    async def start_gobang_game(self, data):
+    async def start_reversi_game(self, data):
         self.room_name = data['room_name']
         if self.user.id == data['a_id']:
             a_id = data['a_id']
@@ -89,17 +91,17 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
                 return Bot.objects.get(id=id)
 
             botA = None
-            if data["a_operate"] == 0:
+            if data['a_operate'] == 0:
                 botA = await database_sync_to_async(db_get_bot)(int(data['a_bot_id']))
 
             botB = None
             if data['b_operate'] == 0:
                 botB = await database_sync_to_async(db_get_bot)(int(data['b_bot_id']))
 
-            game = Game(17, 17, a_id, botA, b_id, botB, room_name)
+            game = Game(8, 8, a_id, botA, b_id, botB, room_name)
             game.start()
-            MultiPlayerGobangGame.users[a_id].game = game
-            MultiPlayerGobangGame.users[b_id].game = game
+            MultiPlayerReversiGame.users[a_id].game = game
+            MultiPlayerReversiGame.users[b_id].game = game
 
             resp = {
                 'a_id': game.playerA.id,
@@ -129,24 +131,10 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
                 }
             )
 
-    async def send_message(self, data):
-        await self.channel_layer.group_send(
-            self.room_name,
-            {
-                'type': "group_send_event",
-                'event': "pk_message",
-                'msg': {
-                    'username': data['username'],
-                    'photo': data['photo'],
-                    'text': data['text']
-                }
-            }
-        )
-
     async def next_round(self, cell):
-        if MultiPlayerGobangGame.users[self.user.id].game.playerA.id == self.user.id and MultiPlayerGobangGame.users[self.user.id].game.currentRound == self.user.id:
+        if MultiPlayerReversiGame.users[self.user.id].game.playerA.id == self.user.id and MultiPlayerReversiGame.users[self.user.id].game.currentRound == self.user.id:
             self.game.setNextCellA(cell)
-        elif MultiPlayerGobangGame.users[self.user.id].game.playerB.id == self.user.id and MultiPlayerGobangGame.users[self.user.id].game.currentRound == self.user.id:
+        elif MultiPlayerReversiGame.users[self.user.id].game.playerB.id == self.user.id and MultiPlayerReversiGame.users[self.user.id].game.currentRound == self.user.id:
             self.game.setNextCellB(cell)
 
     async def group_send_event(self, data):
@@ -161,5 +149,5 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
             await self.stop_match(data)
         elif event == 'pk_message':
             await self.send_message(data)
-        elif event == "next_round":
+        elif event == 'next_round':
             await self.next_round(Cell(data['x'], data['y']))

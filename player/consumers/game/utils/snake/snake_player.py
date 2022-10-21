@@ -1,11 +1,9 @@
-from player.consumers.game.utils.snake.cell import Cell
+from player.consumers.game.utils.player import Player
+from player.consumers.game.utils.cell import Cell
 
-class Player:
+class SnakePlayer(Player):
     def __init__(self, id, botId, language, botCode, sx, sy, steps):
-        self.id = id
-        self.botId = botId
-        self.language = language
-        self.botCode = botCode
+        super().__init__(id, botId, language, botCode)
         # 蛇头
         self.sx = sx
         self.sy = sy

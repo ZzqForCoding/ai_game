@@ -1,9 +1,9 @@
-from player.consumers.game.utils.gobang.cell import Cell
+from player.consumers.game.utils.player import Player
 import json
 
-class Player:
-    def __init__(self, id, cells):
-        self.id = id
+class GobangPlayer(Player):
+    def __init__(self, id, botId, language, botCode, cells):
+        super().__init__(id, botId, language, botCode)
         self.cells = cells
 
     def getCellsString(self):
