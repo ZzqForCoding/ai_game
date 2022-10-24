@@ -1,7 +1,7 @@
 <template>
     <el-row>
         <el-col :span="14" :offset="2">
-            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing' || game === 3" flag="pk" />
+            <PlayGround :game="game" v-if="$store.state.pk.status === 'playing'" flag="pk" />
             <MatchGround v-if="$store.state.pk.status === 'matching'" :operate="operate" :botId="botId" />
         </el-col>
 
@@ -117,7 +117,7 @@ export default {
                             username: data.username,
                             photo: data.photo,
                         });
-                        store.commit("updateGobangGame", data.game);
+                        store.commit("updateChessGame", data.game);
                         store.commit("updateCanSendMsg", true);
                         store.commit("updateIsMatch", false);
                         setTimeout(() => {
@@ -125,7 +125,6 @@ export default {
                             store.commit("clearMatchTime", 0);
                         }, 2000);
                     } else if (data.event === "result") {
-                        console.log(parseInt(data['x']), parseInt(data['y']));
                         store.commit("updateGameResult", {
                             loser: data.loser,
                             status: data.status,    // 超时还是非法操作
@@ -217,7 +216,6 @@ export default {
                     } else if (data.event === "result") {
                         const game = store.state.pk.gameObject;
                         const [snake0, snake1] = game.snakes;
-
                         if (data.loser === "all") {
                             snake0.status = "die", snake1.status = "die";
                         } else if (data.loser === "A" && store.state.user.id === store.state.pk.a_id || data.loser === "B" && store.state.user.id === store.state.pk.b_id) {
@@ -251,6 +249,78 @@ export default {
             onUnmounted(() => {
                 socket.close();
                 store.commit("updateStatus", "matching");
+            });
+        } else if(game === 3) {
+            onMounted(() => {
+                socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/reversi/?token=" + store.state.user.access;
+                socket = new WebSocket(socketUrl);
+
+                socket.onopen = () => {
+                    console.log("connected!");
+                    store.commit("updateSocket", socket);
+                    store.commit("updateCanSendMsg", true);
+                };
+
+                socket.onmessage = msg => {
+                    const data = JSON.parse(msg.data);
+                    if (data.username === store.state.user.username) return;
+                    if (data.event === "pk_message") {
+                        if (!store.state.pk.canSendMsg) return;
+                        store.commit("pushMsg", data.msg);
+                        if (data.msg.username === store.state.user.username) {
+                            store.commit("updateCanSendMsg", false);
+                            setTimeout(() => {
+                                store.commit("updateCanSendMsg", true);
+                            }, 1500);
+                        }
+                        // const scroll = unref(msgScroll);
+                        // scroll.setScrollTop(80000);
+                    } else if (data.event === "start_game") {
+                        round = 0;
+                        store.commit("updateOpponent", {
+                            username: data.username,
+                            photo: data.photo,
+                        });
+                        // 修改函数名
+                        store.commit("updateChessGame", data.game);
+                        store.commit("updateCanSendMsg", true);
+                        store.commit("updateIsMatch", false);
+                        setTimeout(() => {
+                            store.commit("updateStatus", "playing");
+                            store.commit("clearMatchTime", 0);
+                        }, 2000);
+                    } else if (data.event === "result") {
+                        store.commit("updateGameResult", {
+                            loser: data.loser,
+                            status: data.status,    // 超时还是非法操作
+                        });
+                        round = parseInt(data['round']);
+                        if (round === store.state.pk.a_id) {
+                            store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']));
+                        } else if (data['round'] === store.state.pk.b_id) {
+                            store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
+                        }
+                    } else if (data.event === "nextRound") {
+                        round = parseInt(data['round']);
+                        if (round === store.state.pk.a_id) {
+                            store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']));
+                            store.state.pk.gameObject.adviseChess("black");
+                            store.commit("updateFirstMove", store.state.pk.b_id);
+                        } else if (data['round'] === store.state.pk.b_id) {
+                            store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
+                            store.state.pk.gameObject.adviseChess("white");
+                            store.commit("updateFirstMove", store.state.pk.a_id);
+                        }
+                    } else if (data.event === "toggleRound") {
+                        setTimeout(() => {
+                            store.commit("updateFirstMove", store.state.pk.firstMove === store.state.pk.a_id ? store.state.pk.b_id : store.state.pk.a_id);
+                        }, 1000);
+                    }
+                }
+
+                socket.onclose = () => {
+                    console.log("disconnected!");
+                }
             });
         }
 

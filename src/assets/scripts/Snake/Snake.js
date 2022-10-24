@@ -23,7 +23,7 @@ export class Snake extends AcGameObject {
         this.eps = 1e-2;
 
         this.eye_direction = 0;
-        if(this.id === 1) this.eye_direction = 2;   // 左下角的蛇初始朝上，右上角的蛇初始朝下 
+        if(this.id === this.gamemap.store.state.pk.b_id) this.eye_direction = 2;   // 左下角的蛇初始朝上，右上角的蛇初始朝下 
 
         this.eye_dx = [    // 蛇眼睛不同方向的x偏移量
             [-1, 1],

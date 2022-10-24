@@ -7,18 +7,15 @@
                     <img :src="$store.state.user.photo" alt="" style="user-select: none;" class="photo">
                     <span class="username">{{ $store.state.user.username }}</span>
                 </div>
-                <div class="chess"
-                    :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: white;' : 'background-color: black;'"
-                    v-if="game === 1">
-                </div>
-                <div class="body"
-                    :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: #4876EC;' : 'background-color: #F94848;'"
-                    v-if="game === 2">
+                <div class="chess" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: white;' : 'background-color: black;'" v-if="game === 1" />
+                <div class="body" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: #4876EC;' : 'background-color: #F94848;'" v-if="game === 2">
                     <div class="eye" />
                     <div class="eye" />
                 </div>
-                <div
-                    v-if="$store.state.pk.a_id === $store.state.user.id ? $store.state.pk.a_is_robot : $store.state.pk.b_is_robot">
+                <div v-if="game === 3" class="chess" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: white;' : 'background-color: black;'" />
+                <div  v-if="game === 3 && $store.state.pk.a_id === $store.state.user.id" style="color: white; font-size: 18px; font-weight: 600;">白子：{{ $store.state.pk.aCnt }}</div>
+                <div  v-if="game === 3 && $store.state.pk.b_id === $store.state.user.id" style="color: black; font-size: 18px; font-weight: 600;">黑子：{{ $store.state.pk.bCnt }}</div>
+                <div v-if="$store.state.pk.a_id === $store.state.user.id ? $store.state.pk.a_is_robot : $store.state.pk.b_is_robot">
                     <svg t="1662877386013" class="icon" viewBox="0 0 1280 1024" version="1.1"
                         xmlns="http://www.w3.org/2000/svg" p-id="2479" width="30" height="30">
                         <path
@@ -46,7 +43,7 @@
                 >
                 </div>
             </div>
-            <div class="direction-msg" v-if="game === 2">
+            <div class="direction-msg" v-else-if="game === 2">
                 <span>direction</span>
                 <img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/501/none.png" alt=""
                     v-if="$store.state.pk.dir === -1">
@@ -57,6 +54,15 @@
                 <img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/501/down.png" alt=""
                     v-else-if="$store.state.pk.dir === 2">
                 <img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/501/left.png" alt="" v-else>
+            </div>
+            <div class="round-msg" v-else-if="game === 3">
+                <span>round</span>
+                <img src="https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/501/none.png" alt=""
+                    v-if="$store.state.pk.firstMove === null">
+                <div class="chess" v-else
+                    :style="$store.state.pk.a_id === $store.state.pk.firstMove ? 'background-color: white;' : 'background-color: black;'"
+                >
+                </div>
             </div>
             <div class="userinfo-container">
                 <div v-if="$store.state.pk.a_id === $store.state.user.id && $store.state.pk.b_is_robot">
@@ -69,8 +75,7 @@
                         {{ $store.state.pk.a_language }}
                     </el-tag>
                 </div>
-                <div
-                    v-if="$store.state.pk.a_id === $store.state.user.id ? $store.state.pk.b_is_robot : $store.state.pk.a_is_robot">
+                <div v-if="$store.state.pk.a_id === $store.state.user.id ? $store.state.pk.b_is_robot : $store.state.pk.a_is_robot">
                     <svg t="1662877386013" class="icon" viewBox="0 0 1280 1024" version="1.1"
                         xmlns="http://www.w3.org/2000/svg" p-id="2479" width="30" height="30">
                         <path
@@ -78,23 +83,22 @@
                             fill="#1296db" p-id="2480"></path>
                     </svg>
                 </div>
-                <div class="chess"
-                    :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: black;' : 'background-color: white;'"
-                    v-if="game === 1">
+                <div class="chess" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: black;' : 'background-color: white;'" v-if="game === 1">
                 </div>
-                <div class="body"
-                    :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: #F94848;' : 'background-color: #4876EC;'"
-                    v-if="game === 2">
+                <div class="body" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: #F94848;' : 'background-color: #4876EC;'" v-if="game === 2">
                     <div class="eye" />
                     <div class="eye" />
                 </div>
+                <div v-if="game === 3" class="chess" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: black;' : 'background-color: white;'" />
+                <div v-if="game === 3 && $store.state.pk.a_id === $store.state.user.id" style="color: white; font-size: 18px; font-weight: 600;">黑子：{{ $store.state.pk.bCnt }}</div>
+                <div v-if="game === 3 && $store.state.pk.b_id === $store.state.user.id" style="color: black; font-size: 18px; font-weight: 600;">白子：{{ $store.state.pk.aCnt }}</div>
                 <div class="user-profile">
                     <img :src="$store.state.pk.opponent_photo" alt="" style="user-select: none;" class="photo">
                     <span class="username">{{ $store.state.pk.opponent_username }}</span>
                 </div>
             </div>
         </div>
-        <div v-else-if="flag === 'record'" class="userinfo">
+        <div v-else class="userinfo">
             <div class="userinfo-container">
                 <div class="user-profile">
                     <img :src="$store.state.record.a_photo" alt="" style="user-select: none;" class="photo">
@@ -106,6 +110,8 @@
                     <div class="eye" />
                     <div class="eye" />
                 </div>
+                <div v-if="game === 3" class="chess" style="background-color: white;" />
+                <div v-if="game === 3" style="color: white; font-size: 18px; font-weight: 600;">白子：{{ $store.state.pk.aCnt }}</div>
                 <div v-if="$store.state.record.a_is_robot">
                     <svg t="1662877386013" class="icon" viewBox="0 0 1280 1024" version="1.1"
                         xmlns="http://www.w3.org/2000/svg" p-id="2479" width="30" height="30">
@@ -140,6 +146,8 @@
                     <div class="eye" />
                     <div class="eye" />
                 </div>
+                <div v-if="game === 3" class="chess" style="background-color: black;" />
+                <div v-if="game === 3" style="color: black; font-size: 18px; font-weight: 600;">黑子：{{ $store.state.pk.bCnt }}</div>
                 <div class="user-profile">
                     <img :src="$store.state.record.b_photo" alt="" style="user-select: none;" class="photo">
                     <span class="username">{{ $store.state.record.b_username }}</span>
@@ -177,6 +185,11 @@ export default {
             store.commit("clearCodeOutMsg");
             store.commit("updateDir", -1);
             store.commit("updateFirstMove", null);
+            // 还原黑白棋数量
+            store.commit("updateChessCnt", {
+                "aCnt": 2,
+                "bCnt": 2
+            });
         });
     }
 }

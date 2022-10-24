@@ -199,7 +199,6 @@ export default {
         let canSendMsg = ref(false);
         let msgScroll = ref(null);
         let records = ref([]);
-        let record_game = ref([]);
         let total_records = ref(0);
 
         let socket = null;
@@ -368,17 +367,20 @@ export default {
         const see_record = recordId => {
             for(const record of records.value) {
                 if(record.id === recordId) {
-                    record_game.value = record.game_id;
                     store.commit("updateIsRecord", true);
-                    store.commit("updateSnakeGame", {
-                        map: stringTo2D(record.map),
-                        a_id: record.a_id,
-                        a_sx: record.a_sx,
-                        a_sy: record.a_sy,
-                        b_id: record.b_id,
-                        b_sx: record.b_sx,
-                        b_sy: record.b_sy,
-                    });
+                    if(record.game_id === 2) {
+                        store.commit("updateSnakeGame", {
+                            map: stringTo2D(record.map),
+                            a_id: record.a_id,
+                            b_id: record.b_id,
+                        });
+                    } else if(record.game_id === 1 || record.game_id === 3) {
+                        // 当加上随机优先后，可以带firstMove参数
+                        store.commit("updateChessGame", {
+                            a_id: record.a_id,
+                            b_id: record.b_id,
+                        });
+                    }
                     store.commit("updateSteps", {
                         a_steps: record.a_steps,
                         b_steps: record.b_steps,
@@ -403,7 +405,7 @@ export default {
                             recordId,
                         },
                         query: {
-                            game: record_game.value,
+                            game: record.game_id,
                         }
                     });
                     break;

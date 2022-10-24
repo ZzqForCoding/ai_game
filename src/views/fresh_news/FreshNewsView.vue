@@ -195,7 +195,6 @@ export default {
                         type: 'success',
                     });
                     getFreshNews();
-                    console.log(flag);
                     if(flag) {
                         input_comment.value = "";
                     } else {

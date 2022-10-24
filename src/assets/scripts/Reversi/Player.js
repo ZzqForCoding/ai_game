@@ -28,7 +28,13 @@ export class Player extends AcGameObject {
             let r = Math.floor(x), c = Math.floor(y);
             if(this.gamemap.map[r * 10 + c]) return;
             let flag = this.gamemap.adviseChesses.some(chess => chess.r === r && chess.c === c);
-            if(flag) this.set_chess(r, c);
+            if(flag) {
+                this.gamemap.store.state.pk.socket.send(JSON.stringify({
+                    event: "next_round",
+                    x: r,
+                    y: c
+                }));
+            }
         });
         this.gamemap.ctx.canvas.addEventListener("mousemove", e => {
             const rect = this.gamemap.ctx.canvas.getBoundingClientRect();
@@ -55,21 +61,13 @@ export class Player extends AcGameObject {
         // this.gamemap.currentChess = chess;
         this.gamemap.pushChess(chess);
         this.gamemap.process(chess);
-        setTimeout(()=>{
-            if(this.id === 1) {
-                this.gamemap.store.commit("updateFirstMove", 2);
-                this.gamemap.adviseChess("black");
-            }
-            else {
-                this.gamemap.store.commit("updateFirstMove", 1);
-                this.gamemap.adviseChess("white");
-            }
-        }, 200)
+        this.gamemap.calcChessCnt();
     }
 
     render() {
-        if(this.gamemap.store.state.pk.firstMove === this.id &&
-           this.floatR >= 0 && this.floatR < this.gamemap.rows && this.floatC >= 0 && this.floatC < this.gamemap.cols && !this.gamemap.map[this.floatR * 10 + this.floatC]) {
+        if(this.gamemap.store.state.pk.firstMove === this.id && this.id === this.gamemap.store.state.user.id && this.gamemap.store.state.pk.loser === 'none' &&
+           this.floatR >= 0 && this.floatR < this.gamemap.rows && this.floatC >= 0 && this.floatC < this.gamemap.cols && !this.gamemap.map[this.floatR * 10 + this.floatC] &&
+           this.gamemap.adviseChesses.some(chess => chess.r === this.floatR && chess.c === this.floatC)) {
             const L = this.gamemap.L;
             const ctx = this.gamemap.ctx;
 

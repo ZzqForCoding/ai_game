@@ -46,10 +46,12 @@ export class GameMap extends AcGameObject {
             let a = 0, b = 0, k = 0;
             const a_steps = JSON.parse(this.store.state.record.a_steps);
             const b_steps = JSON.parse(this.store.state.record.b_steps);
+            console.log("a: ", a_steps);
+            console.log("b: ", b_steps);
             // const loser = this.store.state.record.record_loser;
             const [player0, player1] = this.players;
             const interval_id = setInterval(() => {
-                if(a >= a_steps.length - 1 && b >= b_steps.length - 1) {
+                if(a >= a_steps.length && b >= b_steps.length) {
                     clearInterval(interval_id);
                 } else {
                     if(a < a_steps.length && k % 2 === 0) player0.set_chess(a_steps[a].x, a_steps[a].y), a++;

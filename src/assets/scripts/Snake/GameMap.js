@@ -40,8 +40,8 @@ export class GameMap extends AcGameObject {
         if(this.store.state.pk.a_id === this.store.state.user.id) selfColor = "#4876EC", yourColor = "#F94848";
         else selfColor = "#F94848", yourColor = "#4876EC";
         this.snakes = [
-            new Snake({id: 0, color: selfColor, r: this.rows - 2, c: 1}, this),
-            new Snake({id: 1, color: yourColor, r: 1, c: this.cols - 2}, this),
+            new Snake({id: this.store.state.pk.a_id, color: selfColor, r: this.rows - 2, c: 1}, this),
+            new Snake({id: this.store.state.pk.b_id, color: yourColor, r: 1, c: this.cols - 2}, this),
         ];
         this.add_listening_events();
     }
@@ -121,27 +121,6 @@ export class GameMap extends AcGameObject {
         for(const snake of this.snakes) {
             snake.next_step();
         }
-    }
-
-    check_valid(cell) {    // 检测目标位置是否合法：没有撞到两条蛇的身体和障碍物
-        for(const wall of this.walls) {
-            if(wall.r === cell.r && wall.c === cell.c) {
-                return false;
-            }
-        }
-
-        for(const snake of this.snakes) {
-            let k = snake.cells.length;
-            if(!snake.check_tail_increasing()) {    // 当蛇尾会前进的时候，蛇尾不要判断
-                k--;
-            }
-            for(let i = 0; i < k; i++) {
-                if(snake.cells[i].r === cell.r && snake.cells[i].c === cell.c) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     update() {

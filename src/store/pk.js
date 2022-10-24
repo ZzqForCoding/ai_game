@@ -6,15 +6,13 @@ export default {
     opponent_photo: "",
     gamemap: null,
     a_id: 0,
-    a_sx: 0,
-    a_sy: 0,
     a_language: "",
     a_is_robot: false,
     b_id: 0,
-    b_sx: 0,
-    b_sy: 0,
     b_language: "",
     b_is_robot: false,
+    aCnt: 2, 
+    bCnt: 2,
     gameObject: null,
     loser: "none",
     type: "none",
@@ -37,20 +35,18 @@ export default {
     updateStatus(state, status) {
         state.status = status;
     },
+    // 带地图类游戏
     updateSnakeGame(state, game) {
         state.gamemap = game.map;
         state.a_id = parseInt(game.a_id);
-        state.a_sx = game.a_sx;
-        state.a_sy = game.a_sy;
         state.a_language = game.a_language;
         state.a_is_robot = Boolean(game.a_is_robot);
         state.b_id = parseInt(game.b_id);
-        state.b_sx = game.b_sx;
-        state.b_sy = game.b_sy;
         state.b_language = game.b_language;
         state.b_is_robot = Boolean(game.b_is_robot);
     },
-    updateGobangGame(state, game) {
+    // 棋类游戏(还没实现棋类代码，因此与上方函数缺少一些参数)
+    updateChessGame(state, game) {
         state.a_id = parseInt(game.a_id);
         state.b_id = parseInt(game.b_id);
         state.firstMove = game.current_round;
@@ -64,6 +60,10 @@ export default {
     updateGameResult(state, result) {
         state.loser = result.loser;
         state.type = result.status;
+    },
+    updateChessCnt(state, data) {
+        state.aCnt = data.aCnt;
+        state.bCnt = data.bCnt;
     },
     pushMsg(state, msg) {
         msg.id = state.msgs.length + 1;

@@ -27,7 +27,7 @@ export class Player extends AcGameObject {
                 const rect = this.gamemap.ctx.canvas.getBoundingClientRect();
                 let x = (e.clientX - rect.left) / this.gamemap.L, y = (e.clientY - rect.top) / this.gamemap.L;
                 let r = Math.round(x), c = Math.round(y);
-                if(!this.gamemap.pre_judge(r, c) && this.gamemap.map[r * 10 + c]) {
+                if(!this.gamemap.pre_judge(r, c) || this.gamemap.map[r * 10 + c]) {
                     return;
                 }
 
