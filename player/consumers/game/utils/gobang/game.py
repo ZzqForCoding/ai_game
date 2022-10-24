@@ -71,9 +71,11 @@ class Game(threading.Thread):
             self.lock.acquire()
             try:
                 if self.nextCellA != None:
+                    self.g[self.nextCellA.x][self.nextCellA.y] = self.currentRound
                     self.playerA.cells.append(self.nextCellA)
                     return True
                 elif self.nextCellB != None:
+                    self.g[self.nextCellB.x][self.nextCellB.y] = self.currentRound
                     self.playerB.cells.append(self.nextCellB)
                     return True
             finally:
@@ -83,8 +85,8 @@ class Game(threading.Thread):
     def check_valid(self, cell):
         if cell.x < 1 or cell.x > self.rows - 1 or cell.y < 1 or cell.y > self.cols - 1:
             return False
-        if self.g[cell.x][cell.y] != 0:
-            return False
+        # if self.g[cell.x][cell.y] != 0:
+        #     return False
         return True
 
     # 判断是否走到非法区域和已下棋区域，并判断是否赢了游戏
@@ -107,112 +109,100 @@ class Game(threading.Thread):
         # 上
         up = 0
         for i in range(1, 5):
-            if self.g[cell.x][cell.y + i] == self.g[cell.x][cell.y]:
+            if cell.y + i <= self.cols - 1 and self.g[cell.x][cell.y + i] == self.g[cell.x][cell.y]:
                 up += 1
             else:
                 break
         if up == 4:
             flag = True
-            return
 
         # 下
         d = 0
         for i in range(1, 5):
-            if self.g[cell.x][cell.y - i] == self.g[cell.x][cell.y]:
+            if cell.y - i >= 1 and self.g[cell.x][cell.y - i] == self.g[cell.x][cell.y]:
                 d += 1
             else:
                 break
 
         if d == 4:
             flag = True
-            return
 
         if up + d == 4:
             flag = True
-            return
 
         # 左
         l = 0
         for i in range(1, 5):
-            if self.g[cell.x - i][cell.y] == self.g[cell.x][cell.y]:
+            if cell.x - i >= 1 and self.g[cell.x - i][cell.y] == self.g[cell.x][cell.y]:
                 l += 1
             else:
                 break
 
         if l == 4:
             flag = True
-            return
 
         # 右
         r = 0
         for i in range(1, 5):
-            if self.g[cell.x + i][cell.y] == self.g[cell.x][cell.y]:
+            if cell.x + i <= self.rows - 1 and self.g[cell.x + i][cell.y] == self.g[cell.x][cell.y]:
                 r += 1
             else:
                 break
 
         if r == 4:
             flag = True
-            return
 
         if l + r == 4:
             flag = True
-            return
 
         # 左下
         ld = 0
         for i in range(1, 5):
-            if self.g[cell.x - i][cell.y - i] == self.g[cell.x][cell.y]:
+            if cell.x - i >= 1 and cell.y - i >= 1 and self.g[cell.x - i][cell.y - i] == self.g[cell.x][cell.y]:
                 ld += 1
             else:
                 break
 
         if ld == 4:
             flag = True
-            return
 
         # 右下
         rd = 0
         for i in range(1, 5):
-            if self.g[cell.x + i][cell.y - i] == self.g[cell.x][cell.y]:
+            if cell.x + i <= self.rows - 1 and cell.y - i >= 1 and self.g[cell.x + i][cell.y - i] == self.g[cell.x][cell.y]:
                 rd += 1
             else:
                 break
         if rd == 4:
             flag = True
-            return
 
         # 左上
         lu = 0
         for i in range(1, 5):
-            if self.g[cell.x - i][cell.y + i] == self.g[cell.x][cell.y]:
+            if cell.x - i >= 1 and cell.y + i <= self.cols - 1 and self.g[cell.x - i][cell.y + i] == self.g[cell.x][cell.y]:
                 lu += 1
             else:
                 break
 
         if lu == 4:
             flag = True
-            return
 
         # 右上
         ru = 0
         for i in range(1, 5):
-            if self.g[cell.x + i][cell.y + i] == self.g[cell.x][cell.y]:
+            if cell.x + i <= self.rows - 1 and cell.y + i <= self.cols - 1 and self.g[cell.x + i][cell.y + i] == self.g[cell.x][cell.y]:
                 ru += 1
             else:
                 break
 
         if ru == 4:
             flag = True
-            return
 
         if ld + ru == 4:
             flag = True
-            return
 
         if lu + rd == 4:
             flag = True
-            return
 
         if flag:
             self.status = 'A Win' if self.currentRound == self.playerA.id else 'B Win'
@@ -293,7 +283,7 @@ class Game(threading.Thread):
             ncb = copy.deepcopy(self.nextCellB)
         finally:
             self.lock.release()
-        if self.status == "illegal":
+        if self.status != "overtime":
             resp['x'] = nca.x if self.currentRound == self.playerA.id else ncb.x
             resp['y'] = nca.y if self.currentRound == self.playerA.id else ncb.y
             resp['round'] = self.currentRound
@@ -308,10 +298,6 @@ class Game(threading.Thread):
         for i in range(400):
             if self.nextStep():
                 self.judge()
-                if self.nextCellA != None:
-                    self.g[self.nextCellA.x][self.nextCellA.y] = self.currentRound
-                elif self.nextCellB != None:
-                    self.g[self.nextCellB.x][self.nextCellB.y] = self.currentRound
                 if self.status == "playing":
                     self.sendNextRound()
                 else:

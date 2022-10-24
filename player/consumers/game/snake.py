@@ -79,100 +79,6 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
 
         transport.close()
 
-    # 开始匹配(1.0)
-    async def start_match_old(self, data):
-        print('start_match')
-        self.room_name = None
-        # 找房间
-        start = 0
-        for i in range(start, 100000000):
-            name = "room-%d" % (i)
-            if not cache.has_key(name) or len(cache.get(name)) < 2:
-                self.room_name = name
-                break
-
-        # 爆满则不能匹配
-        if not self.room_name:
-            return
-
-        # 找到了房间，但是此房间未创建则存到redis里
-        if not cache.has_key(self.room_name):
-            cache.set(self.room_name, [], 3600)
-
-        # 将房间里已有的玩家告诉给当前玩家
-        for player in cache.get(self.room_name):
-            await self.send(text_data=json.dumps({
-                'event': "start_match",
-                'username': player['username'],
-                'photo': player['photo']
-            }))
-
-        # 将房间加入django channels维护的channel layers中
-        await self.channel_layer.group_add(self.room_name, self.channel_name)
-        # 获取redis中房间已有玩家
-        players = cache.get(self.room_name)
-        # 加入当前玩家
-        players.append({
-            'username': data['username'],
-            'photo': data['photo']
-        })
-        # 将玩家存入redis中
-        cache.set(self.room_name, players, 3600)
-        def db_get_user(username):
-            return User.objects.get(username=username)
-        # 当当前房间人数 >= 2则匹配成功
-        if len(players) >= 2:
-            # 因为贪吃蛇游戏一局两个人，获取两名玩家
-            a = await database_sync_to_async(db_get_user)(players[0]['username'])
-            b = await database_sync_to_async(db_get_user)(players[1]['username'])
-            # 创建地图
-            game = Game(13, 14, 20, a.id, b.id, self.room_name)
-            game.createMap()
-            # 一局游戏一个线程
-            game.start()
-            MultiPlayerSnakeGame.users[a.id].game = game
-            MultiPlayerSnakeGame.users[b.id].game = game
-            # 返回给玩家的信息
-            resp = {
-                'a_id': game.playerA.id,
-                'a_sx': game.playerA.sx,
-                'a_sy': game.playerA.sy,
-                'b_id': game.playerB.id,
-                'b_sx': game.playerB.sx,
-                'b_sy': game.playerB.sy,
-                'map': game.getG()
-            }
-            # 广播给当前房间的所有玩家
-            await self.channel_layer.group_send(
-                self.room_name,
-                {
-                    'type': "group_send_event",
-                    'event': "start_match",
-                    'username': data['username'],
-                    'photo': data['photo'],
-                    'game': resp
-                }
-            )
-
-    # 停止匹配
-    async def stop_match_old(self, data):
-        print('stop_match')
-        player = {
-            'username': data['username'],
-            'photo': data['photo']
-        }
-        start = 0
-        for i in range(start, 100000000):
-            room_name = "room-%d" % (i)
-            if cache.get(room_name) != None and len(cache.get(room_name)) < 2:
-                players = cache.get(room_name)
-                if player in players:
-                    players.remove(player)
-                    cache.set(room_name, players)
-                    # 清除channel layer中的房间
-                    await self.channel_layer.group_discard(room_name, self.channel_name)
-                    break
-
     # 移动
     async def move(self, direction):
         if MultiPlayerSnakeGame.users[self.user.id].game.playerA.id == self.user.id:
@@ -247,13 +153,9 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
             # 返回给玩家的信息
             resp = {
                 'a_id': game.playerA.id,
-                'a_sx': game.playerA.sx,
-                'a_sy': game.playerA.sy,
                 'a_language': "" if botA == None else botA.language,
                 'a_is_robot': True if botA != None else False,
                 'b_id': game.playerB.id,
-                'b_sx': game.playerB.sx,
-                'b_sy': game.playerB.sy,
                 'b_language': "" if botB == None else botB.language,
                 'b_is_robot': True if botB != None else False,
                 'map': game.getG()

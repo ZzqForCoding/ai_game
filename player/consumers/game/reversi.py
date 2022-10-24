@@ -137,6 +137,9 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
         elif MultiPlayerReversiGame.users[self.user.id].game.playerB.id == self.user.id and MultiPlayerReversiGame.users[self.user.id].game.currentRound == self.user.id:
             self.game.setNextCellB(cell)
 
+    async def toggle_round(self):
+        self.game.setToggleRound()
+
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
 
@@ -151,3 +154,5 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
             await self.send_message(data)
         elif event == 'next_round':
             await self.next_round(Cell(data['x'], data['y']))
+        elif event == 'toggle_round':
+            await self.toggle_round()

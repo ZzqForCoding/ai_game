@@ -10,13 +10,9 @@ class Record(models.Model):
         related_name='game_record'
     )
     a_id = models.IntegerField()
-    a_sx = models.IntegerField(default=-1, blank=True, null=True)
-    a_sy = models.IntegerField(default=-1, blank=True, null=True)
     a_is_robot = models.BooleanField(default=False)
     a_language = models.CharField(max_length=20, default="", blank=True, null=True)
     b_id = models.IntegerField()
-    b_sx = models.IntegerField(default=-1, blank=True, null=True)
-    b_sy = models.IntegerField(default=-1, blank=True, null=True)
     b_is_robot = models.BooleanField(default=False)
     b_language = models.CharField(max_length=20, default="", blank=True, null=True)
     a_steps = models.TextField(max_length=1000)

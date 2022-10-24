@@ -33,13 +33,9 @@ class GetListView(APIView):
             item['b_username'] = playerB.user.username
             item['id'] = record.id
             item['a_id'] = record.a_id
-            item['a_sx'] = record.a_sx
-            item['a_sy'] = record.a_sy
             item['a_is_robot'] = record.a_is_robot
             item['a_language'] = record.a_language
             item['b_id'] = record.b_id
-            item['b_sx'] = record.b_sx
-            item['b_sy'] = record.b_sy
             item['b_is_robot'] = record.b_is_robot
             item['b_language'] = record.b_language
             item['a_steps'] = record.a_steps

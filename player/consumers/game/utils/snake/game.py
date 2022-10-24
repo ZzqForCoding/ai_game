@@ -94,13 +94,9 @@ class Game(threading.Thread):
         record = Record.objects.create(
             game = game,
             a_id = self.playerA.id,
-            a_sx = self.playerA.sx,
-            a_sy = self.playerA.sy,
             a_is_robot = False if self.botIdA == -1 else True,
             a_language = self.languageA,
             b_id = self.playerB.id,
-            b_sx = self.playerB.sx,
-            b_sy = self.playerB.sy,
             b_is_robot = False if self.botIdB == -1 else True,
             b_language = self.languageB,
             a_steps = self.playerA.getStepsString(),
@@ -284,17 +280,13 @@ class Game(threading.Thread):
             self.lock.release()
 
         if self.status == 'illegal':
-            resp['a_direction'] = nsa
             self.playerA.steps.append(nsa)
-            resp['b_direction'] = nsb
             self.playerB.steps.append(nsb)
 
         elif self.status == "overtime":
             if nsa != None:
-                resp['a_direction'] = nsa
                 self.playerA.steps.append(nsa)
             if nsb != None:
-                resp['b_direction'] = nsb
                 self.playerB.steps.append(nsb)
 
         self.saveToDataBase()

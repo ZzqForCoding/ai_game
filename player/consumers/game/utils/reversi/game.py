@@ -10,14 +10,18 @@ import time
 import copy
 
 class Game(threading.Thread):
-    dx = [-1, 0, 1, 0]
-    dy = [0, 1, 0, -1]
+    dx = [-1, -1, -1, 0, 1, 1,  1,  0]
+    dy = [-1,  0,  1, 1, 1, 0, -1, -1]
 
     def __init__(self, rows, cols, idA, botA, idB, botB, room_name):
         threading.Thread.__init__(self)
         self.rows = rows
         self.cols = cols
         self.g = [[0 for i in range(self.cols)] for i in range(self.rows)]
+        self.g[3][3] = idA
+        self.g[4][4] = idA
+        self.g[3][4] = idB
+        self.g[4][3] = idB
         self.aCnt = 2
         self.bCnt = 2
 
@@ -43,12 +47,14 @@ class Game(threading.Thread):
         self.nextCellA = None
         self.nextCellB = None
         self.lock = threading.Lock()
-        self.status = "playing"
+        self.status = "playing"     # playing -> illegal/overtime/A Win
         self.loser = ""
         self.room_name = room_name
         self.channel_layer = get_channel_layer()
         self.isStart = True
         self.currentRound = self.playerA.id
+        self.toggleRound = False
+        self.toggleRoundLock = threading.Lock()
 
     def setNextCellA(self, nextCellA):
         self.lock.acquire()
@@ -66,32 +72,51 @@ class Game(threading.Thread):
             self.lock.release()
         self.bCnt += 1
 
+    # 0: 无输入
+    # 1：有输入
+    # 2: 跳过回合
     def nextStep(self):
         if self.isStart:
             time.sleep(2)
             self.isStart = False
         else:
             time.sleep(0.2)
+        self.toggleRoundLock.acquire()
+        try:
+            if self.toggleRound:
+                print("toggle")
+                return 2
+        finally:
+            self.toggleRoundLock.release()
 
         for i in range(60):
             time.sleep(0.1)
             self.lock.acquire()
             try:
                 if self.nextCellA != None:
+                    self.g[self.nextCellA.x][self.nextCellA.y] = self.currentRound
                     self.playerA.cells.append(self.nextCellA)
-                    return True
+                    return 1
                 elif self.nextCellB != None:
+                    self.g[self.nextCellB.x][self.nextCellB.y] = self.currentRound
                     self.playerB.cells.append(self.nextCellB)
-                    return True
+                    return 1
             finally:
                 self.lock.release()
-        return False
+            self.toggleRoundLock.acquire()
+            try:
+                if self.toggleRound:
+                    print("toggle 2")
+                    return 2
+            finally:
+                self.toggleRoundLock.release()
+        return 0
 
     def check_valid(self, cell):
         if cell.x < 0 or cell.x >= self.rows or cell.y < 0 or cell.y >= self.cols:
             return False
-        if self.g[cell.x][cell.y] != 0:
-            return False
+        # if self.g[cell.x][cell.y] != 0:
+        #     return False
         return True
 
     def judge(self):
@@ -111,22 +136,27 @@ class Game(threading.Thread):
             return
 
         # 变换操作
-        for i in range(4):
-            tx = cell.x
-            ty = cell.y
-            while self.g[Game.dx[i] + tx][Game.dy[i] + ty] == enemy:
+        for i in range(8):
+            tx = cell.x + Game.dx[i]
+            ty = cell.y + Game.dy[i]
+            flag = False
+            while tx >= 0 and tx < self.rows and ty >= 0 and ty < self.cols and self.g[tx][ty] == enemy:
                 tx += Game.dx[i]
                 ty += Game.dy[i]
-            if tx != cell.x or ty != cell.y and self.g[Game.dx[i] + tx][Game.dy[i] + ty] == self.currentRound:
-                re_dir = i ^ 2
-                if self.currentRound == self.playerA.id:
-                    self.aCnt += abs(tx - cell.x) + abs(ty - cell.y)
-                elif self.currentRound == self.playerB.id:
-                    self.bCnt += abs(tx - cell.x) + abs(ty - cell.y)
-                while tx != cell.x or ty != cell.y:
-                    self.g[tx][ty] = self.currentRound
-                    tx += Game.dx[re_dir]
-                    ty += Game.dy[re_dir]
+                flag = True
+            if flag and tx >= 0 and tx < self.rows and ty >= 0 and ty < self.cols and self.g[tx][ty] == self.currentRound:
+                sx = cell.x + Game.dx[i]
+                sy = cell.y + Game.dy[i]
+                while sx != tx or sy != ty:
+                    self.g[sx][sy] = self.currentRound
+                    sx += Game.dx[i]
+                    sy += Game.dy[i]
+                    if self.currentRound == self.playerA.id:
+                        self.aCnt += 1
+                        self.bCnt -= 1
+                    else:
+                        self.aCnt -= 1
+                        self.bCnt += 1
 
     def sendAllMessage(self, message):
         message['type'] = "group_send_event"
@@ -182,7 +212,7 @@ class Game(threading.Thread):
             'event': "nextRound",
             'x': nca.x if self.currentRound == self.playerA.id else ncb.x,
             'y': nca.y if self.currentRound == self.playerA.id else ncb.y,
-            'round': self.currentRound
+            'round': self.currentRound,
         }
         self.sendAllMessage(resp)
         if self.currentRound == self.playerA.id:
@@ -211,23 +241,47 @@ class Game(threading.Thread):
         cache.delete_pattern(self.playerA.id)
         cache.delete_pattern(self.playerB.id)
 
+    def setToggleRound(self):
+        self.toggleRoundLock.acquire()
+        try:
+            self.toggleRound = True
+        finally:
+            self.toggleRoundLock.release()
+
     def run(self):
         for i in range(60):
-            if self.nextStep():
+            t = self.nextStep()
+            if t == 1:
                 self.judge()
-                if self.nextCellA != None:
-                    self.g[self.nextCellA.x][self.nextCellA.y] = self.currentRound
-                elif self.nextCellB != None:
-                    self.g[self.nextCellB.x][self.nextCellB.y] = self.currentRound
                 if self.status == "playing":
                     self.sendNextRound()
                 else:
                     self.sendResult()
-                    break
-            else:
+                    return
+            elif t == 0:
                 self.status = "overtime"
                 self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
                 self.sendResult()
+                return
+            elif t == 2:
+                tr = None
+                self.toggleRoundLock.acquire()
+                try:
+                    tr = self.toggleRound
+                finally:
+                    self.toggleRoundLock.release()
+                if tr:
+                    if self.currentRound == self.playerA.id:
+                        self.currentRound = self.playerB.id
+                    elif self.currentRound == self.playerB.id:
+                        self.currentRound = self.playerA.id
+                resp = {
+                    'event': "toggleRound"
+                }
+                print("send toggleROund")
+                self.sendAllMessage(resp)
+                time.sleep(1)
+            if self.aCnt == 0 or self.bCnt == 0:
                 break
         if self.aCnt > self.bCnt:
             self.status = "A Win"
