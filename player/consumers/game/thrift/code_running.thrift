@@ -1,14 +1,14 @@
-namespace cpp code_running_service
-
-struct Bot {
-    1: i32 userId,
-    2: string botCode,
-    3: string input,
-    4: string language,
-    5: string room_name,
-}
+namespace py code_running_service
 
 service CodeRunning {
 
-    i32 add_bot_code(1: Bot bot, 2: string info);
+    i32 start_container(1: string uuid, 2: string code, 3: string lang);
+
+    i32 stop_container(1: string uuid);
+
+    string compile(1: string uuid);
+
+    i32 prepare_data(1: string uuid, 2:string data);
+
+    string run(1: string uuid);
 }

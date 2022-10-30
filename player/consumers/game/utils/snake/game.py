@@ -9,9 +9,10 @@ import json
 import random
 import threading
 import time
+import uuid
+import re
 
-from player.consumers.game.thrift.code_running_client.code_running import CodeRunning
-from player.consumers.game.thrift.code_running_client.code_running.ttypes import Bot
+from player.consumers.game.thrift.code_running_client.code_running_service import CodeRunning
 from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
@@ -46,29 +47,58 @@ class Game(threading.Thread):
             self.languageB = botB.language
             self.botCodeB = botB.content
 
-        self.playerA = SnakePlayer(idA, self.botIdA, self.languageA, self.botCodeA, self.rows - 2, 1, [])
-        self.playerB = SnakePlayer(idB, self.botIdB, self.languageB, self.botCodeB, 1, self.cols - 2, [])
+        self.playerA = SnakePlayer(idA, str(uuid.uuid1()), self.botIdA, self.languageA, self.botCodeA, self.rows - 2, 1, [])
+        self.playerB = SnakePlayer(idB, str(uuid.uuid1()), self.botIdB, self.languageB, self.botCodeB, 1, self.cols - 2, [])
 
         self.nextStepA = None
-        self.compileA = None
-        self.outputA = None
-        self.resultA = None
         self.nextStepB = None
-        self.compileB = None
-        self.outputB = None
-        self.resultB = None
         self.lock = threading.Lock()
         self.status = "playing" # waiting -> playing -> overtime/illegal -> end
         self.loser = ""     # all: "平局", A: A输, B: B输
         self.room_name = room_name
         self.channel_layer = get_channel_layer()
         self.isStart = True
+        self.round_time = 0
+        if self.botIdA == -1 and self.botIdB == -1: self.round_time = 40 # 4s
+        else:
+            if self.languageA == 'cpp': self.round_time += 10
+            else: self.round_time += 20
+            if self.languageB == 'cpp': self.round_time += 10
+            else: self.round_time += 20
 
-    def getMapString(self):
+        if botA: threading.Thread(target=self.estabCodeRunningConnect(self.playerA)).start()
+        if botB: threading.Thread(target=self.estabCodeRunningConnect(self.playerB)).start()
+
+    def estabCodeRunningConnect(self, player):
+        # Make socket
+        transport = TSocket.TSocket('120.76.157.21', 20104)
+        # Buffering is critical. Raw sockets are very slow
+        player.transport = TTransport.TBufferedTransport(transport)
+        # Wrap in a protocol
+        protocol = TBinaryProtocol.TBinaryProtocol(player.transport)
+        # Create a client to use the protocol encoder
+        player.client = CodeRunning.Client(protocol)
+        # Connect!
+        player.transport.open()
+        # 开启容器
+        player.client.start_container(player.uuid, player.botCode, player.language)
+        player.client.compile(player.uuid)
+
+    def closeCodeRunningConnect(self, player):
+        player.client.stop_container(player.uuid)
+        player.transport.close()
+        del player.client
+        del player.transport
+
+
+    def getMapString(self, t):
         res = ""
-        for i in range(self.rows):
-            for j in range(self.cols):
-                res += str(self.g[i][j])
+        if t == 1:
+            for line in self.g:
+                res += "".join(map(str, line))
+        elif t == 2:
+            for line in self.g:
+                res += " ".join(map(str, line)) + "\n"
         return res
 
     def updatePlayerRating(self, player, rating):
@@ -101,7 +131,7 @@ class Game(threading.Thread):
             b_language = self.languageB,
             a_steps = self.playerA.getStepsString(),
             b_steps = self.playerB.getStepsString(),
-            map = self.getMapString(),
+            map = self.getMapString(1),
             loser = self.loser
         )
         record.save()
@@ -110,30 +140,25 @@ class Game(threading.Thread):
     # 广播给一个房间的玩家的信息
     def sendAllMessage(self, message):
         message['type'] = "group_send_event"
+
         async_to_sync(self.channel_layer.group_send)(
             self.room_name,
             message
         )
 
-    def setNextStepA(self, nextStepA, compile, output, result):
+    def setNextStepA(self, nextStepA):
         self.lock.acquire()
         try:
             self.nextStepA = nextStepA
         finally:
             self.lock.release()
-        self.compileA = compile
-        self.outputA = output
-        self.resultA = result
 
-    def setNextStepB(self, nextStepB, compile, output, result):
+    def setNextStepB(self, nextStepB):
         self.lock.acquire()
         try:
             self.nextStepB = nextStepB
         finally:
             self.lock.release()
-        self.compileB = compile
-        self.outputB = output
-        self.resultB = result
 
     def getInput(self, player):
         me = None
@@ -145,38 +170,37 @@ class Game(threading.Thread):
             me = self.playerB
             you = self.playerA
 
-        return self.getMapString() + '#' +\
-                str(me.sx) + '#' +\
-                str(me.sy) + '#(' +\
-                me.getStepsString() + ')#' +\
-                str(you.sx) + '#' +\
-                str(you.sy) + '#(' +\
-                you.getStepsString() + ')'
+        return self.getMapString(2) +\
+                me.getStepsInputString() +\
+                you.getStepsInputString()
 
-    def sendBotCode(self, player):
-        if player.botId == -1:
-            return
+    def checkResult(self, res):
+        try:
+            if res == None or len(res) == 0:
+                raise Exception("输出为空")
+            # 匹配正号或负号和多位数字，+在正则表达式中表示匹配多次所以需要看转义
+            if not re.match("^[-\\+]?\\d+$", res):
+                raise Exception("非法输出：%s" % res)
+            d = int(res)
+            if d < 0 or d > 3:
+                raise Exception("非法输出：%d" % d)
+        except Exception as e:
+            return e
+        return res
 
-        # Make socket
-        transport = TSocket.TSocket('120.76.157.21', 20104)
 
-        # Buffering is critical. Raw sockets are very slow
-        transport = TTransport.TBufferedTransport(transport)
-
-        # Wrap in a protocol
-        protocol = TBinaryProtocol.TBinaryProtocol(transport)
-
-        # Create a client to use the protocol encoder
-        client = CodeRunning.Client(protocol)
-
-        # Connect!
-        transport.open()
-
-        bot = Bot(player.id, player.botCode, self.getInput(player), player.language, self.room_name)
-        client.add_bot_code(bot, "")
-
-        # Close!
-        transport.close()
+    def runBot(self, player):
+        player.client.prepare_data(player.uuid, self.getInput(player))
+        res = player.client.run(player.uuid)
+        ret = self.checkResult(res)
+        if res != ret:
+            # 错误提示
+            pass
+        else:
+            if player.id == self.playerA.id:
+                self.setNextStepA(int(res))
+            else:
+                self.setNextStepB(int(res))
 
     # 接收玩家输入
     def nextStep(self):
@@ -186,11 +210,13 @@ class Game(threading.Thread):
         else:
             time.sleep(0.2)
 
-        self.sendBotCode(self.playerA)
-        self.sendBotCode(self.playerB)
+        if self.playerA.botId != -1:
+            threading.Thread(target=self.runBot(self.playerA)).start()
+        if self.playerB.botId != -1:
+            threading.Thread(target=self.runBot(self.playerB)).start()
 
-        # 接收6s内的输入
-        for i in range(60):
+        # 接收固定时间内的输入
+        for i in range(self.round_time):
             time.sleep(0.1)
             self.lock.acquire()
             try:
@@ -249,21 +275,9 @@ class Game(threading.Thread):
         resp = {
             'event': "move",
             'a_direction': nsa,
-            'a_compile': self.compileA,
-            'a_output': self.outputA,
-            'a_result': self.resultA,
             'b_direction': nsb,
-            'b_compile': self.compileB,
-            'b_output': self.outputB,
-            'b_result': self.resultB
         }
         self.sendAllMessage(resp)
-        self.compileA = None
-        self.outputA = None
-        self.resultA = None
-        self.compileB = None
-        self.outputB = None
-        self.resultB = None
 
     # 发送移动结果
     def sendResult(self):
@@ -279,11 +293,7 @@ class Game(threading.Thread):
         finally:
             self.lock.release()
 
-        if self.status == 'illegal':
-            self.playerA.steps.append(nsa)
-            self.playerB.steps.append(nsb)
-
-        elif self.status == "overtime":
+        if self.status == "overtime":
             if nsa != None:
                 self.playerA.steps.append(nsa)
             if nsb != None:
@@ -323,6 +333,8 @@ class Game(threading.Thread):
 
                 self.sendResult()
                 break
+        if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
+        if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
 
     # 获取地图
     def getG(self):

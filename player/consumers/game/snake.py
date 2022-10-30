@@ -83,10 +83,10 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
     async def move(self, direction):
         if MultiPlayerSnakeGame.users[self.user.id].game.playerA.id == self.user.id:
             if MultiPlayerSnakeGame.users[self.user.id].game.playerA.botId == -1:
-                self.game.setNextStepA(direction, "", "", "")
+                self.game.setNextStepA(direction)
         elif MultiPlayerSnakeGame.users[self.user.id].game.playerB.id == self.user.id:
             if MultiPlayerSnakeGame.users[self.user.id].game.playerB.botId == -1:
-                self.game.setNextStepB(direction, "", "", "")
+                self.game.setNextStepB(direction)
 
     # 辅助函数：发送给当前房间玩家信息
     async def group_send_event(self, data):
@@ -103,9 +103,9 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
             return
 
         if MultiPlayerSnakeGame.users[self.user.id].game.playerA.id == data['user_id']:
-            self.game.setNextStepA(int(data['result']), data['compile'], data['output'], data['result'])
+            self.game.setNextStepA(int(data['result']))
         elif MultiPlayerSnakeGame.users[self.user.id].game.playerB.id == data['user_id']:
-            self.game.setNextStepB(int(data['result']), data['compile'], data['output'], data['result'])
+            self.game.setNextStepB(int(data['result']))
 
     async def send_message(self, data):
         await self.channel_layer.group_send(
