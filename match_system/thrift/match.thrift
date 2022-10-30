@@ -1,4 +1,4 @@
-namespace cpp match_service
+namespace py match_service
 
 struct Player {
     1: i32 id,
@@ -13,7 +13,7 @@ struct Player {
 
 service Match {
 
-    i32 add_player(1: Player player, 2: string info),
+    i32 add_player(1: Player player),
 
-    i32 remove_player(1: Player player, 2: string info),
+    i32 remove_player(1: Player player),
 }
