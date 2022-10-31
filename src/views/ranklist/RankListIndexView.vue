@@ -9,7 +9,7 @@
                     </div>
                 </template>
                 <el-table :data="players" style="width: 100%;" highlight-current-row max-height="720" table-layout="auto">
-                    <el-table-column label="id" align="center" prop="rank" width="140" />
+                    <el-table-column label="rank" align="center" prop="rank" width="140" />
                     <el-table-column label="玩家" align="center">
                         <template #default="scope">
                             <div class="userinfo">

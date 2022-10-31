@@ -169,10 +169,22 @@ export class GameMap extends AcGameObject {
         }
     }
 
+    // 判断是否是机器人
+    judgeRobot() {
+        if(this.store.state.user.id == this.store.state.pk.a_id) {
+            if(this.store.state.pk.a_is_robot) return true;
+            else return false;
+        } else {
+            if(this.store.state.pk.b_is_robot) return true;
+            else return false;
+        }
+    }
+
     update() {
         this.update_size();
         this.render();
     }
+
     render() {
         const L = this.L;
         const ctx = this.ctx;
@@ -185,7 +197,7 @@ export class GameMap extends AcGameObject {
             }
         }
 
-        if(this.store.state.pk.firstMove === this.store.state.user.id && this.store.state.pk.loser === "none") {
+        if(this.store.state.pk.firstMove === this.store.state.user.id && this.store.state.pk.loser === "none" && !this.judgeRobot()) {
             for(let chess of this.adviseChesses) {
                 ctx.fillStyle = this.store.state.pk.firstMove === this.store.state.pk.a_id ? "white" : "black";
                 this.canvasUtils.drawDottedCircle(ctx, chess.r * L + L / 2.0, chess.c * L + L / 2.0, L * 0.31, L * 0.01, "red", L * 0.03);

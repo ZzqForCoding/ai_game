@@ -67,7 +67,7 @@ export class Player extends AcGameObject {
     render() {
         if(this.gamemap.store.state.pk.firstMove === this.id && this.id === this.gamemap.store.state.user.id && this.gamemap.store.state.pk.loser === 'none' &&
            this.floatR >= 0 && this.floatR < this.gamemap.rows && this.floatC >= 0 && this.floatC < this.gamemap.cols && !this.gamemap.map[this.floatR * 10 + this.floatC] &&
-           this.gamemap.adviseChesses.some(chess => chess.r === this.floatR && chess.c === this.floatC)) {
+           this.gamemap.adviseChesses.some(chess => chess.r === this.floatR && chess.c === this.floatC) && !this.gamemap.judgeRobot()) {
             const L = this.gamemap.L;
             const ctx = this.gamemap.ctx;
 

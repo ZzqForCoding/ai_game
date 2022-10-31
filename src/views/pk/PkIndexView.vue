@@ -38,7 +38,7 @@
                     </el-form>
                 </el-card>
             </el-card>
-            <el-card class="code-out-card" style="margin-top: 20px;"
+            <!-- <el-card class="code-out-card" style="margin-top: 20px;"
                 v-if="$store.state.pk.status === 'playing' && operate === 0">
                 <template #header>
                     <div class="card-header">
@@ -48,7 +48,7 @@
                 <el-scrollbar max-height="170px" style="height: 170px;">
                     <pre class="codeOutMsg">{{ $store.state.pk.codeOutMsg }}</pre>
                 </el-scrollbar>
-            </el-card>
+            </el-card> -->
         </el-col>
     </el-row>
 </template>
@@ -75,7 +75,6 @@ export default {
         let socketUrl = "";
         let message = ref('');
         let msgScroll = ref(null);
-        let round = 0;
 
         store.commit("updateGameResult", { loser: 'none', status: 'none' });
         store.commit("updateOpponent", {
@@ -112,7 +111,6 @@ export default {
                         // const scroll = unref(msgScroll);
                         // scroll.setScrollTop(80000);
                     } else if (data.event === "start_game") {
-                        round = 0;
                         store.commit("updateOpponent", {
                             username: data.username,
                             photo: data.photo,
@@ -129,20 +127,20 @@ export default {
                             loser: data.loser,
                             status: data.status,    // 超时还是非法操作
                         });
-                        round = parseInt(data['round']);
+                        let round = parseInt(data['round']);
                         if (round === store.state.pk.a_id) {
                             store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.commit("updateFirstMove", store.state.pk.b_id);
-                        } else if (data['round'] === store.state.pk.b_id) {
+                        } else if (round === store.state.pk.b_id) {
                             store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.commit("updateFirstMove", store.state.pk.a_id);
                         }
                     } else if (data.event === "nextRound") {
-                        round = parseInt(data['round']);
+                        let round = parseInt(data['round']);
                         if (round === store.state.pk.a_id) {
                             store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.commit("updateFirstMove", store.state.pk.b_id);
-                        } else if (data['round'] === store.state.pk.b_id) {
+                        } else if (round === store.state.pk.b_id) {
                             store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.commit("updateFirstMove", store.state.pk.a_id);
                         }
@@ -177,7 +175,6 @@ export default {
                     const data = JSON.parse(msg.data);
                     if (data.username === store.state.user.username) return;
                     if (data.event === "start_game") {
-                        round = 0;
                         store.commit("updateOpponent", {
                             username: data.username,
                             photo: data.photo,
@@ -196,22 +193,10 @@ export default {
                             store.commit("updateDir", data.a_direction);
                             snake0.set_direction(data.a_direction);
                             snake1.set_direction(data.b_direction);
-                            if (operate === 0) {
-                                store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
-    compile: " + data.a_compile + "\n\
-    output: " + data.a_output + "\n\
-    result: " + data.a_result + "\n");
-                            }
                         } else {
                             store.commit("updateDir", transDir(data.b_direction));
                             snake0.set_direction(transDir(data.b_direction));
                             snake1.set_direction(transDir(data.a_direction));
-                            if (operate === 0) {
-                                store.commit("addCodeOutMsg", "round " + (++round) + ": \n\
-    compile: " + data.b_compile + "\n\
-    output: " + data.b_output + "\n\
-    result: " + data.b_result + "\n");
-                            }
                         }
                     } else if (data.event === "result") {
                         const game = store.state.pk.gameObject;
@@ -276,7 +261,6 @@ export default {
                         // const scroll = unref(msgScroll);
                         // scroll.setScrollTop(80000);
                     } else if (data.event === "start_game") {
-                        round = 0;
                         store.commit("updateOpponent", {
                             username: data.username,
                             photo: data.photo,
@@ -294,19 +278,19 @@ export default {
                             loser: data.loser,
                             status: data.status,    // 超时还是非法操作
                         });
-                        round = parseInt(data['round']);
+                        let round = parseInt(data['round']);
                         if (round === store.state.pk.a_id) {
                             store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']));
-                        } else if (data['round'] === store.state.pk.b_id) {
+                        } else if (round === store.state.pk.b_id) {
                             store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
                         }
                     } else if (data.event === "nextRound") {
-                        round = parseInt(data['round']);
+                        let round = parseInt(data['round']);
                         if (round === store.state.pk.a_id) {
                             store.state.pk.gameObject.players[0].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.state.pk.gameObject.adviseChess("black");
                             store.commit("updateFirstMove", store.state.pk.b_id);
-                        } else if (data['round'] === store.state.pk.b_id) {
+                        } else if (round === store.state.pk.b_id) {
                             store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.state.pk.gameObject.adviseChess("white");
                             store.commit("updateFirstMove", store.state.pk.a_id);

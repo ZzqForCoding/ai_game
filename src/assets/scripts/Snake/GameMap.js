@@ -24,7 +24,6 @@ export class GameMap extends AcGameObject {
 
     create_walls() {
         const g = this.store.state.pk.gamemap;
-
         for(let r = 0; r < this.rows; r++) {
             for(let c = 0; c < this.cols; c++) {
                 if(g[r][c]) {
@@ -60,7 +59,7 @@ export class GameMap extends AcGameObject {
             const loser = this.store.state.record.record_loser;
             const [snake0, snake1] = this.snakes;
             const interval_id = setInterval(() => {
-                if(k >= a_steps.length - 1) {
+                if(k >= a_steps.length) {
                     if(loser === "all" || loser === "A") {
                         snake0.status = "die";
                     }
@@ -77,19 +76,20 @@ export class GameMap extends AcGameObject {
         } else {
             this.ctx.canvas.focus();
             this.ctx.canvas.addEventListener("keydown", e => {
-                let d = -1, dir;
+                let d = -1, dir = -1;
                 if(e.key === 'w') d = 0;
                 else if(e.key === 'd') d = 1;
                 else if(e.key === 's') d = 2;
                 else if(e.key === 'a') d = 3;
                 if(this.store.state.user.id !== this.store.state.pk.a_id) {
                     dir = this.transDir(d);
+                } else {
+                    dir = d;
                 }
                 // else if(e.key === 'ArrowUp') snake1.set_direction(0);
                 // else if(e.key === 'ArrowRight') snake1.set_direction(1);
                 // else if(e.key === 'ArrowDown') snake1.set_direction(2);
                 // else if(e.key === 'ArrowLeft') snake1.set_direction(3);
-            
                 if(dir >= 0) {
                     this.store.commit("updateDir", d);
                     this.store.state.pk.socket.send(JSON.stringify({

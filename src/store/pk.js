@@ -45,10 +45,14 @@ export default {
         state.b_language = game.b_language;
         state.b_is_robot = Boolean(game.b_is_robot);
     },
-    // 棋类游戏(还没实现棋类代码，因此与上方函数缺少一些参数)
+    // 棋类游戏
     updateChessGame(state, game) {
         state.a_id = parseInt(game.a_id);
+        state.a_language = game.a_language;
+        state.a_is_robot = Boolean(game.a_is_robot);
         state.b_id = parseInt(game.b_id);
+        state.b_language = game.b_language;
+        state.b_is_robot = Boolean(game.b_is_robot);
         state.firstMove = game.current_round;
     },
     updateFirstMove(state, firstMove) {

@@ -46,8 +46,6 @@ export class GameMap extends AcGameObject {
             let a = 0, b = 0, k = 0;
             const a_steps = JSON.parse(this.store.state.record.a_steps);
             const b_steps = JSON.parse(this.store.state.record.b_steps);
-            console.log("a: ", a_steps);
-            console.log("b: ", b_steps);
             // const loser = this.store.state.record.record_loser;
             const [player0, player1] = this.players;
             const interval_id = setInterval(() => {
@@ -61,8 +59,6 @@ export class GameMap extends AcGameObject {
             }, 500);
         }
     }
-
-    
 
     update_size() {
         this.L = parseInt(Math.min(this.parent.clientWidth / this.cols, this.parent.clientHeight / this.rows));
@@ -83,6 +79,17 @@ export class GameMap extends AcGameObject {
     pushChess(chess) {
         this.chesses.push(chess);
         this.map[chess.r * 10 + chess.c] = chess.color;
+    }
+
+    // 判断是否是机器人
+    judgeRobot() {
+        if(this.store.state.user.id == this.store.state.pk.a_id) {
+            if(this.store.state.pk.a_is_robot) return true;
+            else return false;
+        } else {
+            if(this.store.state.pk.b_is_robot) return true;
+            else return false;
+        }
     }
 
     render() {
