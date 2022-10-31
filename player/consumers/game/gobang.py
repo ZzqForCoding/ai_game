@@ -47,7 +47,7 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
         player = await database_sync_to_async(db_get_player)()
 
         player_info = PlayerInfo(self.user.id, self.user.username,
-                player.photo, player.rating, self.channel_name, 1, -1, self.game_id)
+                player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']), self.game_id)
 
         client.add_player(player_info, "")
         cache.set(self.user.id, True, 3600)
@@ -95,7 +95,6 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
             botB = None
             if data['b_operate'] == 0:
                 botB = await database_sync_to_async(db_get_bot)(int(data['b_bot_id']))
-
             game = Game(17, 17, a_id, botA, b_id, botB, room_name)
             game.start()
             MultiPlayerGobangGame.users[a_id].game = game
@@ -103,7 +102,11 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
 
             resp = {
                 'a_id': game.playerA.id,
+                'b_language': "" if botB == None else botB.language,
+                'b_is_robot': True if botB != None else False,
                 'b_id': game.playerB.id,
+                'b_language': "" if botB == None else botB.language,
+                'b_is_robot': True if botB != None else False,
                 'current_round': game.playerA.id
             }
 
@@ -145,9 +148,11 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
 
     async def next_round(self, cell):
         if MultiPlayerGobangGame.users[self.user.id].game.playerA.id == self.user.id and MultiPlayerGobangGame.users[self.user.id].game.currentRound == self.user.id:
-            self.game.setNextCellA(cell)
+            if MultiPlayerGobangGame.users[self.user.id].game.playerA.botId == -1:
+                self.game.setNextCellA(cell)
         elif MultiPlayerGobangGame.users[self.user.id].game.playerB.id == self.user.id and MultiPlayerGobangGame.users[self.user.id].game.currentRound == self.user.id:
-            self.game.setNextCellB(cell)
+            if MultiPlayerGobangGame.users[self.user.id].game.playerB.botId == -1:
+                self.game.setNextCellB(cell)
 
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))

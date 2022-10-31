@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from player.consumers.game.utils.cell import Cell
 from player.consumers.game.utils.gobang.gobang_player import GobangPlayer
 from player.models.player import Player as Player_Model
 from record.models.record import Record
@@ -8,6 +9,14 @@ from asgiref.sync import async_to_sync
 import threading
 import time
 import copy
+import uuid
+import re
+
+from player.consumers.game.thrift.code_running_client.code_running_service import CodeRunning
+from thrift import Thrift
+from thrift.transport import TSocket
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
 
 class Game(threading.Thread):
     def __init__(self, rows, cols, idA, botA, idB, botB, room_name):
@@ -32,8 +41,8 @@ class Game(threading.Thread):
             self.languageB = botB.language
             self.botCodeB = botB.content
 
-        self.playerA = GobangPlayer(idA, self.botIdA, self.languageA, self.botCodeA, [])
-        self.playerB = GobangPlayer(idB, self.botIdB, self.languageB, self.botCodeB, [])
+        self.playerA = GobangPlayer(idA, str(uuid.uuid1()), self.botIdA, self.languageA, self.botCodeA, [])
+        self.playerB = GobangPlayer(idB, str(uuid.uuid1()), self.botIdB, self.languageB, self.botCodeB, [])
 
         self.nextCellA = None
         self.nextCellB = None
@@ -44,6 +53,38 @@ class Game(threading.Thread):
         self.channel_layer = get_channel_layer()
         self.isStart = True
         self.currentRound = self.playerA.id
+
+        self.round_time = 0
+        if self.botIdA == -1 and self.botIdB == -1: self.round_time = 40 # 4s
+        else:
+            if self.languageA == 'cpp': self.round_time += 10
+            else: self.round_time += 20
+            if self.languageB == 'cpp': self.round_time += 10
+            else: self.round_time += 20
+
+        if botA: threading.Thread(target=self.estabCodeRunningConnect(self.playerA)).start()
+        if botB: threading.Thread(target=self.estabCodeRunningConnect(self.playerB)).start()
+
+    def estabCodeRunningConnect(self, player):
+        # Make socket
+        transport = TSocket.TSocket('120.76.157.21', 20104)
+        # Buffering is critical. Raw sockets are very slow
+        player.transport = TTransport.TBufferedTransport(transport)
+        # Wrap in a protocol
+        protocol = TBinaryProtocol.TBinaryProtocol(player.transport)
+        # Create a client to use the protocol encoder
+        player.client = CodeRunning.Client(protocol)
+        # Connect!
+        player.transport.open()
+        # 开启容器
+        player.client.start_container(player.uuid, player.botCode, player.language)
+        player.client.compile(player.uuid)
+
+    def closeCodeRunningConnect(self, player):
+        player.client.stop_container(player.uuid)
+        player.transport.close()
+        del player.client
+        del player.transport
 
     def setNextCellA(self, nextCellA):
         self.lock.acquire()
@@ -59,6 +100,46 @@ class Game(threading.Thread):
         finally:
             self.lock.release()
 
+    def getInput(self, player):
+        me = None
+        you = None
+        if self.playerA.id == player.id:
+            me = self.playerA
+            you = self.playerB
+        else:
+            me = self.playerB
+            you = self.playerA
+        return me.getCellsInputString() +\
+                you.getCellsInputString()
+
+    def checkResult(self, res):
+        try:
+            if res == None or len(res) == 0:
+                raise Exception("输出为空")
+            if not re.match("^[-\\+]?\\d+\s{1}[-\\+]?\\d+$", res):
+                raise Exception("非法输出：%s" % res)
+            a, b = map(int, res.split())
+            if a < 1 or a > self.rows - 1 or b < 1 or b > self.cols - 1:
+                raise Exception("非法输出：%s" % res)
+        except Exception as e:
+            return e
+        return res
+
+    def runBot(self, player):
+        player.client.prepare_data(player.uuid, self.getInput(player))
+        res = player.client.run(player.uuid)
+        ret = self.checkResult(res)
+        if res != ret:
+            # 错误提示
+            pass
+        else:
+            a, b = map(int, res.split())
+            cell = Cell(a, b)
+            if player.id == self.playerA.id:
+                self.setNextCellA(cell)
+            else:
+                self.setNextCellB(cell)
+
     def nextStep(self):
         if self.isStart:
             time.sleep(2)
@@ -66,7 +147,11 @@ class Game(threading.Thread):
         else:
             time.sleep(0.2)
 
-        for i in range(60):
+        if self.currentRound == self.playerA.id and self.playerA.botId != -1:
+            threading.Thread(target=self.runBot(self.playerA)).start()
+        if self.currentRound == self.playerB.id and self.playerB.botId != -1:
+            threading.Thread(target=self.runBot(self.playerB)).start()
+        for i in range(self.round_time):
             time.sleep(0.1)
             self.lock.acquire()
             try:
@@ -291,8 +376,6 @@ class Game(threading.Thread):
         self.sendAllMessage(resp)
         cache.delete_pattern(self.playerA.id)
         cache.delete_pattern(self.playerB.id)
-        # del MultiPlayerGobangGame.users[self.playerA.id]
-        # del MultiPlayerGobangGame.users[self.playerB.id]
 
     def run(self):
         for i in range(400):
@@ -308,3 +391,5 @@ class Game(threading.Thread):
                 self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
                 self.sendResult()
                 break
+        if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
+        if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)

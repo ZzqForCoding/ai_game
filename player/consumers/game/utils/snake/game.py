@@ -303,8 +303,6 @@ class Game(threading.Thread):
         self.sendAllMessage(resp)
         cache.delete_pattern(self.playerA.id)
         cache.delete_pattern(self.playerB.id)
-        # del MultiPlayerSnakeGame.users[self.playerA.id]
-        # del MultiPlayerSnakeGame.users[self.playerB.id]
 
     # 线程入口
     def run(self):

@@ -102,9 +102,9 @@ class Pool:
                     if self.check_match(i, j):
                         playerA = self.players[i]
                         playerB = self.players[j]
+                        self.match_success([playerA, playerB])
                         self.players = self.players[:i] + self.players[i + 1:j] + self.players[j + 1:]
                         self.wt = self.wt[:i] + self.wt[i + 1:j] + self.wt[j + 1:]
-                        self.match_success([playerA, playerB])
                         flag = True
                         break
                 if flag: break

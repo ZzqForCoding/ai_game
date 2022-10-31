@@ -97,7 +97,6 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
             botB = None
             if data['b_operate'] == 0:
                 botB = await database_sync_to_async(db_get_bot)(int(data['b_bot_id']))
-
             game = Game(8, 8, a_id, botA, b_id, botB, room_name)
             game.start()
             MultiPlayerReversiGame.users[a_id].game = game
@@ -105,7 +104,11 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
 
             resp = {
                 'a_id': game.playerA.id,
+                'a_language': "" if botA == None else botA.language,
+                'a_is_robot': True if botA != None else False,
                 'b_id': game.playerB.id,
+                'b_language': "" if botB == None else botB.language,
+                'b_is_robot': True if botB != None else False,
                 'current_round': game.playerA.id
             }
 
