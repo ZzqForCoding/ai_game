@@ -2,6 +2,8 @@ import os
 import subprocess
 from subprocess import PIPE
 from compiler import config
+import json
+import time
 
 debug = False
 
@@ -59,8 +61,16 @@ class Sandbox:
         return result
 
     def compile(self):
-        if self.compiled: return 'ok'
-        if self.config.get('compile_command') is None: return 'ok'
+        if self.compiled:
+            return json.dumps({
+                'returncode': 0,
+                'status': 'ok'
+            })
+        if self.config.get('compile_command') is None:
+            return json.dumps({
+                'returncode': 0,
+                'status': 'ok'
+            })
 
         compile_command = self.config['compile_command'].format(code=self.path_code, target=self.path_target)
         command = 'docker exec -u zzq_code %s /bin/bash -c "%s"' % (self.container, compile_command)
@@ -70,10 +80,23 @@ class Sandbox:
             if debug:
                 raise RuntimeError('Compile Error: %s' % p.stderr)
             else:
-                return 'Compile Error: %s' % p.stderr.decode()
+                ret = {
+                    'returncode': p.returncode,
+                    'status': 'Compile Error',
+                    'desp': p.stderr.decode()
+                }
+                return json.dumps(ret)
         self.compiled = True
         result = self.update_container(1, self.config['memory_limit'])
-        return result
+        ret = {}
+        if result != 'ok':
+            ret['returncode'] = 256
+            ret['status'] = "Internal Error"
+            ret['desp'] = result
+        else:
+            ret['returncode'] = 0
+            ret['status'] = "ok"
+        return json.dumps(ret)
 
     def prepare_data(self, data):
         file_data = open(self.path_data, 'w')
@@ -91,16 +114,34 @@ class Sandbox:
 
     def run(self):
         run_command = self.config['run_command'].format(target=self.path_target, data=self.path_data)
+        st = time.perf_counter()
         p = subprocess.run('docker exec -u zzq_code %s /bin/bash -c "timeout %d %s"' % (self.container, (self.config['time_limit'] + self.config['sub_time_limit']) / 1000, run_command), stdout=PIPE, stderr=PIPE, shell=True, encoding='utf-8')
+        ed = time.perf_counter()
+        t = int(float(ed - st) * 1000)
         if p.returncode != 0:
             # 运行错误
             if debug:
                 raise RuntimeError('Failed to run program! Detail: \n%s' % p.stderr)
             else:
                 if p.stderr == None or len(p.stderr) == 0:
-                    return 'Time Limit Exceeded'
-                return 'Runtime Error: %s' % p.stderr
-        return p.stdout
+                    ret = {
+                        "returncode": p.returncode,
+                        "status": "Time Limit Exceeded",
+                        "desp": "",
+                    }
+                    return json.dumps(ret)
+                ret = {
+                    "returncode": p.returncode,
+                    "status": "Runtime Error",
+                    "desp": p.stderr.decode(),
+                }
+                return json.dumps(ret)
+        ret = {
+            "returncode": 0,
+            "output": p.stdout,
+            "time": t
+        }
+        return json.dumps(ret)
 
     # 获取docker镜像列表
     def get_local_images(self):
