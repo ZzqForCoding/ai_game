@@ -89,7 +89,7 @@
                     :ellipsis="false"
                     @select="handleSelect"
                 >
-                    <div class="current-page">
+                    <div class="current-page" v-if="!$store.state.user.pulling_info">
                         <span v-if="$store.state.backPage !== ''" class="back-menu" @click="showConfirmBack">
                             <el-icon :size="25"><Back /></el-icon>
                         </span>

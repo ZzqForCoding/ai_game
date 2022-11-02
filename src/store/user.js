@@ -125,7 +125,7 @@ export default {
                         console.log(resp);
                     }
                 });
-            }, 4.5 * 60 * 1000);
+            }, 55 * 60 * 1000);
             context.commit("setIntervalFunc", func);
         },    
     },

@@ -154,6 +154,39 @@
                                         theme="textmate"
                                         style="height: 300px; width: 100%;" />
                                 </el-form-item>
+                                <el-card class="debug-card" v-if="showDebugPannel">
+                                    <template #header>
+                                        <div class="card-header">
+                                            <div>
+                                                <span>
+                                                    代码运行状态：
+                                                </span>
+                                                <span :style="codeStatus === 'Finished' ? 'color: rgb(68, 157, 68); font-weight: 600;' : codeStatus === 'Running...' ? 'color: rgb(51, 122, 183); font-weight: 600;' : 'color: rgb(208, 84, 81); font-weight: 600;'">
+                                                    {{codeStatus}}
+                                                </span>
+                                                <button class="card-close-btn" @click="closeDebugPannel"> x </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="card-body">
+                                        <div class="pannel-body">
+                                            <div>
+                                                <label for="run-code-stdin" style="font-weight: normal; font-size: 15px;">输入</label>
+                                                <br>
+                                                <el-input id="run-code-stdin" type="textarea" class="card-code-input" maxlength="2000" rows="1" resize="none" v-model="codeInput" :autosize="{ minRows: 1 }" style="margin-top: 5px;"></el-input>
+                                            </div>
+                                            <div style="margin-top: 5px">
+                                                <label style="font-weight: normal; font-size: 15px;">输出</label>
+                                                <br>
+                                                <el-input id="run-code-stdout" type="textarea" class="card-code-output" disabled maxlength="2000" rows="1" resize="none" v-model="codeOutput" :autosize="{ minRows: 1 }" style="margin-top: 5px;"></el-input>
+                                            </div>
+                                            <div style="margin-top: 5px;" v-if="codeStatus === 'Finished'">
+                                                运行时间：
+                                                <span>{{codeTime}}ms</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </el-card>
                             </el-form>
                             <template #footer>
                                 <span class="dialog-footer">
