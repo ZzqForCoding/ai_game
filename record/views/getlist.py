@@ -22,8 +22,8 @@ class GetListView(APIView):
         page_records = pagination.paginate_queryset(queryset=records, request=request, view=self)
         items = []
         for record in page_records:
-            playerA = Player.objects.get(id=record.a_id)
-            playerB = Player.objects.get(id=record.b_id)
+            playerA = Player.objects.get(user__id=record.a_id)
+            playerB = Player.objects.get(user__id=record.b_id)
             item = {}
             item['game_id'] = record.game.id
             item['game'] = record.game.name

@@ -28,13 +28,11 @@ if [[ $result = "" ]]; then
 
   tmux split-window -t $TMUX_RUN_SESSION_NAME:0.0 -v
   tmux send-keys -t $TMUX_RUN_SESSION_NAME "cd match_system/src/" C-m
-  tmux send-keys -t $TMUX_RUN_SESSION_NAME "./main" C-m
+  tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 main.py" C-m
 
   tmux split-window -t $TMUX_RUN_SESSION_NAME:0.0 -v
   tmux send-keys -t $TMUX_RUN_SESSION_NAME "daphne -b 0.0.0.0 -p 5015 ai_game_platform.asgi:application" C-m
   tmux split-window -t $TMUX_RUN_SESSION_NAME:0.2 -v
-  tmux send-keys -t $TMUX_RUN_SESSION_NAME "cd message_system/src/" C-m
-  tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 main.py" C-m
 
   tmux new-session -d -s $TMUX_DEV_SESSION_NAME
   tmux split-window -h

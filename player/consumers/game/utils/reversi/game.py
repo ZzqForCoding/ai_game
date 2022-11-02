@@ -11,6 +11,7 @@ import time
 import copy
 import uuid
 import re
+import json
 
 from player.consumers.game.thrift.code_running_client.code_running_service import CodeRunning
 from thrift import Thrift
@@ -49,8 +50,6 @@ class Game(threading.Thread):
             self.botIdB = botB.id
             self.languageB = botB.language
             self.botCodeB = botB.content
-
-        print("bot: ", self.botIdA, self.botIdB)
 
         self.playerA = ReversiPlayer(idA, str(uuid.uuid1()), self.botIdA, self.languageA, self.botCodeA, [Cell(3, 3), Cell(4, 4)])
         self.playerB = ReversiPlayer(idB, str(uuid.uuid1()), self.botIdB, self.languageB, self.botCodeB, [Cell(3, 4), Cell(4, 3)])
@@ -142,7 +141,11 @@ class Game(threading.Thread):
 
     def runBot(self, player):
         player.client.prepare_data(player.uuid, self.getInput(player))
-        res = player.client.run(player.uuid)
+        res = json.loads(player.client.run(player.uuid))
+        if res['returncode'] != 0:
+            return
+        else:
+            res = res['output']
         ret = self.checkResult(res)
         if res != ret:
             # 错误提示
@@ -254,13 +257,13 @@ class Game(threading.Thread):
         )
 
     def updatePlayerRating(self, player, rating):
-        p = Player_Model.objects.get(id=player.id)
+        p = Player_Model.objects.get(user__id=player.id)
         p.rating = rating
         p.save()
 
     def saveToDatabase(self):
-        ratingA = Player_Model.objects.get(id=self.playerA.id).rating
-        ratingB = Player_Model.objects.get(id=self.playerB.id).rating
+        ratingA = Player_Model.objects.get(user__id=self.playerA.id).rating
+        ratingB = Player_Model.objects.get(user__id=self.playerB.id).rating
 
         if self.loser == "A":
             ratingA -= 2
@@ -337,47 +340,48 @@ class Game(threading.Thread):
             self.toggleRoundLock.release()
 
     def run(self):
-        for i in range(60):
-            t = self.nextStep()
-            if t == 1:
-                self.judge()
-                if self.status == "playing":
-                    self.sendNextRound()
-                else:
+        try:
+            for i in range(60):
+                t = self.nextStep()
+                if t == 1:
+                    self.judge()
+                    if self.status == "playing":
+                        self.sendNextRound()
+                    else:
+                        self.sendResult()
+                        return
+                elif t == 0:
+                    self.status = "overtime"
+                    self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
                     self.sendResult()
                     return
-            elif t == 0:
-                self.status = "overtime"
-                self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
-                self.sendResult()
-                return
-            elif t == 2:
-                tr = None
-                self.toggleRoundLock.acquire()
-                try:
-                    tr = self.toggleRound
-                finally:
-                    self.toggleRoundLock.release()
-                if tr:
-                    if self.currentRound == self.playerA.id:
-                        self.currentRound = self.playerB.id
-                    elif self.currentRound == self.playerB.id:
-                        self.currentRound = self.playerA.id
-                resp = {
-                    'event': "toggleRound"
-                }
-                print("send toggleROund")
-                self.sendAllMessage(resp)
-                time.sleep(1)
-            if self.aCnt == 0 or self.bCnt == 0:
-                break
-        if self.aCnt > self.bCnt:
-            self.status = "A Win"
-            self.loser = "B"
-        elif self.bCnt > self.aCnt:
-            self.status = "B Win"
-            self.loser = "A"
-        self.sendResult()
-
-        if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
-        if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
+                elif t == 2:
+                    tr = None
+                    self.toggleRoundLock.acquire()
+                    try:
+                        tr = self.toggleRound
+                    finally:
+                        self.toggleRoundLock.release()
+                    if tr:
+                        if self.currentRound == self.playerA.id:
+                            self.currentRound = self.playerB.id
+                        elif self.currentRound == self.playerB.id:
+                            self.currentRound = self.playerA.id
+                    resp = {
+                        'event': "toggleRound"
+                    }
+                    print("send toggleROund")
+                    self.sendAllMessage(resp)
+                    time.sleep(1)
+                if self.aCnt == 0 or self.bCnt == 0:
+                    break
+            if self.aCnt > self.bCnt:
+                self.status = "A Win"
+                self.loser = "B"
+            elif self.bCnt > self.aCnt:
+                self.status = "B Win"
+                self.loser = "A"
+            self.sendResult()
+        finally:
+            if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
+            if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)

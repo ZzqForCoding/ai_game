@@ -11,6 +11,7 @@ import time
 import copy
 import uuid
 import re
+import json
 
 from player.consumers.game.thrift.code_running_client.code_running_service import CodeRunning
 from thrift import Thrift
@@ -127,7 +128,11 @@ class Game(threading.Thread):
 
     def runBot(self, player):
         player.client.prepare_data(player.uuid, self.getInput(player))
-        res = player.client.run(player.uuid)
+        res = json.loads(player.client.run(player.uuid))
+        if res['returncode'] != 0:
+            return
+        else:
+            res = res['output']
         ret = self.checkResult(res)
         if res != ret:
             # 错误提示
@@ -301,13 +306,13 @@ class Game(threading.Thread):
         )
 
     def updatePlayerRating(self, player, rating):
-        p = Player_Model.objects.get(id=player.id)
+        p = Player_Model.objects.get(user__id=player.id)
         p.rating = rating
         p.save()
 
     def saveToDatabase(self):
-        ratingA = Player_Model.objects.get(id=self.playerA.id).rating
-        ratingB = Player_Model.objects.get(id=self.playerB.id).rating
+        ratingA = Player_Model.objects.get(user__id=self.playerA.id).rating
+        ratingB = Player_Model.objects.get(user__id=self.playerB.id).rating
 
         if self.loser == "A":
             ratingA -= 2
@@ -378,18 +383,20 @@ class Game(threading.Thread):
         cache.delete_pattern(self.playerB.id)
 
     def run(self):
-        for i in range(400):
-            if self.nextStep():
-                self.judge()
-                if self.status == "playing":
-                    self.sendNextRound()
+        try:
+            for i in range(400):
+                if self.nextStep():
+                    self.judge()
+                    if self.status == "playing":
+                        self.sendNextRound()
+                    else:
+                        self.sendResult()
+                        break
                 else:
+                    self.status = "overtime"
+                    self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
                     self.sendResult()
                     break
-            else:
-                self.status = "overtime"
-                self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
-                self.sendResult()
-                break
-        if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
-        if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
+        finally:
+            if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
+            if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)

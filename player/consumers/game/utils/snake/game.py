@@ -102,13 +102,14 @@ class Game(threading.Thread):
         return res
 
     def updatePlayerRating(self, player, rating):
-        p = Player_Model.objects.get(id=player.id)
+        p = Player_Model.objects.get(user__id=player.id)
         p.rating = rating
         p.save()
 
     def saveToDataBase(self):
-        ratingA = Player_Model.objects.get(id=self.playerA.id).rating
-        ratingB = Player_Model.objects.get(id=self.playerB.id).rating
+        print("id: ", self.playerA.id, self.playerB.id)
+        ratingA = Player_Model.objects.get(user__id=self.playerA.id).rating
+        ratingB = Player_Model.objects.get(user__id=self.playerB.id).rating
 
         if self.loser == "A":
             ratingA -= 2
@@ -191,8 +192,13 @@ class Game(threading.Thread):
 
     def runBot(self, player):
         player.client.prepare_data(player.uuid, self.getInput(player))
-        res = player.client.run(player.uuid)
+        res = json.loads(player.client.run(player.uuid))
+        if res['returncode'] != 0:
+            return
+        else:
+            res = res['output']
         ret = self.checkResult(res)
+
         if res != ret:
             # 错误提示
             pass
@@ -306,33 +312,36 @@ class Game(threading.Thread):
 
     # 线程入口
     def run(self):
-        for i in range(1000):
-            if self.nextStep():
-                self.judge()
-                if self.status == "playing":
-                    self.sendMove()
+        try:
+            for i in range(1000):
+                if self.nextStep():
+                    self.judge()
+                    if self.status == "playing":
+                        self.sendMove()
+                    else:
+                        self.sendResult()
+                        break
                 else:
+                    self.status = "overtime"
+                    self.lock.acquire()
+                    try:
+                        nsa = self.nextStepA
+                        nsb = self.nextStepB
+                    finally:
+                        self.lock.release()
+                    if nsa == None and nsb == None:
+                        self.loser = "all"
+                    elif nsa == None:
+                        self.loser = "A"
+                    else:
+                        self.loser = "B"
+
                     self.sendResult()
                     break
-            else:
-                self.status = "overtime"
-                self.lock.acquire()
-                try:
-                    nsa = self.nextStepA
-                    nsb = self.nextStepB
-                finally:
-                    self.lock.release()
-                if nsa == None and nsb == None:
-                    self.loser = "all"
-                elif nsa == None:
-                    self.loser = "A"
-                else:
-                    self.loser = "B"
+        finally:
+            if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
+            if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
 
-                self.sendResult()
-                break
-        if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
-        if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
 
     # 获取地图
     def getG(self):

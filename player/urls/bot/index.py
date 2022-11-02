@@ -4,6 +4,7 @@ from player.views.bot.remove import RemoveView
 from player.views.bot.update import UpdateView
 from player.views.bot.getlist import GetListView
 from player.views.bot.getlist_game import GetListByGameView
+from player.views.bot.debug import DebugView
 
 urlpatterns = [
     path('add/', AddView.as_view(), name='bot_add'),
@@ -11,4 +12,5 @@ urlpatterns = [
     path('update/', UpdateView.as_view(), name='bot_update'),
     path('getlist/', GetListView.as_view(), name='bot_getlist_user'),
     path('getlist_game/', GetListByGameView.as_view(), name='bot_getlist_game'),
+    path('debug/', DebugView.as_view(), name='bot_debug'),
 ]
