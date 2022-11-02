@@ -13,7 +13,7 @@ class RecordPagination(PageNumberPagination):
     max_page_size = None
 
 class GetListView(APIView):
-    permission_classes = ([OneUserLogin])
+    # permission_classes = ([OneUserLogin])
 
     def get(self, request):
         records = Record.objects.all().order_by('-createtime')
