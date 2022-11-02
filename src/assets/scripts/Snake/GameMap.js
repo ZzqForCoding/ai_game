@@ -35,9 +35,13 @@ export class GameMap extends AcGameObject {
 
     start() {
         this.create_walls();
-        let selfColor = 0, yourColor = 0;
-        if(this.store.state.pk.a_id === this.store.state.user.id) selfColor = "#4876EC", yourColor = "#F94848";
-        else selfColor = "#F94848", yourColor = "#4876EC";
+        let selfColor = '', yourColor = '';
+        if(this.store.state.record.is_record) {
+            selfColor = "#F94848", yourColor = "#4876EC";
+        } else {
+            if(this.store.state.pk.a_id === this.store.state.user.id) selfColor = "#4876EC", yourColor = "#F94848";
+            else selfColor = "#F94848", yourColor = "#4876EC";
+        }
         this.snakes = [
             new Snake({id: this.store.state.pk.a_id, color: selfColor, r: this.rows - 2, c: 1}, this),
             new Snake({id: this.store.state.pk.b_id, color: yourColor, r: 1, c: this.cols - 2}, this),

@@ -54,7 +54,7 @@ export class GameMap extends AcGameObject {
         this.dx = [-1, -1, -1, 0, 1, 1,  1,  0];
         this.dy = [-1,  0,  1, 1, 1, 0, -1, -1];
         if(this.store.state.record.is_record) {
-            let a = 0, b = 0, k = 0;
+            let a = 2, b = 2, k = 4;
             const a_steps = JSON.parse(this.store.state.record.a_steps);
             const b_steps = JSON.parse(this.store.state.record.b_steps);
             // const loser = this.store.state.record.record_loser;
@@ -87,6 +87,7 @@ export class GameMap extends AcGameObject {
             bCnt
         });
         this.aCnt = aCnt, this.bCnt = bCnt;
+        console.log(this.chesses)
     }
 
     update_size() {

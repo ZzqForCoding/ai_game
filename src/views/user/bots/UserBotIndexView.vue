@@ -157,6 +157,7 @@
                             </el-form>
                             <template #footer>
                                 <span class="dialog-footer">
+                                    <el-button type="warning" @click="debugCode(bot.language, bot.content)" :loading="submitCoding">调试</el-button>
                                     <el-button type="primary" @click="confirmCreateBot">创建</el-button>
                                     <el-button @click="cancelCreateBot">取消</el-button>
                                 </span>
@@ -262,9 +263,45 @@
                                 theme="textmate"
                                 style="height: 300px; width: 100%;" />
                         </el-form-item>
+                        <el-card class="debug-card" v-if="showDebugPannel">
+                            <template #header>
+                                <div class="card-header">
+                                    <div>
+                                        <span>
+                                            代码运行状态：
+                                        </span>
+                                        <span :style="codeStatus === 'Finished' ? 'color: rgb(68, 157, 68); font-weight: 600;' : codeStatus === 'Running...' ? 'color: rgb(51, 122, 183); font-weight: 600;' : 'color: rgb(208, 84, 81); font-weight: 600;'">
+                                            {{codeStatus}}
+                                        </span>
+                                        <button class="card-close-btn" @click="closeDebugPannel"> x </button>
+                                    </div>
+                                </div>
+                            </template>
+                            <div class="card-body">
+                                <div class="pannel-body">
+                                    <div>
+                                        <label for="run-code-stdin" style="font-weight: normal; font-size: 15px;">输入</label>
+                                        <br>
+                                        <el-input id="run-code-stdin" type="textarea" class="card-code-input" maxlength="2000" rows="1" resize="none" v-model="codeInput" :autosize="{ minRows: 1 }" style="margin-top: 5px;"></el-input>
+                                    </div>
+                                    <div style="margin-top: 5px">
+                                        <label style="font-weight: normal; font-size: 15px;">输出</label>
+                                        <br>
+                                        <el-input id="run-code-stdout" type="textarea" class="card-code-output" disabled maxlength="2000" rows="1" resize="none" v-model="codeOutput" :autosize="{ minRows: 1 }" style="margin-top: 5px;"></el-input>
+                                    </div>
+                                    <div style="margin-top: 5px;" v-if="codeStatus === 'Finished'">
+                                        运行时间：
+                                        <span>{{codeTime}}ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </el-card>
                     </el-form>
                     <template #footer>
                         <span class="dialog-footer">
+                            <el-button type="warning" @click="debugCode(currentOpBot.language, currentOpBot.content)" :loading="submitCoding">
+                                调试
+                            </el-button>
                             <el-button type="primary" @click="confirmEditBot">保存修改</el-button>
                             <el-button @click="cancelEditBot">取消</el-button>
                         </span>
@@ -323,6 +360,12 @@ export default {
         let fontsize = ref(11);
         let editor_mode = ref('vscode');
         let editor_space = ref(4);
+        let submitCoding = ref(false);
+        let codeInput = ref('');
+        let codeOutput = ref('');
+        let showDebugPannel = ref(false);
+        let codeStatus = ref('');
+        let codeTime = ref(0);
         
         const editorInit = (editor) => {
             editor.renderer.setShowPrintMargin(false);
@@ -620,6 +663,51 @@ export default {
             ElMessage('取消删除');
         }
 
+        const debugCode = (lang, code) => {
+            showDebugPannel.value = true;
+            codeOutput.value = "";
+            submitCoding.value = true;
+            codeStatus.value = "Running...";
+            lang = lang.trim(), code = code.trim();
+            if(code === "") {
+                ElMessage.error("代码为空，无法调试");
+                submitCoding.value = false;
+                return;
+            }
+            if(lang === "") {
+                ElMessage.error("请选择语言");
+                submitCoding.value = false;
+                return;
+            }
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/bot/debug/",
+                type: "post",
+                data: {
+                    lang: lang,
+                    code: code,
+                    data: codeInput.value,
+                },
+                headers: {
+                    "Authorization": "Bearer " + store.state.user.access,
+                },
+                success(resp) {
+                    codeStatus.value = resp.status;
+                    codeOutput.value = resp.output;
+                    submitCoding.value = false;
+                    if(codeStatus.value === "Finished") {
+                        codeTime.value = resp.time;
+                    }
+                },
+            });
+        }
+
+        const closeDebugPannel = () => {
+            showDebugPannel.value = false;
+            codeOutput.value = "";
+            codeInput.value = "";
+            codeTime.value = 0;
+        }
+
         return {
             bots,
             games,
@@ -652,6 +740,14 @@ export default {
             editor_mode,
             editor_space,
             refreshEditor,
+            debugCode,
+            submitCoding,
+            codeInput,
+            codeOutput,
+            showDebugPannel,
+            closeDebugPannel,
+            codeStatus,
+            codeTime,
             rules: {
                 title: [
                     { required: true, message: '名称不得为空！', trigger: 'blur' },
@@ -787,4 +883,60 @@ export default {
     transform: scale(1.2);
     transition: 100ms;
 }
+
+.debug-card:deep(.el-card__header) {
+    color: #333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+
+.debug-card .card-close-btn {
+    -webkit-appearance: none;
+    padding: 0;
+    cursor: pointer;
+    background: 0 0;
+    border: none;
+}
+
+.debug-card .card-close-btn {
+    float: right;
+    font-size: 21px;
+    font-weight: 700;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.2;
+    line-height: 21px;
+}
+
+.debug-card .card-close-btn:hover {
+    opacity: 1;
+}
+
+.debug-card .pannel-body {
+    padding: 7px 60px 10px 35px;
+}
+
+.debug-card .card-code-input:deep(.el-textarea__inner), .debug-card .card-code-output:deep(.el-textarea__inner) {
+    background-color: rgb(248, 248, 248);
+    font-size: 15px;
+    font-family: monospace;
+}
+
+.debug-card .card-code-output:deep(.el-textarea__inner) {
+    color: black;
+    font-size: 12px;
+}
+
+/* .debug-card .card-code-output {
+    background-color: rgb(248, 248, 248);
+    border: 1px solid #CCCCCC;
+    border-radius: 5px;
+    margin-top: 3px;
+    padding: 6px 12px;
+    resize: none;
+    font-family: monospace;
+    overflow: hidden;
+    min-height: 20px;
+    height: 20px;
+    font-size: 15px;
+} */
 </style>

@@ -15,14 +15,6 @@
                 <div v-if="game === 3" class="chess" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: white;' : 'background-color: black;'" />
                 <div  v-if="game === 3 && $store.state.pk.a_id === $store.state.user.id" style="color: white; font-size: 18px; font-weight: 600;">白子：{{ $store.state.pk.aCnt }}</div>
                 <div  v-if="game === 3 && $store.state.pk.b_id === $store.state.user.id" style="color: black; font-size: 18px; font-weight: 600;">黑子：{{ $store.state.pk.bCnt }}</div>
-                <div v-if="$store.state.pk.a_id === $store.state.user.id ? $store.state.pk.a_is_robot : $store.state.pk.b_is_robot">
-                    <svg t="1662877386013" class="icon" viewBox="0 0 1280 1024" version="1.1"
-                        xmlns="http://www.w3.org/2000/svg" p-id="2479" width="30" height="30">
-                        <path
-                            d="M0 512v256c0 35.4 28.6 64 64 64h64V448H64c-35.4 0-64 28.6-64 64zM928 192H704V64c0-35.4-28.6-64-64-64s-64 28.6-64 64v128H352c-88.4 0-160 71.6-160 160v544c0 70.6 57.4 128 128 128h640c70.6 0 128-57.4 128-128V352c0-88.4-71.6-160-160-160zM512 832h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m256 240h-128v-64h128v64z m192 0h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m384-144h-64v384h64c35.4 0 64-28.6 64-64V512c0-35.4-28.6-64-64-64z"
-                            fill="#1296db" p-id="2480"></path>
-                    </svg>
-                </div>
                 <div v-if="$store.state.pk.a_id === $store.state.user.id && $store.state.pk.a_is_robot">
                     <el-tag type="danger" class="mx-1" effect="dark" round>
                         {{ $store.state.pk.a_language }}
@@ -75,14 +67,6 @@
                         {{ $store.state.pk.a_language }}
                     </el-tag>
                 </div>
-                <div v-if="$store.state.pk.a_id === $store.state.user.id ? $store.state.pk.b_is_robot : $store.state.pk.a_is_robot">
-                    <svg t="1662877386013" class="icon" viewBox="0 0 1280 1024" version="1.1"
-                        xmlns="http://www.w3.org/2000/svg" p-id="2479" width="30" height="30">
-                        <path
-                            d="M0 512v256c0 35.4 28.6 64 64 64h64V448H64c-35.4 0-64 28.6-64 64zM928 192H704V64c0-35.4-28.6-64-64-64s-64 28.6-64 64v128H352c-88.4 0-160 71.6-160 160v544c0 70.6 57.4 128 128 128h640c70.6 0 128-57.4 128-128V352c0-88.4-71.6-160-160-160zM512 832h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m256 240h-128v-64h128v64z m192 0h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m384-144h-64v384h64c35.4 0 64-28.6 64-64V512c0-35.4-28.6-64-64-64z"
-                            fill="#1296db" p-id="2480"></path>
-                    </svg>
-                </div>
                 <div class="chess" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: black;' : 'background-color: white;'" v-if="game === 1">
                 </div>
                 <div class="body" :style="$store.state.pk.a_id === $store.state.user.id ? 'background-color: #F94848;' : 'background-color: #4876EC;'" v-if="game === 2">
@@ -106,20 +90,12 @@
                 </div>
                 <div class="chess" style="background-color: white;" v-if="game === 1">
                 </div>
-                <div class="body" style="background-color: #4876EC;" v-if="game === 2">
+                <div class="body" style="background-color: #F94848;" v-if="game === 2">
                     <div class="eye" />
                     <div class="eye" />
                 </div>
                 <div v-if="game === 3" class="chess" style="background-color: white;" />
                 <div v-if="game === 3" style="color: white; font-size: 18px; font-weight: 600;">白子：{{ $store.state.pk.aCnt }}</div>
-                <div v-if="$store.state.record.a_is_robot">
-                    <svg t="1662877386013" class="icon" viewBox="0 0 1280 1024" version="1.1"
-                        xmlns="http://www.w3.org/2000/svg" p-id="2479" width="30" height="30">
-                        <path
-                            d="M0 512v256c0 35.4 28.6 64 64 64h64V448H64c-35.4 0-64 28.6-64 64zM928 192H704V64c0-35.4-28.6-64-64-64s-64 28.6-64 64v128H352c-88.4 0-160 71.6-160 160v544c0 70.6 57.4 128 128 128h640c70.6 0 128-57.4 128-128V352c0-88.4-71.6-160-160-160zM512 832h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m256 240h-128v-64h128v64z m192 0h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m384-144h-64v384h64c35.4 0 64-28.6 64-64V512c0-35.4-28.6-64-64-64z"
-                            fill="#1296db" p-id="2480"></path>
-                    </svg>
-                </div>
                 <div v-if="$store.state.record.a_is_robot">
                     <el-tag type="danger" class="mx-1" effect="dark" round>
                         {{ $store.state.record.a_language }}
@@ -132,17 +108,9 @@
                         {{ $store.state.record.b_language }}
                     </el-tag>
                 </div>
-                <div v-if="$store.state.record.b_is_robot">
-                    <svg t="1662877386013" class="icon" viewBox="0 0 1280 1024" version="1.1"
-                        xmlns="http://www.w3.org/2000/svg" p-id="2479" width="30" height="30">
-                        <path
-                            d="M0 512v256c0 35.4 28.6 64 64 64h64V448H64c-35.4 0-64 28.6-64 64zM928 192H704V64c0-35.4-28.6-64-64-64s-64 28.6-64 64v128H352c-88.4 0-160 71.6-160 160v544c0 70.6 57.4 128 128 128h640c70.6 0 128-57.4 128-128V352c0-88.4-71.6-160-160-160zM512 832h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m256 240h-128v-64h128v64z m192 0h-128v-64h128v64z m-64-240c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z m384-144h-64v384h64c35.4 0 64-28.6 64-64V512c0-35.4-28.6-64-64-64z"
-                            fill="#1296db" p-id="2480"></path>
-                    </svg>
-                </div>
                 <div class="chess" style="background-color: black;" v-if="game === 1">
                 </div>
-                <div class="body" style="background-color: #F94848;" v-if="game === 2">
+                <div class="body" style="background-color: #4876EC;" v-if="game === 2">
                     <div class="eye" />
                     <div class="eye" />
                 </div>
