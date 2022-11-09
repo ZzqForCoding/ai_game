@@ -61,9 +61,9 @@
                 <el-tab-pane label="动态">
                     有什么新鲜事想告诉大家！快去发帖吧！
                 </el-tab-pane>
-                <el-tab-pane label="发帖">
+                <!-- <el-tab-pane label="发帖">
                     快去讨论讨论游戏叭！
-                </el-tab-pane>
+                </el-tab-pane> -->
             </el-tabs>
         </el-col>
     </el-row>
