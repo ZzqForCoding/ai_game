@@ -59,6 +59,7 @@ import MatchGround from '@/components/MatchGround.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
+import { ElMessage } from 'element-plus';
 
 export default {
     name: 'PkIndexView',
@@ -144,6 +145,8 @@ export default {
                             store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.commit("updateFirstMove", store.state.pk.a_id);
                         }
+                    } else if (data.event === "prompt") {
+                        ElMessage(data.prompt);
                     }
                 }
 
@@ -174,6 +177,7 @@ export default {
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
                     if (data.username === store.state.user.username) return;
+                    console.log(data);
                     if (data.event === "start_game") {
                         store.commit("updateOpponent", {
                             username: data.username,
@@ -223,6 +227,8 @@ export default {
                         }
                         // const scroll = unref(msgScroll);
                         // scroll.setScrollTop(80000);
+                    } else if (data.event === "prompt") {
+                        ElMessage(data.prompt);
                     }
                 }
 
@@ -299,6 +305,8 @@ export default {
                         setTimeout(() => {
                             store.commit("updateFirstMove", store.state.pk.firstMove === store.state.pk.a_id ? store.state.pk.b_id : store.state.pk.a_id);
                         }, 1000);
+                    } else if (data.event === "prompt") {
+                        ElMessage(data.prompt);
                     }
                 }
 

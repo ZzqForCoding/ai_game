@@ -12,19 +12,19 @@
                     <el-table-column label="rank" align="center" prop="rank" width="140" />
                     <el-table-column label="玩家" align="center">
                         <template #default="scope">
-                            <div class="userinfo">
-                                <el-avatar shape="square" size="small" :src="scope.row.photo" />
-                                <span class="player-card-username">
-                                    <el-link type="primary">
-                                        <span class="ranklist-username" style="margin-left: 8px;">
+                            <div class="player-container">
+                                <div class="player-card" @click="enterPlayerSpace(scope.row.id)">
+                                    <el-avatar shape="square" size="small" :src="scope.row.photo" />
+                                    <span class="player-card-username">
+                                        <span class="ranklist-username">
                                             {{ scope.row.username }}
                                         </span>
-                                    </el-link>
-                                    <span v-if="is_find && $store.state.user.username === scope.row.username" style="height: 15px;">
-                                        <el-icon :size="15">
-                                            <Back />
-                                        </el-icon>
                                     </span>
+                                </div>
+                                <span v-if="is_find && $store.state.user.username === scope.row.username" style="height: 15px; margin-left: 5px;">
+                                    <el-icon :size="15">
+                                        <Back />
+                                    </el-icon>
                                 </span>
                             </div>
                         </template>
@@ -50,6 +50,7 @@
 <script>
 import { useStore } from 'vuex';
 import $ from 'jquery';
+import router from '@/router';
 import { ref, onMounted } from 'vue';
 
 export default {
@@ -101,6 +102,17 @@ export default {
             });
         }
 
+        const enterPlayerSpace = userId => {
+            router.push(
+                { 
+                    name: "myspace_index",
+                    params: {
+                        userId
+                    }
+                }
+            );
+        }
+
         return {
             players,
             total_players,
@@ -108,6 +120,7 @@ export default {
             findme,
             is_find,
             current_page,
+            enterPlayerSpace,
         }
     }
 }
@@ -119,10 +132,24 @@ export default {
     font-weight: 600;
 }
 
-.userinfo {
+.player-container {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.player-card {
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    height: 35px;
+    width: 90px;
+}
+
+.player-card:hover {
+    transform: scale(1.02);
+    background-color: #ccc;
+    transition: 100ms;
 }
 
 .ranklist-username {
@@ -131,6 +158,7 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 60px;
+    color: #409EFF;
 }
 
 .player-card-username {

@@ -6,7 +6,7 @@ import RecordContentView from '@/views/record/RecordContentView'
 import DiscussionView from '@/views/discussion/DiscussionView'
 import FreshNewsView from '@/views/fresh_news/FreshNewsView'
 import MessageBoardView from '@/views/message_board/MessageBoardView'
-import UserBotIndexView from '@/views/user/bots/UserBotIndexView'
+import SpaceMainView from '@/views/myspace/SpaceMainView'
 import NotFound from '@/views/error/NotFound'
 import UserAccountLoginView from '@/views/user/account/UserAccountLoginView'
 import UserAccountRegisterView from '@/views/user/account/UserAccountRegisterView'
@@ -96,13 +96,13 @@ const routes = [
         }
     },
     {
-        path: '/user/bot/',
-        name: 'user_bot_index',
-        component: UserBotIndexView,
+        path: '/myspace/:userId/',
+        name: 'myspace_index',
+        component: SpaceMainView,
         meta: {
             requestAuth: true,
-            description: '我的Bot',
-            isRoot: true,
+            description: '我的空间',
+            isRoot: false,
         }
     },
     {

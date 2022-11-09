@@ -54,7 +54,7 @@
                         </el-menu-item>
                     </router-link>
 
-                    <router-link class="link-text" :to="{name: 'discussion_index'}">
+                    <!-- <router-link class="link-text" :to="{name: 'discussion_index'}">
                         <el-menu-item index="5">
                             <el-icon :size="30"><Comment /></el-icon>
                             <template #title>讨论区</template>
@@ -68,7 +68,7 @@
                             </el-icon>
                             <template #title>留言板</template>
                         </el-menu-item>
-                    </router-link>
+                    </router-link> -->
                     
                     <el-button @click="collapse" circle class="collapse-btn" color="#626aef">
                         <el-icon :size="17" v-if="isCollapse">
@@ -133,8 +133,8 @@
                             </span>
                             <template #dropdown>
                                 <el-dropdown-menu style="user-select: none;">
-                                    <router-link class="link-text" :to="{name: 'user_bot_index'}">
-                                        <el-dropdown-item>我的Bot</el-dropdown-item>
+                                    <router-link class="link-text" :to="{name: 'myspace_index', params: {userId: $store.state.user.id}}">
+                                        <el-dropdown-item>我的空间</el-dropdown-item>
                                     </router-link>
                                     <el-dropdown-item divided @click="logout">退出</el-dropdown-item>
                                 </el-dropdown-menu>
@@ -160,7 +160,7 @@
             </el-header>
             <el-main class="main" style="padding: 0; height: calc(100vh - 60px - 50px); ">     
                 <el-scrollbar class="main-scrollbar">
-                    <router-view></router-view>
+                    <router-view :key="$route.fullPath"></router-view>
                 </el-scrollbar>
             </el-main>
             <el-footer>

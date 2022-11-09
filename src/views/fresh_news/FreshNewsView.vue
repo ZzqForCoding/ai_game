@@ -83,9 +83,7 @@
                         <span>{{ item.since }}</span>
                     </div>
                 </div>
-                <div class="post-content">
-                    {{ item.content }}
-                </div>
+                <pre class="post-content">{{ item.content }}</pre>
                 <el-divider style="margin-top: 5px; margin-bottom: 0px;" />
                 <div class="post-tools">
                     <div @click="openComment(item.id)">
