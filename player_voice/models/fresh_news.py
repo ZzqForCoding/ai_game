@@ -25,6 +25,7 @@ class FreshNews(MPTTModel):
         on_delete=models.CASCADE,
         related_name='replyers',
     )
+    likes = models.IntegerField(default=0)
 
     # class MPTTMeta:
     #     order_insertion_by = ['createdtime']
