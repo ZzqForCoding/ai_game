@@ -6,10 +6,8 @@ from player.models.bot import Bot
 class GetListView(APIView):
     permission_classes = ([OneUserLogin])
 
-    def get(self, request):
-        user = request.user
-
-        bots = Bot.objects.filter(user=user)
+    def get(self, request, userId):
+        bots = Bot.objects.filter(user__id=userId)
 
         resp = []
         for bot in bots:

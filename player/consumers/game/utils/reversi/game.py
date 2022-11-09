@@ -385,3 +385,11 @@ class Game(threading.Thread):
         finally:
             if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
             if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
+            self.sendAllMessage({
+                "idA": self.playerA.id,
+                "idB": self.playerB.id
+            }, "finish_game")
+
+            gameCnt = cache.get('game_cnt', 0)
+            if gameCnt > 0:
+                cache.set('game_cnt', gameCnt - 1)

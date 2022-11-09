@@ -107,7 +107,6 @@ class Game(threading.Thread):
         p.save()
 
     def saveToDataBase(self):
-        print("id: ", self.playerA.id, self.playerB.id)
         ratingA = Player_Model.objects.get(user__id=self.playerA.id).rating
         ratingB = Player_Model.objects.get(user__id=self.playerB.id).rating
 
@@ -139,8 +138,8 @@ class Game(threading.Thread):
 
 
     # 广播给一个房间的玩家的信息
-    def sendAllMessage(self, message):
-        message['type'] = "group_send_event"
+    def sendAllMessage(self, message, type="group_send_event"):
+        message['type'] = type
 
         async_to_sync(self.channel_layer.group_send)(
             self.room_name,
@@ -341,7 +340,14 @@ class Game(threading.Thread):
         finally:
             if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
             if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
+            self.sendAllMessage({
+                "idA": self.playerA.id,
+                "idB": self.playerB.id
+            }, "finish_game")
 
+            gameCnt = cache.get('game_cnt', 0)
+            if gameCnt > 0:
+                cache.set('game_cnt', gameCnt - 1)
 
     # 获取地图
     def getG(self):

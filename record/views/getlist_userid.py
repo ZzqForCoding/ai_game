@@ -1,20 +1,22 @@
-from rest_framework.views import APIView
+from rest_framework.views  import APIView
 from rest_framework.response import Response
+from django.db.models import Q
 from record.models.record import Record
 from record.pagination.record_pagination import RecordPagination
 from player.permissions.one_user_login import OneUserLogin
 from player.models.player import Player
 import json
 
-class GetListView(APIView):
+class GetListForUserIdView(APIView):
     permission_classes = ([OneUserLogin])
 
-    def get(self, request):
-        records = Record.objects.all().order_by('-createtime')
+    def get(self, request, userId):
+        records = Record.objects.filter(Q(a_id = userId) | Q(b_id = userId)).order_by("id")
         records_count = records.count()
         pagination = RecordPagination()
         page_records = pagination.paginate_queryset(queryset=records, request=request, view=self)
         items = []
+
         for record in page_records:
             playerA = Player.objects.get(user__id=record.a_id)
             playerB = Player.objects.get(user__id=record.b_id)

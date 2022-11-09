@@ -7,17 +7,20 @@ from game.models.game import Game
 class GetListByGameView(APIView):
     permission_classes = ([OneUserLogin])
 
-    def get(self, request):
-        user = request.user
-        game_id  = request.GET.get('game_id', 0)
-        game = Game.objects.filter(id=game_id)
+    def get(self, request, gameId):
+        userId  = request.GET.get('userId', -1)
+        if userId == -1:
+            return Response({
+                'result': "不存在此用户",
+            })
+        game = Game.objects.filter(id=gameId)
 
         if not game:
             return Response({
                 'result': '不存在这个游戏',
             })
 
-        bots = Bot.objects.filter(user=user, game=game[0])
+        bots = Bot.objects.filter(user__id=userId, game=game[0])
 
         resp = []
         for bot in bots:

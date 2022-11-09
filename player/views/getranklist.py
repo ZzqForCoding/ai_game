@@ -13,7 +13,7 @@ class PlayerRankPagination(PageNumberPagination):
     max_page_size = None
 
 class GetRankListView(APIView):
-    # permission_classes = ([OneUserLogin])
+    permission_classes = ([OneUserLogin])
 
     def get(self, request):
         players = Player.objects.all().order_by('-rating')
@@ -23,6 +23,7 @@ class GetRankListView(APIView):
         resp = []
         for player in page_players:
             item = {}
+            item['id'] = player.user.id
             item['rank'] = Player.objects.filter(rating__gt=player.rating).count() + 1,
             item['username'] = player.user.username
             item['photo'] = player.photo

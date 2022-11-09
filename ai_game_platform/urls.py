@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     path('backend/admin/', admin.site.urls),
@@ -22,4 +23,5 @@ urlpatterns = [
     path('backend/game/', include("game.urls.index")),
     path('backend/record/', include("record.urls.index")),
     path('backend/playervoice/', include("player_voice.urls.index")),
+    path('backend/doc/', include_docs_urls(title="AIGame Platform接口文档", description="游戏编程对战平台API文档")),
 ]

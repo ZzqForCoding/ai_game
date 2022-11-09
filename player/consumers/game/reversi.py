@@ -26,6 +26,13 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
             self.user = user
             self.game_id = 3
             MultiPlayerReversiGame.users[self.user.id] = self
+
+            gameCnt = cache.get('game_cnt', 0)
+            matchingPlayers = cache.get('reversi_matching_players', 0)
+            await self.send(json.dumps({
+                'event': "prompt",
+                'prompt': "当前有 %d 场游戏正在进行, 并且有 %d 个人正在匹配!" % (gameCnt, matchingPlayers),
+            }))
         else:
             await self.close()
 
@@ -52,7 +59,10 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
                 player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']), self.game_id)
 
         client.add_player(player_info, "")
+
         cache.set(self.user.id, True, 3600)
+        await self.channel_layer.group_add("matching-player-%d" % self.user.id, self.channel_name)
+        cache.set('reversi_matching_players', cache.get('reversi_matching_players', 0) + 1)
 
         transport.close()
 
@@ -72,7 +82,12 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
         player_info = PlayerInfo(self.user.id, self.user.username,
                 player.photo, player.rating, self.channel_name, int(data['operate']), int(data['botId']), self.game_id)
         client.remove_player(player_info, "")
+
         cache.delete_pattern(self.user.id)
+        await self.channel_layer.group_discard("matching-player-%d" % self.user.id, self.channel_name)
+        mps = cache.get('reversi_matching_players', 0)
+        if mps > 0:
+            cache.set('reversi_matching_players', mps - 1)
 
         transport.close()
 
@@ -101,6 +116,9 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
             game.start()
             MultiPlayerReversiGame.users[a_id].game = game
             MultiPlayerReversiGame.users[b_id].game = game
+
+            gameCnt = cache.get('game_cnt', 0)
+            cache.set('game_cnt', gameCnt + 1)
 
             resp = {
                 'a_id': game.playerA.id,
@@ -145,6 +163,12 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
 
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
+
+    async def finish_game(self, data):
+        if data["idA"] in self.users.keys():
+            del self.users[data["idA"]]
+        if data["idB"] in self.users.keys():
+            del self.users[data["idB"]]
 
     async def receive(self, text_data):
         data = json.loads(text_data)

@@ -33,6 +33,16 @@ class Pool:
     def add_player(self, player):
         self.players.append(player)
         self.wt.append(0)
+        gameCnt = cache.get('game_cnt', 0)
+        if gameCnt >= 5:
+            async_to_sync(channel_layer.group_send) (
+                "matching-player-%d" % player.id,
+                {
+                    'type': "group_send_event",
+                    'event': "prompt",
+                    'prompt': "由于当前平台资源不足, 正在进行>=5场游戏，请耐心等待...",
+                }
+            )
 
     def remove_player(self, player):
         for i in range(len(self.players)):
@@ -59,12 +69,16 @@ class Pool:
         type = ""
         if ps[0].game_id == 1:
             type = "start_gobang_game"
+            cache.set('gobang_matching_players', cache.get('gobang_matching_players', 0) - len(ps))
         elif ps[0].game_id == 2:
             type = "start_snake_game"
+            cache.set('snake_matching_players', cache.get('snake_matching_players', 0) - len(ps))
         elif ps[0].game_id == 3:
             type = "start_reversi_game"
+            cache.set('reversi_matching_players', cache.get('reversi_matching_players', 0) - len(ps))
         players = []
         for p in ps:
+            async_to_sync(channel_layer.group_discard)("matching-player-%d" % p.id, p.channel_name)
             async_to_sync(channel_layer.group_add)(room_name, p.channel_name)
             players.append({
                 'username': p.username,
@@ -95,6 +109,8 @@ class Pool:
             self.wt[i] += 1
 
     def match(self):
+        if cache.get('game_cnt', 0) >= 5: return
+
         while len(self.players) > 1:
             flag = False
             for i in range(len(self.players)):
@@ -109,6 +125,7 @@ class Pool:
                         break
                 if flag: break
             if not flag: break
+            if cache.get('game_cnt', 0) >= 5: break
         self.increase_waiting_time()
 
 class MatchHandler:
