@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.URLField(max_length=256, blank=True)
+    photo = models.URLField(max_length=256, default="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg")
     rating = models.IntegerField(default=1500)
     openid = models.CharField(default="", max_length=50, blank=True, null=True)
     token = models.CharField(default="", max_length=500, blank=True, null=True)

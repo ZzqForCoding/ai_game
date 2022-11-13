@@ -207,6 +207,9 @@ CHANNEL_LAYERS = {
 
 player_rank_page_size = 10
 
-RETURN_URL = "https://aigame.zzqahm.top/backend/player/bot/alipay/back/"
+ALIPAY_DEBUG = True
 ALIPAY_APP_ID = '2021000121687391'
 ALIPAY_KEY_DIR = os.path.join(BASE_DIR,'key_file/')
+ALIPAY_URL = "https://openapi.alipaydev.com/gateway.do"
+ALIPAY_ORDER_NOTIFY_URL = "https://aigame.zzqahm.top/backend/player/bot/alipay/back/"
+ALIPAY_RETURN_URL = "https://aigame.zzqahm.top/myspace/%d/"

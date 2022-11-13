@@ -24,4 +24,5 @@ urlpatterns = [
     path('bot/', include('player.urls.bot.index')),
     path('acwing/', include('player.urls.acwing.index')),
     path('qq/', include('player.urls.qq.index')),
+    path('upload_avatar/', include('player.urls.upload_avatar.index')),
 ]
