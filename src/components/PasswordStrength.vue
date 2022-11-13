@@ -113,7 +113,7 @@
       }
   </script>
    
-  <style>
+  <style scoped>
     .el-progress__text {
       display: none;
     }

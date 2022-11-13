@@ -5,47 +5,37 @@
             <el-card class="box-card" style="user-select: none;">
                 <div class="card-header" style="height: 32px;">
                     <span style="line-height: 32px;">最新对局</span>
-                    <el-button class="button" type="primary" style="float: right;" @click="showCreateGameDialog = true">创建游戏</el-button>
+                    <el-button class="button" type="primary" style="float: right;" @click="showCreateGameDialog = true">
+                        创建游戏</el-button>
 
                     <el-dialog v-model="showCreateGameDialog" title="新建游戏">
-                        <el-form
-                            label-position="top"
-                            label-width="100px"
-                            :model="createGameInfo"
-                            :rules="rules"
-                            style="max-width: 100%;"
-                            ref="createGameForm"
-                        > 
+                        <el-form label-position="top" label-width="100px" :model="createGameInfo" :rules="rules"
+                            style="max-width: 100%;" ref="createGameForm">
                             <el-form-item label="操作方式">
                                 <el-radio-group v-model="createGameInfo.operateSelect">
                                     <el-radio-button label="0">代码</el-radio-button>
                                     <el-radio-button label="1">亲自出马</el-radio-button>
                                 </el-radio-group>
                             </el-form-item>
-                            
+
                             <el-form-item label="游戏">
                                 <el-radio-group v-model="createGameInfo.gameSelect">
-                                    <el-radio-button v-for="game in games" :key="game.id" :label="game.id">{{ game.name }}</el-radio-button>
+                                    <el-radio-button v-for="game in games" :key="game.id" :label="game.id">{{ game.name
+                                    }}</el-radio-button>
                                 </el-radio-group>
                             </el-form-item>
-                            <el-form-item label="选择Bot" v-if="parseInt(createGameInfo.operateSelect) === 0" prop="botSelect">
+                            <el-form-item label="选择Bot" v-if="parseInt(createGameInfo.operateSelect) === 0"
+                                prop="botSelect">
                                 <el-select v-model="createGameInfo.botSelect" class="m-2" placeholder="Select">
-                                    <el-option
-                                        v-for="bot in bots"
-                                        :key="bot.id"
-                                        :label="bot.title"
-                                        :value="bot.id"
-                                        @click="selectBotCode(bot)"
-                                    />
+                                    <el-option v-for="bot in bots" :key="bot.id" :label="bot.title" :value="bot.id"
+                                        @click="selectBotCode(bot)" />
                                 </el-select>
-                                <el-popover
-                                    v-if="createGameInfo.botSelect"
-                                    placement="right"
-                                    :width="270"
-                                    trigger="click"
-                                >
+                                <el-popover v-if="createGameInfo.botSelect" placement="right" :width="270"
+                                    trigger="click">
                                     <template #reference>
-                                        <el-icon :size="15" class="zoom"><ZoomIn /></el-icon>
+                                        <el-icon :size="15" class="zoom">
+                                            <ZoomIn />
+                                        </el-icon>
                                     </template>
                                     <div class="popover-code-title" style="user-select: none;">查看代码</div>
                                     <el-scrollbar height="300px">
@@ -56,7 +46,8 @@
                         </el-form>
                         <template #footer>
                             <span class="dialog-footer">
-                                <el-button type="primary" @click="confirmGameDialog(createGameInfo.gameSelect)">进入游戏</el-button>
+                                <el-button type="primary" @click="confirmGameDialog(createGameInfo.gameSelect)">进入游戏
+                                </el-button>
                                 <el-button @click="showCreateGameDialog = false">取消</el-button>
                             </span>
                         </template>
@@ -68,11 +59,11 @@
         <el-col :span="5" :offset="1">
             <el-card class="message" style="user-select: none;">
                 <template #header>
-                  <div class="card-header">
-                    <span>公共聊天区</span>
-                  </div>
+                    <div class="card-header">
+                        <span>公共聊天区</span>
+                    </div>
                 </template>
-                
+
                 <el-card class="messages" shadow="never">
                     <el-scrollbar max-height="320px" ref="msgScroll">
                         <div class="message-content" v-for="msg in $store.state.record.hall_msgs" :key="msg.id">
@@ -81,23 +72,18 @@
                             </div>
                             <div class="main">
                                 <el-avatar class="photo" size="small" :src="msg.photo" />
-                                <el-button round  :type="$store.state.user.username === msg.username ? 'primary' : ''">{{ msg.text }}</el-button>
+                                <el-button round :type="$store.state.user.username === msg.username ? 'primary' : ''">{{
+                                msg.text }}</el-button>
                             </div>
                         </div>
                     </el-scrollbar>
                 </el-card>
-                
+
                 <el-card class="message-send" shadow="never">
                     <el-form @submit.prevent="">
-                        <el-input
-                            class="message-input"
-                            :autosize="{ minRows: 6, maxRows: 6 }"
-                            type="textarea"
-                            placeholder="Please input message..."
-                            v-model="message"
-                            resize="none"
-                            @keydown.enter="enterSendMsg"
-                        />
+                        <el-input class="message-input" :autosize="{ minRows: 6, maxRows: 6 }" type="textarea"
+                            placeholder="Please input message..." v-model="message" resize="none"
+                            @keydown.enter="enterSendMsg" />
                         <el-button class="sendBtn" type="primary" @click="sendMsg" size="small">发送</el-button>
                     </el-form>
                 </el-card>
@@ -143,33 +129,39 @@ export default {
                 url: "https://aigame.zzqahm.top/backend/game/getlist/",
                 type: "get",
                 headers: {
-                    "Authorization": "Bearer " + store.state.user.access,
+                   "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
                     if(resp.result === "success") {
                         games.value = resp.games;
                     }
                 },
-            });
+                error() {
+                    store.dispatch("logout");
+                }
+            }); 
         };
 
         const refresh_bots = () => {
-            $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/bot/getlist_game/" + createGameInfo.gameSelect + '/',
+           $.ajax({
+                 url: "https://aigame.zzqahm.top/backend/player/bot/getlist_game/" + createGameInfo.gameSelect + '/',
                 type: "get",
                 data: {
                     userId: store.state.user.id,
-                },
+                 },
                 headers: {
                     "Authorization": "Bearer " + store.state.user.access,
-                },
+                 },
                 success(resp) {
                     if(resp.result === "success") {
-                        bots.value = resp.bots;
-                    }
+                         bots.value = resp.bots;
+                   }
                 },
+                error() {
+                    store.dispatch("logout");
+                }
             });
-        };
+         };
 
         refresh_bots();
 
@@ -229,7 +221,7 @@ export default {
                         },
                         query: {
                             operate: createGameInfo.operateSelect,
-                            bot_id: createGameInfo.botSelect,
+                           bot_id: createGameInfo.botSelect,
                         }
                     });
                 }

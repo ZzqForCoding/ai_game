@@ -1,8 +1,9 @@
 <template>
-    <ContentField v-if="!$store.state.user.pulling_info">
+    <ContentField>
         <el-row>
             <el-col :span="8" :offset="8">
-                <el-form :model="log_info" :rules="rules" ref="ruleForm" label-width="50px" label-position="top" style="user-select: none;">
+                <el-form :model="log_info" :rules="rules" ref="ruleForm" label-width="50px" label-position="top"
+                    style="user-select: none;">
                     <el-form-item label="帐号" prop="username">
                         <el-input v-model="log_info.username" placeholder="请输入账号" clearable />
                     </el-form-item>
@@ -10,7 +11,7 @@
                         <el-input type="password" v-model="log_info.password" placeholder="请输入密码" clearable />
                     </el-form-item>
                     <!-- <el-form-item prop="isLock"> -->
-                        <SliderVerify v-model="log_info.isLock" @change="handlerLock" class="verify" />
+                    <SliderVerify v-model="log_info.isLock" @change="handlerLock" class="verify" />
                     <!-- </el-form-item> -->
                     <!-- <div class="third-login">
                         <el-tooltip
@@ -25,14 +26,11 @@
                         </el-tooltip>
                     </div> -->
                     <div class="third-login">
-                        <el-tooltip
-                            class="box-item"
-                            effect="dark"
-                            content="QQ一键登录"
-                            placement="bottom"
-                        >
+                        <el-tooltip class="box-item" effect="dark" content="QQ一键登录" placement="bottom">
                             <div @click="qq_login">
-                                <img style="width: 25px;" src="https://wiki.connect.qq.com/wp-content/uploads/2013/10/03_qq_symbol-1-250x300.png" alt="">
+                                <img style="width: 25px;"
+                                    src="https://wiki.connect.qq.com/wp-content/uploads/2013/10/03_qq_symbol-1-250x300.png"
+                                    alt="">
                             </div>
                         </el-tooltip>
                     </div>
@@ -69,31 +67,6 @@ export default {
             isLock: false,
         });
 
-        const access = localStorage.getItem("aigame.access");
-        const refresh = localStorage.getItem("aigame.refresh");
-        if(access && refresh) {
-            store.commit("updateToken", {
-                access,
-                refresh,
-            })
-            store.dispatch("refresh_access", refresh);
-            // TODO：虽然定时更新了Token，但是还是获取不了信息
-            store.dispatch("getinfo", {
-                success() {
-                    router.push({name: "home"});
-                    store.commit("updatePullingInfo", false);
-                },
-                error() {
-                    store.commit("updatePullingInfo", false);
-                    localStorage.removeItem("aigame.access");
-                    localStorage.removeItem("aigame.refresh");
-                }
-            })
-        } else {
-            store.commit("updatePullingInfo", false);
-        }
-        
-
         const login = async() => {
             const form = unref(ruleForm);
             await form.validate(valid => {
@@ -107,7 +80,7 @@ export default {
                 }
                 if(valid) {
                     store.dispatch("login", {
-                        ...log_info,
+                       ...log_info,
                         success() {
                             ElMessage({
                                 showClose: true,
@@ -116,29 +89,29 @@ export default {
                             });
                             store.dispatch("getinfo", {
                                 success() {
-                                    router.push({name: 'home'});
-                                }
+                            router.push({name: 'home'});
+                                 }
                             });
-                        },
+                         },
                         error() {
-                            ElMessage({
-                                showClose: true,
+                           ElMessage({
+                                 showClose: true,
                                 message: '用户名或密码错误！',
                                 type: 'error',
                             });
-                        }
+                         }
                     });
                 }
             })
-        };
-
-        const handlerLock = async(data) => {
-            if(data) {
+                     };
+ 
+       const handlerLock = async(data) => {
+            if (data) {
                 if(log_info.username === '' || log_info.password === '' || !log_info.username || !log_info.password) {
                     ElMessage({
                         showClose: true,
-                        message: '请先输入用户名密码！',
-                        type: 'error',
+                        messae: '请先输入用户名密码！',
+                        type:  'error',
                     });
                 }
                 log_info.isLock = true;
@@ -172,6 +145,9 @@ export default {
                     if(resp.result === "success") {
                         window.location.replace(resp.apply_code_url)
                     }
+                },
+                error() {
+                    store.dispatch("logout");
                 }
             });
         }
@@ -179,14 +155,17 @@ export default {
         const qq_login = () => {
             $.ajax({
                 url: "https://aigame.zzqahm.top/backend/player/qq/apply_code/",
-                type: "GET",
+                        
                 success: resp => {
                     if(resp.result === "success") {
                         window.location.replace(resp.apply_code_url)
                     }
+                },
+                error() {
+                    store.dispatch("logout");
                 }
             });
-        }
+         }
 
         return {
             ruleForm,
@@ -203,7 +182,7 @@ export default {
                     // { min: 5, max: 18, message: '长度在 5 到 18 个字符', trigger: 'blur' }
                 ],
                 isLock: [
-                    { validator: checkStatus, trigger: 'blur' },
+                    {  validator: checkStatus, trigger: 'blur' },
                 ],
             },
             acwing_login,

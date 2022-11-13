@@ -8,9 +8,9 @@
                 <div class="content">
                     <el-row>
                         <el-col :span="6" :offset="9">
-                                <div class="photo">
-                                    <img :src="$store.state.user.photo" alt="" class="" style="user-select: none;">
-                                </div>
+                            <div class="photo">
+                                <img :src="$store.state.user.photo" alt="" class="" style="user-select: none;">
+                            </div>
                         </el-col>
                     </el-row>
                     <el-row>
@@ -18,11 +18,11 @@
                             <div class="username">
                                 {{ $store.state.user.username }}
                             </div>
-        
+
                             <div class="profession">
                                 Web Developer at Webestica
                             </div>
-        
+
                             <div class="description">
                                 I'd love to change the world, but they won’t give me the source code.
                             </div>
@@ -56,7 +56,7 @@
                     <div class="avatar-container">
                         <el-avatar :src="$store.state.user.photo" />
                     </div>
-                
+
                     <el-input
                         v-model="input_fresh_news"
                         :rows="4"
@@ -74,7 +74,7 @@
                 </div>
             </el-card>
 
-            
+
             <el-card class="box-card" style="margin-top: 20px;" v-for="item in freshNews" :key="item.id">
                 <div class="post-message-container">
                     <el-avatar :src="item.photo" />
@@ -87,31 +87,51 @@
                 <el-divider style="margin-top: 5px; margin-bottom: 0px;" />
                 <div class="post-tools">
                     <div @click="clickLikeFreshNews(item)">
-                        <svg t="1664632066049" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6641" width="25" height="25"><path d="M513.5 921.6c-38.3 0-87.4-26.1-121.9-48-48.2-30.6-99.4-73.2-144.3-120-67.2-70-179.9-212.1-179.9-376.3 0-66 26.3-134.2 72.2-187.2 23.3-26.9 50.1-48.2 79.7-63.3 32.1-16.4 66-24.8 100.6-24.8 73.4 0 143.3 31.8 191.6 87.1 0.2 0.2 0.6 0.7 1.5 0.7s1.3-0.5 1.5-0.7c48.4-55.4 118.2-87.1 191.6-87.1 34.7 0 68.5 8.4 100.5 24.9 29.6 15.3 56.4 36.8 79.6 64 45.6 53.5 71.7 123.1 71.7 191 0 161.7-112.2 302.7-179.1 372.3-44.7 46.6-95.8 89-143.7 119.5-34.4 21.8-83.4 47.9-121.6 47.9zM319.9 158c-50.6 0-99.6 24.4-138 68.8-18 20.8-32.9 45.4-43 71.2-10.2 26-15.6 53.5-15.6 79.3 0 56.9 16.3 117.1 48.3 178.9 27.8 53.7 67.9 108.6 116 158.6 41.8 43.6 89.4 83.2 133.9 111.5 45.6 29 77.4 39.3 91.9 39.3s46.2-10.3 91.6-39.2c44.3-28.1 91.6-67.6 133.4-111 47.8-49.8 87.7-104.2 115.4-157.3 31.9-61.1 48-120.4 48-176.2 0-54.8-21.3-111.2-58.3-154.7-38-44.6-86.8-69.2-137.5-69.2-57.3 0-111.7 24.8-149.5 68-11 12.6-26.9 19.8-43.6 19.8s-32.6-7.2-43.6-19.8c-37.6-43.2-92.1-68-149.4-68z" fill="" p-id="6642"></path></svg>
+                        <svg t="1664632066049" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" p-id="6641" width="25" height="25">
+                            <path
+                                d="M513.5 921.6c-38.3 0-87.4-26.1-121.9-48-48.2-30.6-99.4-73.2-144.3-120-67.2-70-179.9-212.1-179.9-376.3 0-66 26.3-134.2 72.2-187.2 23.3-26.9 50.1-48.2 79.7-63.3 32.1-16.4 66-24.8 100.6-24.8 73.4 0 143.3 31.8 191.6 87.1 0.2 0.2 0.6 0.7 1.5 0.7s1.3-0.5 1.5-0.7c48.4-55.4 118.2-87.1 191.6-87.1 34.7 0 68.5 8.4 100.5 24.9 29.6 15.3 56.4 36.8 79.6 64 45.6 53.5 71.7 123.1 71.7 191 0 161.7-112.2 302.7-179.1 372.3-44.7 46.6-95.8 89-143.7 119.5-34.4 21.8-83.4 47.9-121.6 47.9zM319.9 158c-50.6 0-99.6 24.4-138 68.8-18 20.8-32.9 45.4-43 71.2-10.2 26-15.6 53.5-15.6 79.3 0 56.9 16.3 117.1 48.3 178.9 27.8 53.7 67.9 108.6 116 158.6 41.8 43.6 89.4 83.2 133.9 111.5 45.6 29 77.4 39.3 91.9 39.3s46.2-10.3 91.6-39.2c44.3-28.1 91.6-67.6 133.4-111 47.8-49.8 87.7-104.2 115.4-157.3 31.9-61.1 48-120.4 48-176.2 0-54.8-21.3-111.2-58.3-154.7-38-44.6-86.8-69.2-137.5-69.2-57.3 0-111.7 24.8-149.5 68-11 12.6-26.9 19.8-43.6 19.8s-32.6-7.2-43.6-19.8c-37.6-43.2-92.1-68-149.4-68z"
+                                fill="" p-id="6642"></path>
+                        </svg>
                         <!-- <svg t="1664632066049" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6641" width="25" height="25"><path d="M513.5 921.6c-38.3 0-87.4-26.1-121.9-48-48.2-30.6-99.4-73.2-144.3-120-67.2-70-179.9-212.1-179.9-376.3 0-66 26.3-134.2 72.2-187.2 23.3-26.9 50.1-48.2 79.7-63.3 32.1-16.4 66-24.8 100.6-24.8 73.4 0 143.3 31.8 191.6 87.1 0.2 0.2 0.6 0.7 1.5 0.7s1.3-0.5 1.5-0.7c48.4-55.4 118.2-87.1 191.6-87.1 34.7 0 68.5 8.4 100.5 24.9 29.6 15.3 56.4 36.8 79.6 64 45.6 53.5 71.7 123.1 71.7 191 0 161.7-112.2 302.7-179.1 372.3-44.7 46.6-95.8 89-143.7 119.5-34.4 21.8-83.4 47.9-121.6 47.9zM319.9 158c-50.6 0-99.6 24.4-138 68.8-18 20.8-32.9 45.4-43 71.2-10.2 26-15.6 53.5-15.6 79.3 0 56.9 16.3 117.1 48.3 178.9 27.8 53.7 67.9 108.6 116 158.6 41.8 43.6 89.4 83.2 133.9 111.5 45.6 29 77.4 39.3 91.9 39.3s46.2-10.3 91.6-39.2c44.3-28.1 91.6-67.6 133.4-111 47.8-49.8 87.7-104.2 115.4-157.3 31.9-61.1 48-120.4 48-176.2 0-54.8-21.3-111.2-58.3-154.7-38-44.6-86.8-69.2-137.5-69.2-57.3 0-111.7 24.8-149.5 68-11 12.6-26.9 19.8-43.6 19.8s-32.6-7.2-43.6-19.8c-37.6-43.2-92.1-68-149.4-68z" fill="#d81e06" p-id="6642"></path></svg> -->
                         <span v-if="!item.is_like">点赞</span>
                         <span v-else>取消点赞</span>
                         <span v-if="item.likes !== 0">({{ item.likes }})</span>
-                        
+
                     </div>
                     <div @click="openComment(item.id)">
-                        <svg t="1664631879270" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2557" width="25" height="25"><path d="M622.56056 464.834794c0 27.928073 22.73684 50.64854 50.664913 50.64854 27.956725 0 50.693566-22.720468 50.693566-50.64854 0-27.928073-22.73684-50.66389-50.693566-50.66389C645.2974 414.171927 622.56056 436.907745 622.56056 464.834794" p-id="2558"></path><path d="M931.254178 211.459063c0-40.637536-33.05893-73.698512-73.728188-73.698512L166.471964 137.76055c-40.637536 0-73.727165 33.059953-73.727165 73.698512l0 506.796488c0 40.637536 33.088606 73.696466 73.727165 73.696466l251.16846 0 94.343715 94.28641 94.315062-94.28641 251.226788 0c40.669258 0 73.728188-33.05893 73.728188-73.696466l0-82.560344-0.089028-1.282203L931.254178 211.459063zM875.96699 695.220928c0 22.88522-18.558681 41.444924-41.443901 41.444924L579.446623 736.665853l-67.462484 67.490114-67.430762-67.490114L189.506587 736.665853c-22.88522 0-41.4746-18.559705-41.4746-41.444924L148.031986 234.493685c0-22.88522 18.58938-41.488927 41.4746-41.488927l645.01548 0c22.88522 0 41.443901 18.603707 41.443901 41.488927l0 396.579247 0 36.161594L875.965967 695.220928z" p-id="2559"></path><path d="M461.321272 464.834794c0 27.928073 22.735817 50.64854 50.662867 50.64854 27.929096 0 50.66389-22.720468 50.66389-50.64854 0-27.928073-22.734794-50.66389-50.66389-50.66389C484.057089 414.171927 461.321272 436.907745 461.321272 464.834794" p-id="2560"></path><path d="M300.083008 464.834794c0 27.928073 22.735817 50.64854 50.66389 50.64854 27.927049 0 50.662867-22.720468 50.662867-50.64854 0-27.928073-22.735817-50.66389-50.662867-50.66389C322.817802 414.171927 300.083008 436.907745 300.083008 464.834794" p-id="2561"></path></svg>
+                        <svg t="1664631879270" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" p-id="2557" width="25" height="25">
+                            <path
+                                d="M622.56056 464.834794c0 27.928073 22.73684 50.64854 50.664913 50.64854 27.956725 0 50.693566-22.720468 50.693566-50.64854 0-27.928073-22.73684-50.66389-50.693566-50.66389C645.2974 414.171927 622.56056 436.907745 622.56056 464.834794"
+                                p-id="2558"></path>
+                            <path
+                                d="M931.254178 211.459063c0-40.637536-33.05893-73.698512-73.728188-73.698512L166.471964 137.76055c-40.637536 0-73.727165 33.059953-73.727165 73.698512l0 506.796488c0 40.637536 33.088606 73.696466 73.727165 73.696466l251.16846 0 94.343715 94.28641 94.315062-94.28641 251.226788 0c40.669258 0 73.728188-33.05893 73.728188-73.696466l0-82.560344-0.089028-1.282203L931.254178 211.459063zM875.96699 695.220928c0 22.88522-18.558681 41.444924-41.443901 41.444924L579.446623 736.665853l-67.462484 67.490114-67.430762-67.490114L189.506587 736.665853c-22.88522 0-41.4746-18.559705-41.4746-41.444924L148.031986 234.493685c0-22.88522 18.58938-41.488927 41.4746-41.488927l645.01548 0c22.88522 0 41.443901 18.603707 41.443901 41.488927l0 396.579247 0 36.161594L875.965967 695.220928z"
+                                p-id="2559"></path>
+                            <path
+                                d="M461.321272 464.834794c0 27.928073 22.735817 50.64854 50.662867 50.64854 27.929096 0 50.66389-22.720468 50.66389-50.64854 0-27.928073-22.734794-50.66389-50.66389-50.66389C484.057089 414.171927 461.321272 436.907745 461.321272 464.834794"
+                                p-id="2560"></path>
+                            <path
+                                d="M300.083008 464.834794c0 27.928073 22.735817 50.64854 50.66389 50.64854 27.927049 0 50.662867-22.720468 50.662867-50.64854 0-27.928073-22.735817-50.66389-50.662867-50.66389C322.817802 414.171927 300.083008 436.907745 300.083008 464.834794"
+                                p-id="2561"></path>
+                        </svg>
                         <span>评论</span>
                     </div>
                     <div>
-                        <svg t="1664632040191" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4832" width="25" height="25"><path d="M71.9 909.8c-2.2 8.4-12.5 5.9-11.9-2.9 13.1-187 71.1-284.1 128.1-352.8C274.7 449.9 469.8 352.7 604 341.3c10.6-0.9 18.9-11.7 18.9-24.8V157.9c0-21.7 21.1-32.9 34.1-18.2l299.5 339.5c9 10.2 8.6 27.6-0.8 37.2L662 817.6c-13.2 13.5-33.3 2-33.3-19V604.3c0-12.9-8.1-23.7-18.6-24.7-85.7-8.5-287.5 10.3-369.1 70.2-34.8 25.4-129.8 112.4-169.1 260z" p-id="4833"></path></svg>
+                        <svg t="1664632040191" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" p-id="4832" width="25" height="25">
+                            <path
+                                d="M71.9 909.8c-2.2 8.4-12.5 5.9-11.9-2.9 13.1-187 71.1-284.1 128.1-352.8C274.7 449.9 469.8 352.7 604 341.3c10.6-0.9 18.9-11.7 18.9-24.8V157.9c0-21.7 21.1-32.9 34.1-18.2l299.5 339.5c9 10.2 8.6 27.6-0.8 37.2L662 817.6c-13.2 13.5-33.3 2-33.3-19V604.3c0-12.9-8.1-23.7-18.6-24.7-85.7-8.5-287.5 10.3-369.1 70.2-34.8 25.4-129.8 112.4-169.1 260z"
+                                p-id="4833"></path>
+                        </svg>
                         <span>转发（3）</span>
                     </div>
                 </div>
                 <el-divider style="margin-top: 0px; margin-bottom: 5px;" />
                 <div class="post-comment" v-if="openCommentId === item.id">
-                    <textarea :class="'post-comment-input' + item.id" placeholder="Please input" v-model="input_comment" cols="40" rows="2" maxlength="3000" required title="回复"></textarea>
-                    <el-button
-                        class="btn"
-                        text
-                        @click="postFreshNews(input_comment, item.id)"
-                        size="small"
-                    >
+                    <textarea :class="'post-comment-input' + item.id" placeholder="Please input" v-model="input_comment"
+                        cols="40" rows="2" maxlength="3000" required title="回复"></textarea>
+                    <el-button class="btn" text @click="postFreshNews(input_comment, item.id)" size="small">
                         提交评论
                     </el-button>
                 </div>
@@ -123,20 +143,18 @@
                         <div class="info">
                             <h6>{{ child.username }}</h6>
                             <span class="time">{{ child.since }}</span>
-                            <span v-if="child.reply !== item.username" class="reply">回复 <a>{{ child.reply }}</a> 的评论</span>
+                            <span v-if="child.reply !== item.username" class="reply">回复 <a>{{ child.reply }}</a>
+                                的评论</span>
                             <a class="post-comment-right-reply" @click="openComment(item.id + '-' + child.id)">回复</a>
                         </div>
                         <div class="content">
                             {{ child.content }}
                         </div>
                         <div class="post-reply-comment" v-if="openCommentId === item.id + '-' + child.id">
-                            <textarea :class="'post-comment-input' + item.id + '-' + child.id" placeholder="Please input" v-model="input_comment" cols="90" rows="2" maxlength="3000" required title="回复"></textarea>
-                            <el-button
-                                class="btn"
-                                text
-                                @click="postFreshNews(input_comment, child.id)"
-                                size="small"
-                            >
+                            <textarea :class="'post-comment-input' + item.id + '-' + child.id"
+                                placeholder="Please input" v-model="input_comment" cols="90" rows="2" maxlength="3000"
+                                required title="回复"></textarea>
+                            <el-button class="btn" text @click="postFreshNews(input_comment, child.id)" size="small">
                                 提交评论
                             </el-button>
                         </div>
@@ -171,11 +189,14 @@ export default {
                 },
                 success(resp) {
                     freshNews.value = resp.freshNews;
+                },
+                error() {
+                    store.dispatch("logout");
                 }
             });
         }
 
-        getFreshNews();
+          getFreshNews();
 
         const postFreshNews = (msg, flag) => {
             if(msg.trim() === "") {
@@ -190,27 +211,30 @@ export default {
                 type: "post",
                 data: {
                     content: msg,
-                    parent_id: flag,
-                },
+            parent_id: flag,
+                 },
                 success() {
-                    ElMessage({
+                     ElMessage({
                         showClose: true,
-                        message: '动态发布成功',
-                        type: 'success',
+                       message: '动态发布成功',
+                         type: 'success',
                     });
                     getFreshNews();
                     if(flag) {
-                        input_comment.value = "";
+                         input_comment.value = "";
                     } else {
                         input_fresh_news.value = "";
-                    }
-                    let element = document.getElementsByClassName('post-comment-input' + openCommentId.value)[0];
+                     }
+                     let element = document.getElementsByClassName('post-comment-input' + openCommentId.value)[0];
                     element.classList.remove('post-comment-input-animation');
                     openCommentId.value = -1;
+                },
+                error() {
+                    store.dispatch("logout");
                 }
             });
         }
-
+ 
         const openComment = id => {
             input_comment.value = "";
             if(openCommentId.value !== -1) {
@@ -243,6 +267,9 @@ export default {
                     success() {
                         item.is_like = false;
                         item.likes -= 1;
+                    },
+                    error() {
+                        store.dispatch("logout");
                     }
                 });
             } else {
@@ -257,7 +284,10 @@ export default {
                     },
                     success() {
                         item.is_like = true;
-                        item.likes += 1;
+                         item.likes += 1;
+                    },
+                    error() {
+                        store.dispatch("logout");
                     }
                 });
             }
@@ -274,7 +304,7 @@ export default {
         };
     }
 }
-</script>
+ </script>
 
 <style scoped>
 .avatar-container {
@@ -287,6 +317,7 @@ export default {
 .post-a-fresh-news {
     display: flex;
 }
+
 .post-a-fresh-news:deep(.el-textarea__inner) {
     background-color: #FFFFFF;
     box-shadow: 0 0 0 0;
@@ -435,7 +466,7 @@ export default {
     font-size: 13.125px;
 }
 
-.post-comments .right .info .reply a{
+.post-comments .right .info .reply a {
     color: #337ab7;
     text-decoration: underline;
 }
@@ -468,7 +499,7 @@ export default {
 .profile-card {
     border: none !important;
 }
-    
+
 .profile-card .background {
     background-image: url('@/assets/images/01.jpg');
     background-position: center;
@@ -477,7 +508,7 @@ export default {
     height: 50px;
 }
 
-.profile-card .photo > img {
+.profile-card .photo>img {
     margin-top: -40px;
     border-radius: 10px 10px 0 0;
     border: 3px solid white;

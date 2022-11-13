@@ -89,7 +89,7 @@
                     :ellipsis="false"
                     @select="handleSelect"
                 >
-                    <div class="current-page" v-if="!$store.state.user.pulling_info">
+                    <div class="current-page">
                         <span v-if="$store.state.backPage !== ''" class="back-menu" @click="showConfirmBack">
                             <el-icon :size="25"><Back /></el-icon>
                         </span>
@@ -133,6 +133,9 @@
                             </span>
                             <template #dropdown>
                                 <el-dropdown-menu style="user-select: none;">
+                                    <router-link class="link-text" :to="{name: 'personal_info'}">
+                                        <el-dropdown-item>个人信息</el-dropdown-item>
+                                    </router-link>
                                     <router-link class="link-text" :to="{name: 'myspace_index', params: {userId: $store.state.user.id}}">
                                         <el-dropdown-item>我的空间</el-dropdown-item>
                                     </router-link>
@@ -142,14 +145,14 @@
                         </el-dropdown>
 
                     </el-menu-item>
-                    <router-link v-if="!$store.state.user.is_login && !$store.state.user.pulling_info" class="link-text" :to="{name: 'user_account_login'}">
+                    <router-link v-if="!$store.state.user.is_login" class="link-text" :to="{name: 'user_account_login'}">
                         <el-menu-item index="1">
                             <span>
                                 登录
                             </span>
                         </el-menu-item>
                     </router-link>
-                    <router-link v-if="!$store.state.user.is_login && !$store.state.user.pulling_info" class="link-text" :to="{name: 'user_account_register'}">
+                    <router-link v-if="!$store.state.user.is_login" class="link-text" :to="{name: 'user_account_register'}">
                         <el-menu-item index="2">
                             <span>
                                 注册
@@ -242,6 +245,38 @@ export default {
             showBackDialog,
             showConfirmBack,
             clickBack,
+        }
+    },
+    // 当 Vue 加载完成后调用
+    mounted() {
+        const store = useStore();
+        // 关闭浏览器清除localStorage
+        // 方法二：通过在关闭浏览器前清除localStorage
+        /**
+         * 刷新页面 就算是简单helloworld都不小于5毫秒, 获取时间差来判断刷新与关闭页面
+         */
+        let start_stamp = 0, // 开始时间
+        differ_time = 0; // 时间差
+        window.onunload = () => {
+            differ_time = new Date().getTime() - start_stamp;
+            if (differ_time <= 5) {
+                localStorage.removeItem("aigame.access");
+                localStorage.removeItem("aigame.refresh");
+                localStorage.removeItem("setIntervalFunc")
+                localStorage.removeItem("user");
+            }
+        };
+        window.onbeforeunload = () => {
+            start_stamp = new Date().getTime();
+        };
+        // 刷新
+        window.onload = () => {
+            // 刷新后定时函数则失效, 因此我们重新调用，因为可能多次进入网页，所以需要清空定时函数
+            window.clearInterval(store.state.user.intervalFunc);
+            let user = JSON.parse(localStorage.getItem("user"));
+
+            // 只有登陆了才需要更新token
+            if(user !== null) store.dispatch("refresh_access", user.refresh);
         }
     },
 }

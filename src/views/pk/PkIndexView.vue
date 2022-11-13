@@ -177,7 +177,6 @@ export default {
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
                     if (data.username === store.state.user.username) return;
-                    console.log(data);
                     if (data.event === "start_game") {
                         store.commit("updateOpponent", {
                             username: data.username,

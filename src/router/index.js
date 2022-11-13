@@ -11,6 +11,7 @@ import NotFound from '@/views/error/NotFound'
 import UserAccountLoginView from '@/views/user/account/UserAccountLoginView'
 import UserAccountRegisterView from '@/views/user/account/UserAccountRegisterView'
 import UserAccountAcWingWebReceiveCodeView from '@/views/user/account/UserAccountAcWingWebReceiveCodeView'
+import PersonalInfoView from '@/views/user/PersonalInfoView'
 import UserAccountQQReceiveCodeView from '@/views/user/account/UserAccountQQReceiveCodeView'
 import store from '@/store'
 
@@ -136,6 +137,16 @@ const routes = [
         }
     },
     {
+        path: '/user/personal_info',
+        name: 'personal_info',
+        component: PersonalInfoView,
+        meta: {
+            requestAuth: true,
+            description: '个人信息',
+            isRoot: true,
+        }
+    },
+    {
         path: "/player/qq/receive_code/",
         name: 'player_qq_receive_code',
         component: UserAccountQQReceiveCodeView,
@@ -166,13 +177,8 @@ const router = createRouter({
     routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     if(to.meta.isRoot) store.commit("updateBackPage", "");
-    if(to.meta.requestAuth && !store.state.user.is_login) {
-        next({name: "user_account_login"});
-    } else {
-        next();
-    }
 })
 
 export default router

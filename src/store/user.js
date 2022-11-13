@@ -1,14 +1,14 @@
 import $ from 'jquery';
+import router from '@/router';
 
 export default {
     state: {
-        id: 0,
-        username: "",
-        photo: "",
-        access: "",
-        refresh: "",
-        is_login: false,
-        pulling_info: true, // 是否在拉取信息
+        id: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).id,
+        username: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).username,
+        photo: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).photo,
+        access: localStorage.getItem('aigame.access') === null ? "" : localStorage.getItem('aigame.access'),
+        refresh: localStorage.getItem('aigame.refresh') === null ? "" : localStorage.getItem('aigame.refresh'),
+        is_login: JSON.parse(localStorage.getItem('user')) === null ? false : JSON.parse(localStorage.getItem('user')).is_login,
         interval_func: 0,
     },
     getters: {
@@ -19,6 +19,8 @@ export default {
             state.username = user.username;
             state.photo = user.photo;
             state.is_login = user.is_login;
+
+            localStorage.setItem("user",  JSON.stringify(user));
         },
         updateToken(state, data) {
             localStorage.setItem("aigame.access", data.access);
@@ -34,16 +36,16 @@ export default {
             state.refresh = "";
             state.is_login = false;
         },
-        updatePullingInfo(state, pulling_info) {
-            state.pulling_info = pulling_info;
-        },
         setIntervalFunc(state, interval_func) {
-            let t = localStorage.getItem('interval_func');
+            let t = localStorage.getItem('setIntervalFunc');
             if(t !== null) {
                 clearInterval(t);
             }
             state.interval_func = interval_func;
             localStorage.setItem("setIntervalFunc", interval_func);
+        },
+        updatePhoto(state, imgUrl) {
+            state.photo = imgUrl;
         },
     },
     actions: {
@@ -60,8 +62,8 @@ export default {
                     context.dispatch("refresh_access", resp.refresh);
                     data.success(resp);
                 },
-                error(resp) {
-                    data.error(resp);
+                error() {
+                    context.dispatch("logout");
                 }
             });
         },
@@ -83,17 +85,20 @@ export default {
                         data.error();
                     }
                 },
-                error(resp) {
-                    data.error(resp);
+                error() {
+                    context.dispatch("logout");
                 }
             });
         },
         logout(context) {
+            clearInterval(localStorage.getItem("setIntervalFunc"));
             localStorage.removeItem("aigame.access");
             localStorage.removeItem("aigame.refresh");
+            localStorage.removeItem("setIntervalFunc")
+            localStorage.removeItem("user");
             
-            clearInterval(localStorage.getItem("setIntervalFunc"));
             context.commit("logout");
+            router.push({ name: "user_account_login" });
         },
         refresh_access(context, refresh) {
             // 每4.5min刷新jwt
@@ -118,11 +123,14 @@ export default {
                             },
                             data: {
                                 token: resp.access,
+                            },
+                            error() {
+                                context.dispatch("logout");
                             }
                         });
                     },
-                    error(resp) {
-                        console.log(resp);
+                    error() {
+                        context.dispatch("logout");
                     }
                 });
             }, 55 * 60 * 1000);

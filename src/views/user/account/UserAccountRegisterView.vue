@@ -91,6 +91,9 @@ export default {
                                     type: 'error',
                                 })
                             }
+                        },
+                        error() {
+                            store.dispatch("logout");
                         }
                     });
                 }

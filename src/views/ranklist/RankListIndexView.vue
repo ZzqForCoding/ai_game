@@ -8,20 +8,23 @@
                         <el-button style="float: right;" type="primary" @click="findme">我</el-button>
                     </div>
                 </template>
-                <el-table :data="players" style="width: 100%;" highlight-current-row max-height="720" table-layout="auto">
+                <el-table :data="players" style="width: 100%;" highlight-current-row max-height="720"
+                    table-layout="auto">
                     <el-table-column label="rank" align="center" prop="rank" width="140" />
                     <el-table-column label="玩家" align="center">
                         <template #default="scope">
                             <div class="player-container">
                                 <div class="player-card" @click="enterPlayerSpace(scope.row.id)">
-                                    <el-avatar shape="square" size="small" :src="scope.row.photo" />
+                                    <el-avatar shape="square" size="small" :src="scope.row.photo"
+                                        style="margin-left: 10px;" />
                                     <span class="player-card-username">
                                         <span class="ranklist-username">
                                             {{ scope.row.username }}
                                         </span>
                                     </span>
                                 </div>
-                                <span v-if="is_find && $store.state.user.username === scope.row.username" style="height: 15px; margin-left: 5px;">
+                                <span v-if="is_find && $store.state.user.username === scope.row.username"
+                                    style="height: 15px; margin-left: 5px;">
                                     <el-icon :size="15">
                                         <Back />
                                     </el-icon>
@@ -32,16 +35,9 @@
                     <el-table-column prop="rating" label="游戏" align="center" />
                 </el-table>
             </el-card>
-            <el-pagination
-                class="player-pagination"
-                background
-                layout="total, prev, pager, next, jumper"
-                :total="total_players"
-                :page-size="10"
-                v-model:current-page="current_page"
-                pager-count="5"
-                @current-change="pull_players"
-            />
+            <el-pagination class="player-pagination" background layout="total, prev, pager, next, jumper"
+                :total="total_players" :page-size="10" v-model:current-page="current_page" pager-count="5"
+                @current-change="pull_players" />
             {{ current_page }}
         </el-col>
     </el-row>
@@ -78,6 +74,9 @@ export default {
                         total_players.value = resp.players_count;
                     }
                 },
+                error() {
+                    store.dispatch("logout");
+                }
             });
         };
 
@@ -93,24 +92,27 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if (resp.result === "success") {
+                     if (resp.result === "success") {
                         current_page.value = resp.page;
-                        pull_players(current_page.value);
-                        is_find.value = true;
+                       pull_players(current_page.value);
+                         is_find.value = true;
                     }
                 },
+                error() {
+                    store.dispatch("logout");
+                }
             });
         }
 
         const enterPlayerSpace = userId => {
             router.push(
-                { 
-                    name: "myspace_index",
+               { 
+                     name: "myspace_index",
                     params: {
                         userId
                     }
                 }
-            );
+             );
         }
 
         return {
@@ -144,6 +146,9 @@ export default {
     border-radius: 5px;
     height: 35px;
     width: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 }
 
 .player-card:hover {
@@ -157,7 +162,7 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 60px;
+    width: 50px;
     color: #409EFF;
 }
 

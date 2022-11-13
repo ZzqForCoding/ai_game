@@ -34,6 +34,9 @@ export default {
                 } else {
                     router.push({ name: "user_account_login" });
                 }
+            },
+            error() {
+                store.dispatch("logout");
             }
         });
     }

@@ -46,8 +46,8 @@
                     </div>
                 </template>
             </el-table-column>
-            
-            <el-table-column fixed="right" label="Operations"  align="center">
+
+            <el-table-column fixed="right" label="Operations" align="center">
                 <template #default="scope">
                     <el-button @click="see_record(scope.row.id)" color="#6666CC">查看录像</el-button>
                 </template>
@@ -100,6 +100,9 @@ export default {
                         total_records.value = resp.records_count;
                     }
                 },
+                error() {
+                    store.dispatch("logout");
+                }
             });
         };
 
@@ -171,10 +174,10 @@ export default {
 
         const enterPlayerSpace = userId => {
             router.push(
-                { 
+                {
                     name: "myspace_index",
                     params: {
-                            userId
+                        userId
                     }
                 }
             );
@@ -191,7 +194,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .player-container {
     display: flex;
     align-items: center;
@@ -244,7 +247,8 @@ export default {
     margin-top: 20px;
 }
 
-.record-pagination:deep(.el-pagination__total), .record-pagination:deep(.el-pagination__jump) {
+.record-pagination:deep(.el-pagination__total),
+.record-pagination:deep(.el-pagination__jump) {
     color: white;
 }
 </style>
