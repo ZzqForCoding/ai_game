@@ -7,6 +7,8 @@ class Player(models.Model):
     rating = models.IntegerField(default=1500)
     openid = models.CharField(default="", max_length=50, blank=True, null=True)
     token = models.CharField(default="", max_length=500, blank=True, null=True)
+    job = models.CharField(max_length=20, blank=True, null=True)
+    desp = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return str(self.user) + ' ' + str(self.rating)

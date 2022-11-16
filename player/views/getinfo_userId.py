@@ -13,5 +13,7 @@ class InfoByUserIdView(APIView):
             "player_info": {
                 'username': player.user.username,
                 'photo': player.photo,
+                'job': player.job,
+                'desp': player.desp
             }
         })
