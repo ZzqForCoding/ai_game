@@ -31,7 +31,7 @@ import { ref, reactive, unref } from 'vue';
 import { useStore } from 'vuex';
 import router from '@/router';
 import $ from 'jquery';
-import { ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus';
 
 export default {
     name: 'UserAccountRegisterView',
@@ -80,6 +80,9 @@ export default {
                                         store.dispatch("getinfo", {
                                             success() {
                                                 router.push({name: 'home'});
+                                            },
+                                            error() {
+                                                store.dispatch("logout");
                                             }
                                         });
                                     }
@@ -93,7 +96,6 @@ export default {
                             }
                         },
                         error() {
-                            store.dispatch("logout");
                         }
                     });
                 }

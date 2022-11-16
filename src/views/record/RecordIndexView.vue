@@ -57,34 +57,34 @@
             <RecordList recordListUrl="https://aigame.zzqahm.top/backend/record/getlist/" />
         </el-col>
         <el-col :span="5" :offset="1">
-            <el-card class="message" style="user-select: none;">
+            <el-card class="message-card" style="user-select: none;">
                 <template #header>
                     <div class="card-header">
                         <span>公共聊天区</span>
                     </div>
                 </template>
 
-                <el-card class="messages" shadow="never">
-                    <el-scrollbar max-height="320px" ref="msgScroll">
+                <el-card class="message-body" shadow="never">
+                    <el-scrollbar max-height="250px" ref="msgScroll">
                         <div class="message-content" v-for="msg in $store.state.record.hall_msgs" :key="msg.id">
                             <div class="username">
                                 {{ msg.username }}
                             </div>
                             <div class="main">
                                 <el-avatar class="photo" size="small" :src="msg.photo" />
-                                <el-button round :type="$store.state.user.username === msg.username ? 'primary' : ''">{{
-                                msg.text }}</el-button>
+                                <el-button round :type="$store.state.user.username === msg.username ? 'primary' : ''">
+                                    {{ msg.text }}
+                                </el-button>
                             </div>
                         </div>
                     </el-scrollbar>
                 </el-card>
-
                 <el-card class="message-send" shadow="never">
                     <el-form @submit.prevent="">
-                        <el-input class="message-input" :autosize="{ minRows: 6, maxRows: 6 }" type="textarea"
+                        <el-input class="message-input" type="textarea"
                             placeholder="Please input message..." v-model="message" resize="none"
                             @keydown.enter="enterSendMsg" />
-                        <el-button class="sendBtn" type="primary" @click="sendMsg" size="small">发送</el-button>
+                        <el-button class="sendBtn" type="primary" @click="sendMsg(2)" size="small">发送</el-button>
                     </el-form>
                 </el-card>
             </el-card>
@@ -93,8 +93,7 @@
 </template>
 
 <script>
-import { onMounted, onUnmounted, h, ref, unref, reactive, watch } from 'vue';
-import { ElNotification } from 'element-plus'
+import { onMounted, ref, unref, reactive, watch } from 'vue';
 import $ from 'jquery';
 import { useStore } from 'vuex';
 import router from '@/router';
@@ -176,11 +175,6 @@ export default {
         }
 
         onMounted(() => {
-            ElNotification({
-                title: 'Welcome',
-                message: h('i', { style: 'color: teal' }, '欢迎来到King Of Bots游戏对战平台！'),
-                offset: 70,
-            });
             get_games();
             
             socket = new WebSocket(socketUrl);
@@ -196,8 +190,6 @@ export default {
                 if(data.username === store.state.user.username) return;
                 if(data.event === "hall_message") {
                     store.commit("pushHallMsg", data.msg);
-                    // const scroll = unref(msgScroll);
-                    // scroll.setScrollTop(5000);
                 }
             }
 
@@ -227,13 +219,10 @@ export default {
                 }
             })
         };
-
-        onUnmounted(() => {
-            socket.close();
-        });
         
-        const sendMsg = () => {
-            if(!canSendMsg.value || message.value === "") return;
+        const sendMsg = (t) => {
+            // 1表示是enter发送的信息，防止enter按键过快重复发送
+            if(t != 1 && (!canSendMsg.value || message.value === "")) return;
             store.state.record.hall_socket.send(JSON.stringify({
                 event: "hall_message",
                 username: store.state.user.username,
@@ -245,16 +234,16 @@ export default {
                 canSendMsg.value = true;
             }, 1500);
             message.value = "";
-            // const scroll = unref(msgScroll);
-            // scroll.setScrollTop(scroll.scrollHeight);
         };
 
         const enterSendMsg = (e) => {
             if(e.ctrlKey && e.keyCode === 13) {   //用户点击了ctrl+enter触发
-                message.value += '\n';
+                // message.value += '\n';
             } else { //用户点击了enter触发
                 e.preventDefault();
-                sendMsg();
+                if(message.value.trim() === "") return;
+                canSendMsg.value = false;
+                sendMsg(1);
             }  
         };
 
@@ -282,30 +271,30 @@ export default {
 </script>
 
 <style scoped>
-.message:deep(.el-card__body) {
+.message-card:deep(.el-card__body) {
     padding: 0px 0px !important;
 }
 
-.message:deep(.el-card__header) {
+.message-card:deep(.el-card__header) {
     padding: 10px 10px !important;
 }
 
-.messages:deep(.el-card__body) {
+.message-body:deep(.el-card__body) {
     display: flex;
     flex-direction: column;
     padding: 5px 10px !important;
 }
 
-.messages .message-content {
-    margin: 10px 0;
+.message-body .message-content {
+    margin: 5px 0;
 }
 
-.messages .message-content .main {
+.message-body .message-content .main {
     display: flex;
     align-items: center;
 }
 
-.messages .message-content .username {
+.message-body .message-content .username {
     color: grey;
     font-size: 8px;
     line-height: 14px;
@@ -319,31 +308,27 @@ export default {
     user-select: text;
 }
 
-.messages .message-content .photo {
+.message-body .message-content .photo {
     margin: 0 4px;
 }
 
-.message:deep(.messages) {
-    height: 150px;
+.message-card:deep(.message-body) {
+    height: 250px;
 }
 
-.message:deep(.el-card__body) {
-    height: 280px !important;
+.message-card:deep(.el-card__body) {
+    height: 350px !important;
 }
 
-.message-send:deep(.el-card__body) {
-    padding: 0px 0px !important;
+.message-input:deep(.el-textarea__inner) {
+    height: 100px;
 }
 
 .message-send .sendBtn {
     position: relative;
     float: right;
-    top: -37px;
+    top: -30px;
     margin-right: 5px;
-}
-
-.message-send .message-input {
-    margin-top: 30px;
 }
 
 .zoom {

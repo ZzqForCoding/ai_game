@@ -21,7 +21,6 @@ const routes = [
         name: 'home',
         redirect: '/record/',
         meta: {
-            requestAuth: true,
             description: '首页',
             isRoot: true,
         }
@@ -31,7 +30,6 @@ const routes = [
         name: 'pk_index',
         component: PkIndexView,
         meta: {
-            requestAuth: true,
             description: '对战界面',
             isRoot: false,
         }
@@ -41,7 +39,6 @@ const routes = [
         name: 'record_index',
         component: RecordIndexView,
         meta: {
-            requestAuth: true,
             description: '对战列表',
             isRoot: true,
         }
@@ -51,7 +48,6 @@ const routes = [
         name: "record_content",
         component: RecordContentView,
         meta: {
-            requestAuth: true,
             description: '回放界面',
             isRoot: false,
         }
@@ -61,7 +57,6 @@ const routes = [
         name: 'ranklist_index',
         component: RankListIndexView,
         meta: {
-            requestAuth: true,
             description: '排行榜',
             isRoot: true,
         }
@@ -71,7 +66,6 @@ const routes = [
         name: 'discussion_index',
         component: DiscussionView,
         meta: {
-            requestAuth: true,
             description: '讨论区',
             isRoot: true,
         }
@@ -81,7 +75,6 @@ const routes = [
         name: 'fresh_news_index',
         component: FreshNewsView,
         meta: {
-            requestAuth: true,
             description: '新鲜事',
             isRoot: true,
         }
@@ -91,7 +84,6 @@ const routes = [
         name: 'message_board_index',
         component: MessageBoardView,
         meta: {
-            requestAuth: true,
             description: '留言板',
             isRoot: true,
         }
@@ -101,7 +93,6 @@ const routes = [
         name: 'myspace_index',
         component: SpaceMainView,
         meta: {
-            requestAuth: true,
             description: '我的空间',
             isRoot: false,
         }
@@ -111,7 +102,6 @@ const routes = [
         name: 'user_account_login',
         component: UserAccountLoginView,
         meta: {
-            requestAuth: false,
             description: '登录',
             isRoot: true,
         }
@@ -121,7 +111,6 @@ const routes = [
         name: 'user_account_register',
         component: UserAccountRegisterView,
         meta: {
-            requestAuth: false,
             description: '注册',
             isRoot: true,
         }
@@ -131,7 +120,6 @@ const routes = [
         name: 'player_acwing_web_receive_code',
         component: UserAccountAcWingWebReceiveCodeView,
         meta: {
-            requestAuth: false,
             description: '',
             isRoot: true,
         }
@@ -141,7 +129,6 @@ const routes = [
         name: 'personal_info',
         component: PersonalInfoView,
         meta: {
-            requestAuth: true,
             description: '个人信息',
             isRoot: true,
         }
@@ -151,7 +138,6 @@ const routes = [
         name: 'player_qq_receive_code',
         component: UserAccountQQReceiveCodeView,
         meta: {
-            requestAuth: false,
             description: '',
             isRoot: true,
         }
@@ -161,7 +147,6 @@ const routes = [
         name: '404',
         component: NotFound,
         meta: {
-            requestAuth: false,
             description: '',
             isRoot: true,
         }

@@ -181,12 +181,13 @@
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import router from './router/index'
-import { watch, ref, onMounted } from 'vue';
+import { watch, ref, onMounted, h } from 'vue';
 import {
     Expand,
     Fold,
 } from '@element-plus/icons-vue';
 import { GameUtils } from '@/assets/scripts/GameUtils';
+import { ElNotification } from 'element-plus';
 
 export default {
     name: 'App',
@@ -232,6 +233,11 @@ export default {
         }
 
         onMounted(() => {
+            ElNotification({
+                title: 'Welcome',
+                message: h('i', { style: 'color: teal' }, '欢迎来到King Of Bots游戏对战平台！'),
+                offset: 70,
+            });
             if(store.state.utils.gameUtils === null) {
                 store.commit("updateGameUtils", new GameUtils(store));
             }

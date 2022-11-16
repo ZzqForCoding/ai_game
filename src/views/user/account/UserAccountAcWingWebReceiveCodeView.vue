@@ -23,7 +23,7 @@ export default {
                 code: myRoute.query.code,
                 state: myRoute.query.state
             },
-            success: resp => {
+            success(resp) {
                 if(resp.result === "success") {
                     store.commit("updateToken", {
                         access: resp.access,
@@ -36,7 +36,6 @@ export default {
                 }
             },
             error() {
-                store.dispatch("logout");
             }
         });
     }

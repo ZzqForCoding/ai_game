@@ -12,8 +12,7 @@
                 </template>
                 <el-row style="margin-top: 40px;">
                     <el-col :span="20" :offset="2">
-                        <el-form :label-position="labelPosition" label-width="180px" :model="formLabelAlign"
-                            style="max-width: 600px">
+                        <el-form :label-position="labelPosition" label-width="180px" :model="personalEditInfo" :rules="rules" style="max-width: 600px">
 
                             <el-form-item label="头像">
                                 <el-upload class="avatar-uploader"
@@ -36,24 +35,20 @@
                                     <img w-full :src="dialogimageUrl" alt="Preview Image" />
                                 </el-dialog>
                             </el-form-item>
-                            <el-form-item label="用户名">
-                                <el-input placeholder="Please input username" clearable />
-                            </el-form-item>
-
-                            <el-form-item label="密码">
-                                <el-input type="password" placeholder="Please input password" clearable />
+                            <el-form-item label="用户名" prop="username">
+                                <el-input placeholder="Please input username" clearable v-model="personalEditInfo.username" />
                             </el-form-item>
 
 
-                            <el-form-item label="职业">
-                                <el-input placeholder="Please input your job" clearable />
+                            <el-form-item label="职业" prop="job">
+                                <el-input placeholder="Please input your job" clearable v-model="personalEditInfo.job" />
                             </el-form-item>
 
-                            <el-form-item label="个性签名">
-                                <el-input type="textarea" />
+                            <el-form-item label="个性签名" prop="desp">
+                                <el-input type="textarea" v-model="personalEditInfo.desp"/>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" style="width: 100%;">保存</el-button>
+                                <el-button type="primary" style="width: 100%;" @click="updatePlayerInfo">更新</el-button>
                             </el-form-item>
                         </el-form>
                     </el-col>
@@ -67,8 +62,8 @@
 import ProfileCard from '@/components/ProfileCard.vue';
 import { useStore } from 'vuex'; 
 import { reactive, ref, watchEffect } from 'vue';
-import { ElMessage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus';
+import { Plus } from '@element-plus/icons-vue';
 import $ from 'jquery';
 
 export default {
@@ -82,6 +77,8 @@ export default {
         const playerInfo = reactive({
             'username': store.state.user.username,
             'photo': store.state.user.photo,
+            'job': store.state.user.job,
+            'desp': store.state.user.desp
         });
         let showImgDialog = ref(false);
         let dialogimageUrl = ref('');
@@ -89,6 +86,11 @@ export default {
             'name': '1.jpg',
             'url': store.state.user.photo
         }]);
+        let personalEditInfo = reactive({
+            username: store.state.user.username,
+            job: store.state.user.job,
+            desp: store.state.user.desp,
+        });
 
         watchEffect(()=>{
             playerInfo.username = store.state.user.username;
@@ -151,7 +153,7 @@ export default {
                         contentType: false,
                         processData: false,
                         data: sendData,
-                        success: resp => {
+                        success(resp) {
                             resp.imgUrl += '?x-oss-process=image/resize,h_500,m_lfit';
                             $.ajax({
                                 url: "https://aigame.zzqahm.top/backend/player/upload_avatar/update_avatar/", 
@@ -162,12 +164,19 @@ export default {
                                 data: {
                                     imgUrl: resp.imgUrl,  
                                 },
-                                success: () => {
+                                success() {
                                     avatarList.value[0] = {
                                         'name': file.name,
                                         'url': resp.imgUrl
                                     };
-                                    store.commit("updatePhoto", resp.imgUrl);
+                                    store.commit("updateUser", {
+                                        'id': store.state.user.id,
+                                        'username': store.state.user.username,
+                                        'photo': resp.imgUrl,
+                                        'is_login': store.state.user.is_login,
+                                        'job': store.state.user.job,
+                                        'desp': store.state.user.desp,
+                                    });
                                 },
                                 error() {
                                     store.dispatch("logout");
@@ -190,6 +199,49 @@ export default {
             dialogimageUrl.value = file.url;
         }
 
+        const updatePlayerInfo = () => {
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/update_info/",
+                type: "POST",
+                headers: {
+                    'Authorization': "Bearer " + store.state.user.access,
+                },
+                data: {
+                    'username': personalEditInfo.username,
+                    'job': personalEditInfo.job,
+                    'desp': personalEditInfo.desp,
+                },
+                success(resp) {
+                    if(resp.result === "success") {
+                        ElMessage({
+                            showClose: true,
+                            message: '更新成功',
+                            type: 'success',
+                        });
+                        playerInfo.job = personalEditInfo.job;
+                        playerInfo.desp = personalEditInfo.desp;
+                        store.commit("updateUser", {
+                            'id': store.state.user.id,
+                            'username': personalEditInfo.username,
+                            'photo': store.state.user.photo,
+                            'is_login': store.state.user.is_login,
+                            'job': personalEditInfo.job,
+                            'desp': personalEditInfo.desp,
+                        });
+                    } else {
+                        ElMessage({
+                            showClose: true,
+                            message: resp.result,
+                            type: 'error',
+                        })
+                    }
+                },
+                error() {
+                    store.dispatch("logout");
+                }
+            });
+        }
+
          return {
             playerInfo,
             beforeAvatarUpload,
@@ -199,6 +251,20 @@ export default {
             dialogimageUrl,
             handlePreviewPic,
             avatarList,
+            personalEditInfo,
+            updatePlayerInfo,
+            rules: {
+                username: [
+                    { required: true, message: '用户名不得为空！', trigger: 'blur' },
+                    { max: 15, message: '长度在 15 个字符之内', trigger: 'blur' }
+                ],
+                job: [
+                    { max: 20, message: '长度在 20 个字符之内', trigger: 'blur' }
+                ],
+                desp: [
+                    { max: 200, message: '长度在 200 个字符之内', trigger: 'blur' }
+                ],
+            },
         }
     }
 }

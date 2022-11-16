@@ -6,10 +6,10 @@
                     <div class="card-header">
                         <span style="font-weight: 700; font-size: 18px;">
                             我的Bot
-                            <span v-if="canCreateBotCnt !== 0">{{ canCreateBotCnt }})</span>
+                            <span v-if="canCreateBotCnt !== 0">({{ canCreateBotCnt }})</span>
                         </span>
-                        <el-button v-if="!isExpand" type="warning" class="button"
-                            style="float: right; margin-left: 10px;" size="small" plain @click="expandBot">扩容
+                        <el-button v-if="!isExpand" type="warning" class="button" style="float: right; margin-left: 10px;" size="small" plain @click="expandBot">
+                            扩容
                         </el-button>
                         <el-button type="primary" class="button" style="float: right;" size="small" plain
                             @click="showCreateDialog = true">创造Bot</el-button>
@@ -451,6 +451,21 @@ export default {
 
 
         onMounted(() => {
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/bot/isexpand/",
+                type: "get",
+                headers: {
+                    "Authorization": "Bearer " + store.state.user.access,
+                },
+                success(resp) {
+                    if(resp.result === "success") {
+                        isExpand.value = resp.status;
+                    }
+                },
+                error() {
+                    store.dispatch("logout");
+                }
+            });
             if(props.userId === store.state.user.id) {
                 refresh_bots();
                 refresh_games();

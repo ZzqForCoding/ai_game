@@ -1,11 +1,14 @@
 import $ from 'jquery';
 import router from '@/router';
+import store from '.';
 
 export default {
     state: {
         id: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).id,
         username: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).username,
         photo: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).photo,
+        job: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).job,
+        desp: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).desp,
         access: localStorage.getItem('aigame.access') === null ? "" : localStorage.getItem('aigame.access'),
         refresh: localStorage.getItem('aigame.refresh') === null ? "" : localStorage.getItem('aigame.refresh'),
         is_login: JSON.parse(localStorage.getItem('user')) === null ? false : JSON.parse(localStorage.getItem('user')).is_login,
@@ -19,6 +22,8 @@ export default {
             state.username = user.username;
             state.photo = user.photo;
             state.is_login = user.is_login;
+            store.job = user.job;
+            store.desp = user.desp;
 
             localStorage.setItem("user",  JSON.stringify(user));
         },
@@ -32,6 +37,8 @@ export default {
             state.id = 0;
             state.username = "";
             state.photo = "";
+            store.job = "";
+            store.desp = "";
             state.access = "";
             state.refresh = "";
             state.is_login = false;
@@ -43,9 +50,6 @@ export default {
             }
             state.interval_func = interval_func;
             localStorage.setItem("setIntervalFunc", interval_func);
-        },
-        updatePhoto(state, imgUrl) {
-            state.photo = imgUrl;
         },
     },
     actions: {
@@ -63,7 +67,7 @@ export default {
                     data.success(resp);
                 },
                 error() {
-                    context.dispatch("logout");
+                    data.error();
                 }
             });
         },
@@ -86,7 +90,7 @@ export default {
                     }
                 },
                 error() {
-                    context.dispatch("logout");
+                    data.error();
                 }
             });
         },

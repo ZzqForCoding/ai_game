@@ -238,6 +238,7 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 35px;
+    display: block;
     color: #409EFF;
 }
 

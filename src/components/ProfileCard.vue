@@ -19,11 +19,15 @@
                     </div>
 
                     <div class="profession">
-                        Web Developer at Webestica
+                        <span>job：</span>
+                        {{ info.job }}
+                        <span v-if="!info.job || info.job.trim() === ''">-</span>
                     </div>
 
                     <div class="description">
-                        I'd love to change the world, but they won’t give me the source code.
+                        <span>mood：</span>
+                        {{ info.desp }}
+                        <span v-if="!info.desp || info.desp.trim() === ''">-</span>
                     </div>
 
                     <div class="friend-num-container">
@@ -93,12 +97,12 @@ export default {
     font-weight: 700;
     height: 20px;
     line-height: 20px;
-    margin-top: 18px;
+    margin-top: 5px;
     user-select: text;
 }
 
 .profile-card .profession {
-    margin-top: 5px;
+    margin-top: 15px;
     color: #676A79;
     font-size: 12px;
     text-align: center;
@@ -109,7 +113,9 @@ export default {
     font-size: 13px;
     text-align: center;
     width: 90%;
-    margin: 15px auto;
+    margin: 30px auto;
+    height: 50px;
+    word-break: break-word;
 }
 
 .profile-card .friend-num-container {

@@ -6,15 +6,15 @@
         </el-col>
 
         <el-col :span="5" :offset="1" style="margin-top: 40px;">
-            <el-card class="message" style="user-select: none;">
+            <el-card class="message-card" style="user-select: none;">
                 <template #header>
                     <div class="card-header">
                         <span>公共聊天区</span>
                     </div>
                 </template>
 
-                <el-card class="messages" shadow="never">
-                    <el-scrollbar max-height="150px" ref="msgScroll">
+                <el-card class="message-body" shadow="never">
+                    <el-scrollbar max-height="250px" ref="msgScroll">
                         <div class="message-content" v-for="msg in $store.state.pk.msgs" :key="msg.id">
                             <div class="username">
                                 {{ msg.username }}
@@ -28,13 +28,12 @@
                         </div>
                     </el-scrollbar>
                 </el-card>
-
                 <el-card class="message-send" shadow="never">
                     <el-form @submit.prevent="">
-                        <el-input class="message-input" :autosize="{ minRows: 6, maxRows: 6 }" type="textarea"
+                        <el-input class="message-input" type="textarea"
                             placeholder="Please input message..." v-model="message" resize="none"
                             @keydown.enter="enterSendMsg" />
-                        <el-button class="sendBtn" type="primary" @click="sendMsg" size="small">发送</el-button>
+                        <el-button class="sendBtn" type="primary" @click="sendMsg(2)" size="small">发送</el-button>
                     </el-form>
                 </el-card>
             </el-card>
@@ -109,8 +108,6 @@ export default {
                                 store.commit("updateCanSendMsg", true);
                             }, 1500);
                         }
-                        // const scroll = unref(msgScroll);
-                        // scroll.setScrollTop(80000);
                     } else if (data.event === "start_game") {
                         store.commit("updateOpponent", {
                             username: data.username,
@@ -224,8 +221,6 @@ export default {
                                 store.commit("updateCanSendMsg", true);
                             }, 1500);
                         }
-                        // const scroll = unref(msgScroll);
-                        // scroll.setScrollTop(80000);
                     } else if (data.event === "prompt") {
                         ElMessage(data.prompt);
                     }
@@ -263,8 +258,6 @@ export default {
                                 store.commit("updateCanSendMsg", true);
                             }, 1500);
                         }
-                        // const scroll = unref(msgScroll);
-                        // scroll.setScrollTop(80000);
                     } else if (data.event === "start_game") {
                         store.commit("updateOpponent", {
                             username: data.username,
@@ -315,8 +308,9 @@ export default {
             });
         }
 
-        const sendMsg = () => {
-            if (!store.state.pk.canSendMsg || message.value === "") return;
+        const sendMsg = (t) => {
+            // 1表示是enter发送的信息，防止enter按键过快重复发送
+            if(t != 1 && (!store.state.pk.canSendMsg || message.value === "")) return;
             store.state.pk.socket.send(JSON.stringify({
                 event: "pk_message",
                 username: store.state.user.username,
@@ -324,16 +318,16 @@ export default {
                 text: message.value,
             }));
             message.value = "";
-            // const scroll = unref(msgScroll);
-            // scroll.setScrollTop(80000);
         };
 
         const enterSendMsg = (e) => {
             if (e.ctrlKey && e.keyCode === 13) {   //用户点击了ctrl+enter触发
-                message.value += '\n';
+                // message.value += '\n';
             } else { //用户点击了enter触发
                 e.preventDefault();
-                sendMsg();
+                if(message.value.trim() === "") return;
+                store.commit("updateCanSendMsg", false);
+                sendMsg(1);
             }
         };
 
@@ -367,30 +361,31 @@ export default {
     margin: 5px 5px;
 }
 
-.message:deep(.el-card__body) {
-    padding: 0px 0px !important;
-}
-
-.message:deep(.el-card__header) {
+.message-card:deep(.el-card__header) {
     padding: 10px 10px !important;
 }
 
-.messages:deep(.el-card__body) {
+.message-card:deep(.el-card__body) {
+    padding: 0px 0px !important;
+}
+
+
+.message-body:deep(.el-card__body) {
     display: flex;
     flex-direction: column;
     padding: 5px 10px !important;
 }
 
-.messages .message-content {
-    margin: 10px 0;
+.message-body .message-content {
+    margin: 5px 0;
 }
 
-.messages .message-content .main {
+.message-body .message-content .main {
     display: flex;
     align-items: center;
 }
 
-.messages .message-content .username {
+.message-body .message-content .username {
     color: grey;
     font-size: 8px;
     line-height: 14px;
@@ -404,30 +399,26 @@ export default {
     user-select: text;
 }
 
-.messages .message-content .photo {
+.message-body .message-content .photo {
     margin: 0 4px;
 }
 
-.message:deep(.messages) {
-    height: 150px;
+.message-card:deep(.el-card__body) {
+    height: 350px !important;
 }
 
-.message:deep(.el-card__body) {
-    height: 280px !important;
+.message-card:deep(.message-body) {
+    height: 250px;
 }
 
-.message-send:deep(.el-card__body) {
-    padding: 0px 0px !important;
+.message-input:deep(.el-textarea__inner) {
+    height: 100px;
 }
 
 .message-send .sendBtn {
     position: relative;
     float: right;
-    top: -37px;
+    top: -30px;
     margin-right: 5px;
-}
-
-.message-send .message-input {
-    margin-top: 30px;
 }
 </style>

@@ -89,13 +89,16 @@ export default {
                             });
                             store.dispatch("getinfo", {
                                 success() {
-                            router.push({name: 'home'});
-                                 }
+                                    router.push({name: 'home'});
+                                },
+                                error() {
+                                    store.dispatch("logout");
+                                }
                             });
                          },
                         error() {
                            ElMessage({
-                                 showClose: true,
+                                showClose: true,
                                 message: '用户名或密码错误！',
                                 type: 'error',
                             });
@@ -103,7 +106,7 @@ export default {
                     });
                 }
             })
-                     };
+        };
  
        const handlerLock = async(data) => {
             if (data) {
@@ -141,13 +144,12 @@ export default {
             $.ajax({
                 url: "https://aigame.zzqahm.top/backend/player/acwing/web/apply_code/",
                 type: "GET",
-                success: resp => {
+                success(resp) {
                     if(resp.result === "success") {
                         window.location.replace(resp.apply_code_url)
                     }
                 },
                 error() {
-                    store.dispatch("logout");
                 }
             });
         }
@@ -155,14 +157,12 @@ export default {
         const qq_login = () => {
             $.ajax({
                 url: "https://aigame.zzqahm.top/backend/player/qq/apply_code/",
-                        
-                success: resp => {
+                success(resp) {
                     if(resp.result === "success") {
                         window.location.replace(resp.apply_code_url)
                     }
                 },
                 error() {
-                    store.dispatch("logout");
                 }
             });
          }

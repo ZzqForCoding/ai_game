@@ -45,6 +45,8 @@ export default {
         const spacePlayerInfo = reactive({
             'name': '',
             'photo': '',
+            'job': '',
+            'desp': ''
         });
 
         const getSpacePlayerInfo = () => {
@@ -58,6 +60,8 @@ export default {
                     if(resp.result === "success") {
                         spacePlayerInfo.username = resp.player_info.username;
                         spacePlayerInfo.photo = resp.player_info.photo;
+                        spacePlayerInfo.job = resp.player_info.job;
+                        spacePlayerInfo.desp = resp.player_info.desp;
                    }
                 },
                 error() {
