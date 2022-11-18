@@ -105,14 +105,12 @@ export default {
         }
 
         const enterPlayerSpace = userId => {
-            router.push(
-               { 
-                     name: "myspace_index",
-                    params: {
-                        userId
-                    }
+            router.push({ 
+                name: "myspace_index",
+                params: {
+                    userId
                 }
-             );
+            });
         }
 
         return {

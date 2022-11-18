@@ -285,7 +285,11 @@
 
                 <!-- 删除模态框 -->
                 <el-dialog v-model="showDeleteDialog" title="删除bot" width="30%" :before-close="handleClose">
-                    <span>确认删除标题为 {{ currentOpBot.title }} 吗?</span>
+                    <span>
+                        确认删除标题为
+                        <span class="content-ellipsis"> {{ currentOpBot.title }} </span>
+                        吗?
+                    </span>
                     <template #footer>
                         <span class="dialog-footer">
                             <el-button type="primary" @click="confirmDeleteBot">确认删除</el-button>
@@ -881,4 +885,16 @@ export default {
     height: 20px;
     font-size: 15px;
 } */
+
+.content-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100px;
+    display: inline-block;
+    position: relative;
+    top: 5px;
+    text-align: center;
+    font-weight: 600;
+}
 </style>

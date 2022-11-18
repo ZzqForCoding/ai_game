@@ -71,7 +71,7 @@
                                 {{ msg.username }}
                             </div>
                             <div class="main">
-                                <el-avatar class="photo" size="small" :src="msg.photo" />
+                                <el-avatar class="photo info-scale" size="small" :src="msg.photo" @click="enterPlayerSpace(msg.userId)" />
                                 <el-button round :type="$store.state.user.username === msg.username ? 'primary' : ''">
                                     {{ msg.text }}
                                 </el-button>
@@ -225,6 +225,7 @@ export default {
             if(t != 1 && (!canSendMsg.value || message.value === "")) return;
             store.state.record.hall_socket.send(JSON.stringify({
                 event: "hall_message",
+                userId: store.state.user.id,
                 username: store.state.user.username,
                 photo: store.state.user.photo,
                 text: message.value,
@@ -247,6 +248,15 @@ export default {
             }  
         };
 
+        const enterPlayerSpace = userId => {
+            router.push({ 
+                name: "myspace_index",
+                params: {
+                    userId
+                }
+            });
+        }
+
         return {
             games,
             showCreateGameDialog,
@@ -256,6 +266,7 @@ export default {
             selectBotCode,
             botContent,
             createGameForm,
+            enterPlayerSpace,
             rules: {
                 botSelect: [
                     { required: true, message: '请选择Bot！', trigger: 'blur' },
@@ -344,5 +355,11 @@ export default {
 
 .popover-content {
     margin: 0 10px;
+}
+
+.info-scale:hover {
+    transform: scale(1.2);
+    transition: 100ms;
+    cursor: pointer;
 }
 </style>

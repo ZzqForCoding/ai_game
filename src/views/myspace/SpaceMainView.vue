@@ -12,7 +12,8 @@
                     <RecordList :recordListUrl="'https://aigame.zzqahm.top/backend/record/getlist/' + userId + '/'" />
                 </el-tab-pane>
                 <el-tab-pane label="动态">
-                    有什么新鲜事想告诉大家！快去发帖吧！
+                    <!-- 有什么新鲜事想告诉大家！快去发帖吧！ -->
+                    <FreshNewsList :freshNewsUrl="'https://aigame.zzqahm.top/backend/playervoice/freshnews/getlist/' + userId + '/'" :showPostComment="false" />
                 </el-tab-pane>
                 <!-- <el-tab-pane label="发帖">
                     快去讨论讨论游戏叭！
@@ -26,6 +27,7 @@
 import UserBotIndexView from '@/components/UserBotIndexView.vue';
 import RecordList from '@/components/RecordList.vue';
 import ProfileCard from '@/components/ProfileCard.vue';
+import FreshNewsList from '@/components/FreshNewsList.vue';
 import { useRoute } from 'vue-router';
 import { onMounted, reactive } from 'vue';
 import $ from 'jquery';
@@ -37,6 +39,7 @@ export default {
         UserBotIndexView,
         RecordList,
         ProfileCard,
+        FreshNewsList,
     },
     setup() {
         const store = useStore();
