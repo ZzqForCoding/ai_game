@@ -28,6 +28,7 @@ class Hall(AsyncWebsocketConsumer):
                 'type': "group_send_event",
                 'event': "hall_message",
                 'msg': {
+                    'userId': data['userId'],
                     'username': data['username'],
                     'photo': data['photo'],
                     'text': data['text'],

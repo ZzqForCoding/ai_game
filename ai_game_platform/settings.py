@@ -28,12 +28,13 @@ SECRET_KEY = 'django-insecure-7z78xc2np%8s*&n2jgp_sej3r*avh%5v-5$!qc4_u_k8gw3@8o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['aigame.zzqahm.top']
+ALLOWED_HOSTS = ['120.76.157.21', 'aigame.zzqahm.top']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -213,3 +214,7 @@ ALIPAY_KEY_DIR = os.path.join(BASE_DIR,'key_file/')
 ALIPAY_URL = "https://openapi.alipaydev.com/gateway.do"
 ALIPAY_ORDER_NOTIFY_URL = "https://aigame.zzqahm.top/backend/player/bot/alipay/back/"
 ALIPAY_RETURN_URL = "https://aigame.zzqahm.top/myspace/%d/"
+
+SIMPLEUI_LOGO = "https://img.zzqahm.top/aigame_platform/avatar/icon.png"
+
+SIMPLEUI_HOME_INFO = False

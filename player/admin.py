@@ -4,6 +4,10 @@ from player.models.bot import Bot
 from player.models.order import Order
 from player.models.img import Img
 
+admin.site.site_header = 'AIGame Platform'  # 设置header
+admin.site.site_title = 'AIGame Platform Administration'   # 设置title
+admin.site.index_title = 'AIGame Platform'
+
 # Register your models here.
 admin.site.register(Player)
 admin.site.register(Bot)

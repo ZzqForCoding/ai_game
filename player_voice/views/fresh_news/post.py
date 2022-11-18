@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from player.permissions.one_user_login import OneUserLogin
 from player_voice.models.fresh_news import FreshNews
-from django.contrib.auth.models import User
 
 class PostView(APIView):
     permission_classes = ([OneUserLogin])
@@ -16,6 +15,10 @@ class PostView(APIView):
         map = {}
         if content == '':
             map['result'] = '内容不能为空'
+            return Response(map)
+
+        if len(content) > 5000:
+            map['result'] = "内容长度不能超过5000个字符"
             return Response(map)
 
         freshNews = FreshNews.objects.create(user=user, content=content)

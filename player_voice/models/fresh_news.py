@@ -26,6 +26,9 @@ class FreshNews(MPTTModel):
         related_name='replyers',
     )
     likes = models.IntegerField(default=0)
+    # 表示被转发的动态id, -1表示不是转发的动态
+    forwarded_id = models.IntegerField(default=-1)
+    forward_count = models.IntegerField(default=0)
 
     # class MPTTMeta:
     #     order_insertion_by = ['createdtime']
