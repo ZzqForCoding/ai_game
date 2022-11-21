@@ -11,7 +11,7 @@ class GetListForUserIdView(APIView):
     permission_classes = ([OneUserLogin])
 
     def get(self, request, userId):
-        records = Record.objects.filter(Q(a_id = userId) | Q(b_id = userId)).order_by("id")
+        records = Record.objects.filter(Q(a_id = userId) | Q(b_id = userId)).order_by("id").order_by('-createtime')
         records_count = records.count()
         pagination = RecordPagination()
         page_records = pagination.paginate_queryset(queryset=records, request=request, view=self)

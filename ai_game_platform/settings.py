@@ -215,6 +215,6 @@ ALIPAY_URL = "https://openapi.alipaydev.com/gateway.do"
 ALIPAY_ORDER_NOTIFY_URL = "https://aigame.zzqahm.top/backend/player/bot/alipay/back/"
 ALIPAY_RETURN_URL = "https://aigame.zzqahm.top/myspace/%d/"
 
-SIMPLEUI_LOGO = "https://img.zzqahm.top/aigame_platform/avatar/icon.png"
+SIMPLEUI_LOGO = "https://img.zzqahm.top/aigame_platform/avatar/icon1.png"
 
 SIMPLEUI_HOME_INFO = False

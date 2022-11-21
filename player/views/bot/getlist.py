@@ -7,7 +7,7 @@ class GetListView(APIView):
     permission_classes = ([OneUserLogin])
 
     def get(self, request, userId):
-        bots = Bot.objects.filter(user__id=userId)
+        bots = Bot.objects.filter(user__id=userId).order_by('-modifytime')
 
         resp = []
         for bot in bots:

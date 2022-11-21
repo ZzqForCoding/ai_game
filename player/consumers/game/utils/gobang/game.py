@@ -55,13 +55,13 @@ class Game(threading.Thread):
         self.isStart = True
         self.currentRound = self.playerA.id
 
-        self.round_time = 0
-        if self.botIdA == -1 and self.botIdB == -1: self.round_time = 40 # 4s
-        else:
-            if self.languageA == 'cpp': self.round_time += 10
-            else: self.round_time += 20
-            if self.languageB == 'cpp': self.round_time += 10
-            else: self.round_time += 20
+        self.round_time = 50
+        # if self.botIdA == -1 and self.botIdB == -1: self.round_time = 40 # 4s
+        # else:
+        #     if self.languageA == 'cpp': self.round_time += 10
+        #     else: self.round_time += 20
+        #     if self.languageB == 'cpp': self.round_time += 10
+        #     else: self.round_time += 20
 
         if botA: threading.Thread(target=self.estabCodeRunningConnect(self.playerA)).start()
         if botB: threading.Thread(target=self.estabCodeRunningConnect(self.playerB)).start()
@@ -397,13 +397,11 @@ class Game(threading.Thread):
                     self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
                     self.sendResult()
                     break
+        except Exception as e:
+            print("except: ", e)
         finally:
             if self.playerA.botId != -1: self.closeCodeRunningConnect(self.playerA)
             if self.playerB.botId != -1: self.closeCodeRunningConnect(self.playerB)
-            self.sendAllMessage({
-                "idA": self.playerA.id,
-                "idB": self.playerB.id
-            }, "finish_game")
 
             gameCnt = cache.get('game_cnt', 0)
             if gameCnt > 0:

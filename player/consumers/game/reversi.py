@@ -91,6 +91,20 @@ class MultiPlayerReversiGame(AsyncWebsocketConsumer):
 
         transport.close()
 
+    async def send_message(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_send_event",
+                'event': "pk_message",
+                'msg': {
+                    'username': data['username'],
+                    'photo': data['photo'],
+                    'text': data['text'],
+                }
+            }
+        )
+
     async def start_reversi_game(self, data):
         self.room_name = data['room_name']
         if self.user.id == data['a_id']:

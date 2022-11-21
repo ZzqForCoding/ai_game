@@ -20,7 +20,7 @@ class GetListByGameView(APIView):
                 'result': '不存在这个游戏',
             })
 
-        bots = Bot.objects.filter(user__id=userId, game=game[0])
+        bots = Bot.objects.filter(user__id=userId, game=game[0]).order_by('-modifytime')
 
         resp = []
         for bot in bots:
