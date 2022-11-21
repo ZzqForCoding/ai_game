@@ -133,7 +133,7 @@ class Sandbox:
                 ret = {
                     "returncode": p.returncode,
                     "status": "Runtime Error",
-                    "desp": p.stderr.decode(),
+                    "desp": p.stderr,
                 }
                 return json.dumps(ret)
         ret = {
