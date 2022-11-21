@@ -12,7 +12,7 @@
 <script>
 import ProfileCard from '@/components/ProfileCard.vue';
 import FreshNewsList from '@/components/FreshNewsList.vue';
-import { reactive } from 'vue';
+import { reactive,watchEffect } from 'vue';
 import { useStore } from 'vuex';
 
 export default {
@@ -24,12 +24,19 @@ export default {
     setup() {
         const store = useStore();
         const playerInfo = reactive({
+            'id': store.state.user.id,
             'username': store.state.user.username,
             'photo': store.state.user.photo,
             'job': store.state.user.job,
-            'desp': store.state.user.desp
+            'desp': store.state.user.desp,
+            'recordCnt': store.state.user.recordCnt,
+            'botCnt': store.state.user.botCnt,
+            'freshNewsCnt': store.state.user.freshNewsCnt,
         });
-
+        
+        watchEffect(()=>{
+            playerInfo.freshNewsCnt = store.state.user.freshNewsCnt;
+        });
         return {
             playerInfo,
         }

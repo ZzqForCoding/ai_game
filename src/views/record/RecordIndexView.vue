@@ -1,6 +1,12 @@
 <template>
     <el-row style="margin-top: 40px;">
-        <!-- 图片切换栏，对战列表 -->
+        <el-col :span="20" :offset="2">
+            <el-carousel indicator-position="outside" height="150px">
+                <el-carousel-item v-for="image in images" :key="image.id">
+                    <img :src="image.url" class="carousel-image-type">
+                </el-carousel-item>
+            </el-carousel>
+        </el-col>
         <el-col :span="14" :offset="2">
             <el-card class="box-card" style="user-select: none;">
                 <div class="card-header" style="height: 32px;">
@@ -84,7 +90,7 @@
                         <el-input class="message-input" type="textarea"
                             placeholder="Please input message..." v-model="message" resize="none"
                             @keydown.enter="enterSendMsg" />
-                        <el-button class="sendBtn" type="primary" @click="sendMsg(2)" size="small">发送</el-button>
+                        <el-button class="sendBtn" type="primary" @click="sendMsg" size="small">发送</el-button>
                     </el-form>
                 </el-card>
             </el-card>
@@ -93,7 +99,7 @@
 </template>
 
 <script>
-import { onMounted, ref, unref, reactive, watch } from 'vue';
+import { onMounted, onUnmounted, ref, unref, reactive, watch } from 'vue';
 import $ from 'jquery';
 import { useStore } from 'vuex';
 import router from '@/router';
@@ -120,6 +126,12 @@ export default {
         let message = ref('');
         let canSendMsg = ref(false);
         let msgScroll = ref(null);
+        
+        const images = ref([
+            {id: 1, url: "https://img.zzqahm.top/aigame_platform/avatar/background3.png"},
+            {id: 2, url: "https://img.zzqahm.top/aigame_platform/avatar/background4.png"},
+            {id: 3, url: "https://img.zzqahm.top/aigame_platform/avatar/background8.jpeg"}
+        ]);
 
         let socket = null;
 
@@ -187,7 +199,6 @@ export default {
 
             socket.onmessage = msg => {
                 const data = JSON.parse(msg.data);
-                if(data.username === store.state.user.username) return;
                 if(data.event === "hall_message") {
                     store.commit("pushHallMsg", data.msg);
                 }
@@ -197,6 +208,11 @@ export default {
                 canSendMsg.value = false;
                 console.log("disconnected!");
             }
+        });
+
+        onUnmounted(() => {
+            canSendMsg.value = false;
+            socket.close();
         });
 
         const confirmGameDialog = async(game) => {
@@ -213,16 +229,19 @@ export default {
                         },
                         query: {
                             operate: createGameInfo.operateSelect,
-                           bot_id: createGameInfo.botSelect,
+                            bot_id: createGameInfo.botSelect,
                         }
                     });
                 }
             })
         };
         
-        const sendMsg = (t) => {
-            // 1表示是enter发送的信息，防止enter按键过快重复发送
-            if(t != 1 && (!canSendMsg.value || message.value === "")) return;
+        const sendMsg = () => {
+            if(!canSendMsg.value || message.value === "" || message.value.trim() === "") return;
+            canSendMsg.value = false;
+            setTimeout(() => {
+                canSendMsg.value = true;
+            }, 1500);
             store.state.record.hall_socket.send(JSON.stringify({
                 event: "hall_message",
                 userId: store.state.user.id,
@@ -230,22 +249,12 @@ export default {
                 photo: store.state.user.photo,
                 text: message.value,
             }));
-            canSendMsg.value = false;
-            setTimeout(() => {
-                canSendMsg.value = true;
-            }, 1500);
             message.value = "";
         };
 
         const enterSendMsg = (e) => {
-            if(e.ctrlKey && e.keyCode === 13) {   //用户点击了ctrl+enter触发
-                // message.value += '\n';
-            } else { //用户点击了enter触发
-                e.preventDefault();
-                if(message.value.trim() === "") return;
-                canSendMsg.value = false;
-                sendMsg(1);
-            }  
+            e.preventDefault();
+            sendMsg();
         };
 
         const enterPlayerSpace = userId => {
@@ -267,6 +276,7 @@ export default {
             botContent,
             createGameForm,
             enterPlayerSpace,
+            images,
             rules: {
                 botSelect: [
                     { required: true, message: '请选择Bot！', trigger: 'blur' },
@@ -298,6 +308,7 @@ export default {
 
 .message-body .message-content {
     margin: 5px 0;
+    height: 60px;
 }
 
 .message-body .message-content .main {
@@ -361,5 +372,9 @@ export default {
     transform: scale(1.2);
     transition: 100ms;
     cursor: pointer;
+}
+
+.carousel-image-type {
+    width: 100%;
 }
 </style>

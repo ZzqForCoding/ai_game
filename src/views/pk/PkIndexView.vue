@@ -33,7 +33,7 @@
                         <el-input class="message-input" type="textarea"
                             placeholder="Please input message..." v-model="message" resize="none"
                             @keydown.enter="enterSendMsg" />
-                        <el-button class="sendBtn" type="primary" @click="sendMsg(2)" size="small">发送</el-button>
+                        <el-button class="sendBtn" type="primary" @click="sendMsg" size="small">发送</el-button>
                     </el-form>
                 </el-card>
             </el-card>
@@ -88,26 +88,20 @@ export default {
         if (game === 1) {
             onMounted(() => {
                 socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/gobang/?token=" + store.state.user.access;
+                store.commit("updateMatchTime", 0);
+                store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);
 
                 socket.onopen = () => {
                     console.log("connected!");
                     store.commit("updateSocket", socket);
-                    store.commit("updateCanSendMsg", true);
                 };
 
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
                     if (data.username === store.state.user.username) return;
                     if (data.event === "pk_message") {
-                        if (!store.state.pk.canSendMsg) return;
                         store.commit("pushMsg", data.msg);
-                        if (data.msg.username === store.state.user.username) {
-                            store.commit("updateCanSendMsg", false);
-                            setTimeout(() => {
-                                store.commit("updateCanSendMsg", true);
-                            }, 1500);
-                        }
                     } else if (data.event === "start_game") {
                         store.commit("updateOpponent", {
                             username: data.username,
@@ -133,6 +127,18 @@ export default {
                             store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
                             store.commit("updateFirstMove", store.state.pk.a_id);
                         }
+                        store.commit("updateUser", {
+                            'id': store.state.user.id,
+                            'username': store.state.user.username,
+                            'photo': store.state.user.photo,
+                            'is_login': store.state.user.is_login,
+                            'job': store.state.user.job,
+                            'desp': store.state.user.desp,
+                            'botCnt': store.state.user.botCnt,
+                            'recordCnt': store.state.user.recordCnt + 1,
+                            'freshNewsCnt': store.state.user.freshNewsCnt,
+                            'isSuperUser': store.state.user.isSuperUser,
+                        });
                     } else if (data.event === "nextRound") {
                         let round = parseInt(data['round']);
                         if (round === store.state.pk.a_id) {
@@ -150,6 +156,12 @@ export default {
                 socket.onclose = () => {
                     console.log("disconnected!");
                 }
+            });
+
+            onUnmounted(() => {
+                socket.close();
+                store.commit("updateStatus", "matching");
+                store.commit("updateCanSendMsg", false);
             });
         }
         // 绕蛇
@@ -212,15 +224,20 @@ export default {
                             loser: data.loser,
                             status: data.status,    // 超时还是非法操作
                         });
+                        store.commit("updateUser", {
+                            'id': store.state.user.id,
+                            'username': store.state.user.username,
+                            'photo': store.state.user.photo,
+                            'is_login': store.state.user.is_login,
+                            'job': store.state.user.job,
+                            'desp': store.state.user.desp,
+                            'botCnt': store.state.user.botCnt,
+                            'recordCnt': store.state.user.recordCnt + 1,
+                            'freshNewsCnt': store.state.user.freshNewsCnt,
+                            'isSuperUser': store.state.user.isSuperUser,
+                        });
                     } else if (data.event === "pk_message") {
-                        if (!store.state.pk.canSendMsg) return;
                         store.commit("pushMsg", data.msg);
-                        if (data.msg.username === store.state.user.username) {
-                            store.commit("updateCanSendMsg", false);
-                            setTimeout(() => {
-                                store.commit("updateCanSendMsg", true);
-                            }, 1500);
-                        }
                     } else if (data.event === "prompt") {
                         ElMessage(data.prompt);
                     }
@@ -234,30 +251,25 @@ export default {
             onUnmounted(() => {
                 socket.close();
                 store.commit("updateStatus", "matching");
+                store.commit("updateCanSendMsg", false);
             });
         } else if(game === 3) {
             onMounted(() => {
                 socketUrl = "wss://aigame.zzqahm.top/wss/multiplayer/reversi/?token=" + store.state.user.access;
+                store.commit("updateMatchTime", 0);
+                store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);
 
                 socket.onopen = () => {
                     console.log("connected!");
                     store.commit("updateSocket", socket);
-                    store.commit("updateCanSendMsg", true);
                 };
 
                 socket.onmessage = msg => {
                     const data = JSON.parse(msg.data);
                     if (data.username === store.state.user.username) return;
                     if (data.event === "pk_message") {
-                        if (!store.state.pk.canSendMsg) return;
                         store.commit("pushMsg", data.msg);
-                        if (data.msg.username === store.state.user.username) {
-                            store.commit("updateCanSendMsg", false);
-                            setTimeout(() => {
-                                store.commit("updateCanSendMsg", true);
-                            }, 1500);
-                        }
                     } else if (data.event === "start_game") {
                         store.commit("updateOpponent", {
                             username: data.username,
@@ -282,6 +294,18 @@ export default {
                         } else if (round === store.state.pk.b_id) {
                             store.state.pk.gameObject.players[1].set_chess(parseInt(data['x']), parseInt(data['y']));
                         }
+                        store.commit("updateUser", {
+                            'id': store.state.user.id,
+                            'username': store.state.user.username,
+                            'photo': store.state.user.photo,
+                            'is_login': store.state.user.is_login,
+                            'job': store.state.user.job,
+                            'desp': store.state.user.desp,
+                            'botCnt': store.state.user.botCnt,
+                            'recordCnt': store.state.user.recordCnt + 1,
+                            'freshNewsCnt': store.state.user.freshNewsCnt,
+                            'isSuperUser': store.state.user.isSuperUser,
+                        });
                     } else if (data.event === "nextRound") {
                         let round = parseInt(data['round']);
                         if (round === store.state.pk.a_id) {
@@ -296,7 +320,7 @@ export default {
                     } else if (data.event === "toggleRound") {
                         setTimeout(() => {
                             store.commit("updateFirstMove", store.state.pk.firstMove === store.state.pk.a_id ? store.state.pk.b_id : store.state.pk.a_id);
-                        }, 1000);
+                        }, 600);
                     } else if (data.event === "prompt") {
                         ElMessage(data.prompt);
                     }
@@ -306,11 +330,21 @@ export default {
                     console.log("disconnected!");
                 }
             });
+
+            onUnmounted(() => {
+                socket.close();
+                store.commit("updateStatus", "matching");
+                store.commit("updateCanSendMsg", false);
+            });
         }
 
-        const sendMsg = (t) => {
+        const sendMsg = () => {
             // 1表示是enter发送的信息，防止enter按键过快重复发送
-            if(t != 1 && (!store.state.pk.canSendMsg || message.value === "")) return;
+            if(!store.state.pk.canSendMsg || message.value === "" || message.value.trim() === "") return;
+            store.commit("updateCanSendMsg", false);
+            setTimeout(() => {
+                store.commit("updateCanSendMsg", true);
+            }, 1500);
             store.state.pk.socket.send(JSON.stringify({
                 event: "pk_message",
                 username: store.state.user.username,
@@ -321,14 +355,8 @@ export default {
         };
 
         const enterSendMsg = (e) => {
-            if (e.ctrlKey && e.keyCode === 13) {   //用户点击了ctrl+enter触发
-                // message.value += '\n';
-            } else { //用户点击了enter触发
-                e.preventDefault();
-                if(message.value.trim() === "") return;
-                store.commit("updateCanSendMsg", false);
-                sendMsg(1);
-            }
+            e.preventDefault();
+            sendMsg();
         };
 
         return {
@@ -378,6 +406,7 @@ export default {
 
 .message-body .message-content {
     margin: 5px 0;
+    height: 60px;
 }
 
 .message-body .message-content .main {

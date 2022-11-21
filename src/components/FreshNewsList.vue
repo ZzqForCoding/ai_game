@@ -5,14 +5,8 @@
                 <el-avatar :src="$store.state.user.photo" />
             </div>
 
-            <el-input
-                v-model="input_fresh_news"
-                :rows="4"
-                class="input-fresh-news"
-                resize="none"
-                type="textarea"
-                placeholder="Share your thoughts..."
-            />
+            <el-input v-model="input_fresh_news" :rows="4" class="input-fresh-news" resize="none" type="textarea"
+                placeholder="Share your thoughts..." />
         </div>
         <el-divider style="margin-top: 5px; margin-bottom: 0px;" />
         <div class="post-container">
@@ -21,7 +15,8 @@
             </div>
         </div>
     </el-card>
-    <ul v-if="freshNews.length > 0" v-infinite-scroll="load" :infinite-scroll-disabled="isOver" style="margin: 0; padding: 0; list-style: none;">
+    <ul v-if="freshNews.length > 0" v-infinite-scroll="load" :infinite-scroll-disabled="isOver"
+        style="margin: 0; padding: 0; list-style: none;">
         <li style="margin-top: 20px;" v-for="item in freshNews" :key="item.id">
             <el-card class="box-card" style="position: relative;">
                 <span class="forward-desp" v-if="item.forwarded_id !== -1">
@@ -29,17 +24,12 @@
                     <span @click="enterPlayerSpace(item.forwarded_userId)"> {{ item.forwarded_username }} </span>
                     的动态
                 </span>
-                <el-button
-                    type="danger"
-                    text
-                    style="float: right; margin: 30px 20px 0 0;"
-                    v-if="item.userId === $store.state.user.id"
-                    @click="openDeleteDialog(item)"
-                >
+                <el-button type="danger" text style="float: right; margin: 30px 20px 0 0;"
+                    v-if="item.userId === $store.state.user.id" @click="openDeleteDialog(item)">
                     删除
                 </el-button>
                 <div class="post-message-container">
-                    <el-avatar class="info-scale" :src="item.photo"  @click="enterPlayerSpace(item.userId)"/>
+                    <el-avatar class="info-scale" :src="item.photo" @click="enterPlayerSpace(item.userId)" />
                     <div class="post-message">
                         <h6 class="info-scale" @click="enterPlayerSpace(item.userId)">{{ item.username }}</h6>
                         <span>{{ item.since }}</span>
@@ -61,7 +51,8 @@
                         <span v-if="item.likes !== 0">({{ item.likes }})</span>
                     </div>
                     <div @click="openComment(item.id)">
-                        <svg t="1664631879270" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2557" width="25" height="25">
+                        <svg t="1664631879270" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" p-id="2557" width="25" height="25">
                             <path
                                 d="M622.56056 464.834794c0 27.928073 22.73684 50.64854 50.664913 50.64854 27.956725 0 50.693566-22.720468 50.693566-50.64854 0-27.928073-22.73684-50.66389-50.693566-50.66389C645.2974 414.171927 622.56056 436.907745 622.56056 464.834794"
                                 p-id="2558"></path>
@@ -100,7 +91,8 @@
                 </div>
                 <div v-for="child in item.children" :key="child.id" class="post-comments">
                     <div class="avatar">
-                        <el-avatar size="small" :src="child.photo" class="info-scale" @click="enterPlayerSpace(child.userId)" />
+                        <el-avatar size="small" :src="child.photo" class="info-scale"
+                            @click="enterPlayerSpace(child.userId)" />
                     </div>
                     <div class="right">
                         <div class="info">
@@ -109,14 +101,9 @@
                             <span v-if="child.reply !== item.username" class="reply">回复 <a>{{ child.reply }}</a>
                                 的评论</span>
                             <a class="post-comment-right-reply" @click="openComment(item.id + '-' + child.id)">回复</a>
-                            
-                            <el-button
-                                type="danger"
-                                text
-                                style="float: right; margin: 20px 20px 0 0;"
-                                v-if="child.userId === $store.state.user.id"
-                                @click="openDeleteDialog(child)"
-                            >
+
+                            <el-button type="danger" text style="float: right; margin: 20px 20px 0 0;"
+                                v-if="child.userId === $store.state.user.id" @click="openDeleteDialog(child)">
                                 删除
                             </el-button>
                         </div>
@@ -153,7 +140,8 @@
         </span>
         <template #footer>
             <span class="dialog-footer">
-                <el-button type="primary" @click="removeFreshNews(curOpeItem.id, curOpeItem.forwarded_id)">确认删除</el-button>
+                <el-button type="primary" @click="removeFreshNews(curOpeItem.id, curOpeItem.forwarded_id)">确认删除
+                </el-button>
                 <el-button @click="cancelDeleteBot">取消</el-button>
             </span>
         </template>
@@ -268,6 +256,21 @@ export default {
                         } else {
                             input_fresh_news.value = "";
                         }
+                        // 如果玩家发布动态且动态不是评论，则动态数 + 1
+                        if(!flag) {
+                            store.commit("updateUser", {
+                                'id': store.state.user.id,
+                                'username': store.state.user.username,
+                                'photo': store.state.user.photo,
+                                'is_login': store.state.user.is_login,
+                                'job': store.state.user.job,
+                                'desp': store.state.user.desp,
+                                'botCnt': store.state.user.botCnt,
+                                'recordCnt': store.state.user.recordCnt,
+                                'freshNewsCnt': store.state.user.freshNewsCnt + 1,
+                                'isSuperUser': store.state.user.isSuperUser,
+                            });
+                        }
                         let element = document.getElementsByClassName('post-comment-input' + openCommentId.value)[0];
                         element.classList.remove('post-comment-input-animation');
                         openCommentId.value = -1;
@@ -378,6 +381,19 @@ export default {
                         for(let i = 0; i < freshNews.value.length; i++) {
                             if(freshNews.value[i].id === id) {
                                 freshNews.value.splice(i, 1);
+                                // 如果玩家删除动态且动态不是评论，则动态数 - 1
+                                store.commit("updateUser", {
+                                    'id': store.state.user.id,
+                                    'username': store.state.user.username,
+                                    'photo': store.state.user.photo,
+                                    'is_login': store.state.user.is_login,
+                                    'job': store.state.user.job,
+                                    'desp': store.state.user.desp,
+                                    'botCnt': store.state.user.botCnt,
+                                    'recordCnt': store.state.user.recordCnt,
+                                    'freshNewsCnt': store.state.user.freshNewsCnt - 1,
+                                    'isSuperUser': store.state.user.isSuperUser,
+                                });
                                 break;
                             }
                             if(freshNews.value[i].children && freshNews.value[i].children.length > 0) {
@@ -442,6 +458,18 @@ export default {
                         load(1);
                         showForwardDialog.value = false;
                         curOpeItem.value = null;
+                        store.commit("updateUser", {
+                            'id': store.state.user.id,
+                            'username': store.state.user.username,
+                            'photo': store.state.user.photo,
+                            'is_login': store.state.user.is_login,
+                            'job': store.state.user.job,
+                            'desp': store.state.user.desp,
+                            'botCnt': store.state.user.botCnt,
+                            'recordCnt': store.state.user.recordCnt,
+                            'freshNewsCnt': store.state.user.freshNewsCnt + 1,
+                            'isSuperUser': store.state.user.isSuperUser,
+                        });
                     } else {
                         ElMessage.error(resp.result);
                     }
@@ -561,6 +589,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    user-select: none;
 }
 
 .post-tools div {

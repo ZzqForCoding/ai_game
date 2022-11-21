@@ -87,7 +87,6 @@ export class GameMap extends AcGameObject {
             bCnt
         });
         this.aCnt = aCnt, this.bCnt = bCnt;
-        console.log(this.chesses)
     }
 
     update_size() {

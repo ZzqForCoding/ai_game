@@ -8,7 +8,8 @@
                             我的Bot
                             <span v-if="canCreateBotCnt !== 0">({{ canCreateBotCnt }})</span>
                         </span>
-                        <el-button v-if="!isExpand" type="warning" class="button" style="float: right; margin-left: 10px;" size="small" plain @click="expandBot">
+                        <el-button v-if="!isExpand" type="warning" class="button"
+                            style="float: right; margin-left: 10px;" size="small" plain @click="expandBot">
                             扩容
                         </el-button>
                         <el-button type="primary" class="button" style="float: right;" size="small" plain
@@ -372,14 +373,14 @@ export default {
 
             editor.setOptions({
                 'fontSize': `${fontsize.value}pt`,
-                'tabSize': parseInt(editor_space.value),
+               'tabSize': parseInt(editor_space.value),
             });
             editor.setKeyboardHandler("ace/keyboard/" + editor_mode.value);
             editor.setTheme("ace/theme/" + skin.value);
         }
 
         const changeEditSkin = () => {
-            editor.setTheme("ace/theme/" + skin.value);
+           editor.setTheme("ace/theme/" + skin.value);
             localStorage.setItem("editor_skin_for_" + store.state.user.username, skin.value);
         }
 
@@ -501,6 +502,18 @@ export default {
                             message: '创建成功',
                             type: 'success',
                         })
+                        store.commit("updateUser", {
+                            'id': store.state.user.id,
+                            'username': store.state.user.username,
+                            'photo': store.state.user.photo,
+                            'is_login': store.state.user.is_login,
+                            'job': store.state.user.job,
+                            'desp': store.state.user.desp,
+                            'botCnt': store.state.user.botCnt + 1,
+                            'recordCnt': store.state.user.recordCnt,
+                            'freshNewsCnt': store.state.user.freshNewsCnt,
+                            'isSuperUser': store.state.user.isSuperUser,
+                        });
                     } else {
                         ElMessage.error(resp.result);
                     }
@@ -528,6 +541,18 @@ export default {
                             showClose: true,
                             message: '删除成功',
                             type: 'success',
+                        });
+                        store.commit("updateUser", {
+                            'id': store.state.user.id,
+                            'username': store.state.user.username,
+                            'photo': store.state.user.photo,
+                            'is_login': store.state.user.is_login,
+                            'job': store.state.user.job,
+                            'desp': store.state.user.desp,
+                            'botCnt': store.state.user.botCnt - 1,
+                            'recordCnt': store.state.user.recordCnt,
+                            'freshNewsCnt': store.state.user.freshNewsCnt,
+                            'isSuperUser': store.state.user.isSuperUser,
                         });
                     }
                 },
@@ -632,6 +657,7 @@ export default {
             ElMessage('取消创建');
             const form = unref(createForm);
             form.resetFields();
+            closeDebugPannel();
         }
 
         const confirmEditBot = async() => {
@@ -664,6 +690,7 @@ export default {
             ElMessage('取消修改');
             const form = unref(editForm);
             form.resetFields();
+            closeDebugPannel();
         }
 
         const confirmDeleteBot = () => {

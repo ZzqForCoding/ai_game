@@ -1,5 +1,5 @@
 <template>
-    <el-card style="margin-top: 25px; user-select: none;">
+    <el-card v-if="records.length > 0" style="margin-top: 25px; user-select: none;">
         <el-table :data="records" style="width: 100%;" highlight-current-row max-height="720" table-layout="auto">
             <el-table-column prop="createtime" align="center" label="对局时间" />
             <el-table-column prop="game" label="游戏" align="center" width="190" />
@@ -54,6 +54,13 @@
             </el-table-column>
         </el-table>
     </el-card>
+    <div v-else-if="records.length == 0">
+        <el-card class="box-card" style="margin-top: 20px;">
+            <div class="card-header">
+                <span>赶快开始一场游戏叭，我在游戏场等你哦!~</span>
+            </div>
+        </el-card>
+    </div>
     <el-pagination 
         class="record-pagination" 
         background 

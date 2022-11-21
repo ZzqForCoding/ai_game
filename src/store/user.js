@@ -9,6 +9,10 @@ export default {
         photo: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).photo,
         job: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).job,
         desp: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).desp,
+        recordCnt: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).recordCnt,
+        botCnt: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).botCnt,
+        freshNewsCnt: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).freshNewsCnt,
+        isSuperUser: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).isSuperUser,
         access: localStorage.getItem('aigame.access') === null ? "" : localStorage.getItem('aigame.access'),
         refresh: localStorage.getItem('aigame.refresh') === null ? "" : localStorage.getItem('aigame.refresh'),
         is_login: JSON.parse(localStorage.getItem('user')) === null ? false : JSON.parse(localStorage.getItem('user')).is_login,
@@ -22,10 +26,14 @@ export default {
             state.username = user.username;
             state.photo = user.photo;
             state.is_login = user.is_login;
-            store.job = user.job;
-            store.desp = user.desp;
+            state.job = user.job;
+            state.desp = user.desp;
+            state.botCnt = user.botCnt;
+            state.recordCnt = user.recordCnt;
+            state.freshNewsCnt = user.freshNewsCnt;
+            state.isSuperUser = user.isSuperUser;
 
-            localStorage.setItem("user",  JSON.stringify(user));
+            localStorage.setItem("user", JSON.stringify(user));
         },
         updateToken(state, data) {
             localStorage.setItem("aigame.access", data.access);
@@ -39,13 +47,16 @@ export default {
             state.photo = "";
             store.job = "";
             store.desp = "";
+            store.botCnt = 0;
+            store.recordCnt = 0;
+            store.freshNewsCnt = 0;
             state.access = "";
             state.refresh = "";
             state.is_login = false;
         },
         setIntervalFunc(state, interval_func) {
             let t = localStorage.getItem('setIntervalFunc');
-            if(t !== null) {
+            if (t !== null) {
                 clearInterval(t);
             }
             state.interval_func = interval_func;
@@ -79,7 +90,7 @@ export default {
                     "Authorization": "Bearer " + context.state.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         context.commit("updateUser", {
                             ...resp,
                             is_login: true,
@@ -100,7 +111,7 @@ export default {
             localStorage.removeItem("aigame.refresh");
             localStorage.removeItem("setIntervalFunc")
             localStorage.removeItem("user");
-            
+
             context.commit("logout");
             router.push({ name: "user_account_login" });
         },
@@ -139,7 +150,7 @@ export default {
                 });
             }, 55 * 60 * 1000);
             context.commit("setIntervalFunc", func);
-        },    
+        },
     },
     modules: {
     }

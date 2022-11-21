@@ -31,19 +31,19 @@
                     </div>
 
                     <div class="friend-num-container">
-                        <div>
-                            <h6 class="num">256</h6>
-                            <small class="text">Post</small>
+                        <div class="infoSelect" @click="switchPannel('bots')">
+                            <h6 class="num">{{ info.botCnt }}</h6>
+                            <small class="text">Bots</small>
                         </div>
                         <div class="vertical-divider"></div>
-                        <div>
-                            <h6 class="num">2.5K</h6>
-                            <small class="text">Followers</small>
-                        </div>
-                        <div class="vertical-divider"></div>
-                        <div>
-                            <h6 class="num">365</h6>
+                        <div class="infoSelect" @click="switchPannel('records')">
+                            <h6 class="num">{{ info.recordCnt }}</h6>
                             <small class="text">Records</small>
+                        </div>
+                        <div class="vertical-divider"></div>
+                        <div class="infoSelect" @click="switchPannel('freshnews')">
+                            <h6 class="num">{{ info.freshNewsCnt }}</h6>
+                            <small class="text">Post</small>
                         </div>
                     </div>
 
@@ -55,12 +55,42 @@
 </template>
 
 <script>
+import { useStore } from 'vuex'; 
+import { ElMessage } from 'element-plus';
+import { useRoute } from 'vue-router';
+import router from '@/router';
+
 export default {
     name: 'ProfileCard',
     props: {
         info: {
             type: Object,
             required: true
+        }
+    },
+    setup(props, context) {
+        const store = useStore();
+        const route = useRoute();
+        const switchPannel = name => {
+            if(props.info.id !== store.state.user.id && name === "bots") {
+                ElMessage.error("别人的代码不能查看哦!~");
+                return;
+            }
+            if(route.name !== "myspace_index") {
+                router.push(
+                    {
+                        name: "myspace_index",
+                        params: {
+                            userId: props.info.id,
+                        }
+                    }
+                );
+            }
+            context.emit("switchPannel", name);
+        }
+
+        return {
+            switchPannel,
         }
     }
 }
@@ -142,6 +172,16 @@ export default {
     font-size: 8px;
     color: #676A79;
     user-select: none;
+}
+
+.profile-card .friend-num-container .infoSelect {
+    user-select: none;
+}
+
+.profile-card .friend-num-container .infoSelect:hover {
+    transform: scale(1.2);
+    cursor: pointer;
+    transition: 100ms;
 }
 
 .profile-card .vertical-divider {

@@ -17,7 +17,6 @@
                             <el-form-item label="头像">
                                 <el-upload class="avatar-uploader"
                                     v-model:file-list="avatarList"
-                                    action="https://aigame.zzqahm.top/backend/player/upload_avatar/"
                                     list-type="picture-card"
                                     :before-upload="beforeAvatarUpload"
                                     :http-request="uploadAvatar"
@@ -75,18 +74,23 @@ export default {
     setup() {
         const store = useStore();
         const playerInfo = reactive({
+            'id': store.state.user.id,
             'username': store.state.user.username,
             'photo': store.state.user.photo,
             'job': store.state.user.job,
-            'desp': store.state.user.desp
+            'desp': store.state.user.desp,
+            'recordCnt': store.state.user.recordCnt,
+            'botCnt': store.state.user.botCnt,
+            'freshNewsCnt': store.state.user.freshNewsCnt,
         });
         let showImgDialog = ref(false);
         let dialogimageUrl = ref('');
         let avatarList = ref([{
             'name': '1.jpg',
-            'url': store.state.user.photo
+            'url': store.state.user.photo,
         }]);
         let personalEditInfo = reactive({
+            photo: store.state.user.photo,
             username: store.state.user.username,
             job: store.state.user.job,
             desp: store.state.user.desp,
@@ -95,6 +99,8 @@ export default {
         watchEffect(()=>{
             playerInfo.username = store.state.user.username;
             playerInfo.photo = store.state.user.photo;
+            playerInfo.job = store.state.user.job;
+            playerInfo.desp = store.state.user.desp;
         })
 
         const beforeAvatarUpload = (rawFile) => {
@@ -114,82 +120,47 @@ export default {
             }
         }
 
-        const uuid = () => {
-            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-            );
-        }
-
-        const uploadAvatar = (data) => {
-            let file = data.file;
-            //填写获取签名的地址
-            const getPolicyApiUrl = 'https://aigame.zzqahm.top/backend/player/upload_avatar/apply/'; //获取oss签名的地址
+        const updateAvatar = () => {
             $.ajax({
-                url: getPolicyApiUrl, 
-                type: "GET",
-                data: {
-                    'filename': file.name,
-                    'userId': store.state.user.id
+                url: "https://aigame.zzqahm.top/backend/player/img/update_avatar/", 
+                type: "POST",
+                headers: {
+                    "Authorization": "Bearer " + store.state.user.access,
                 },
-                success: resp => {
-                    resp = $.parseJSON(resp)
-                    let ossUrl = "https://player-avatar.oss-cn-shenzhen.aliyuncs.com";
-                    let pos = file.name.lastIndexOf('.');
-                    let accessUrl = resp.dir + '/' + uuid() + file.name.substr(pos);
-                    let sendData = new FormData();
-                    sendData.append("OSSAccessKeyId", resp.accessid);
-                    sendData.append("policy", resp.policy);
-                    sendData.append("signature", resp.signature);
-                    sendData.append("keys", resp.dir);
-                    sendData.append("callback", resp.callback);
-                    sendData.append("key", accessUrl);
-                    sendData.append('success_action_status', 200); // 指定返回的状态码
-                    sendData.append('type', file.type);
-                    sendData.append('file', file);
-                    $.ajax({
-                        url: ossUrl, 
-                        type: "POST",
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        data: sendData,
-                        success(resp) {
-                            resp.imgUrl += '?x-oss-process=image/resize,h_500,m_lfit';
-                            $.ajax({
-                                url: "https://aigame.zzqahm.top/backend/player/upload_avatar/update_avatar/", 
-                                type: "POST",
-                                headers: {
-                                    "Authorization": "Bearer " + store.state.user.access,
-                                },
-                                data: {
-                                    imgUrl: resp.imgUrl,  
-                                },
-                                success() {
-                                    avatarList.value[0] = {
-                                        'name': file.name,
-                                        'url': resp.imgUrl
-                                    };
-                                    store.commit("updateUser", {
-                                        'id': store.state.user.id,
-                                        'username': store.state.user.username,
-                                        'photo': resp.imgUrl,
-                                        'is_login': store.state.user.is_login,
-                                        'job': store.state.user.job,
-                                        'desp': store.state.user.desp,
-                                    });
-                                },
-                                error() {
-                                    store.dispatch("logout");
-                                }
-                            });
-                        },
-                        error() {
-                            store.dispatch("logout");
-                        }
+                data: {
+                    imgUrl: personalEditInfo.photo,  
+                },
+                success() {
+                    avatarList.value[0] = {
+                        'name': ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)) + '.jpg',
+                        'url': personalEditInfo.photo
+                    };
+                    store.commit("updateUser", {
+                        'id': store.state.user.id,
+                        'username': store.state.user.username,
+                        'photo': personalEditInfo.photo,
+                        'is_login': store.state.user.is_login,
+                        'job': store.state.user.job,
+                        'desp': store.state.user.desp,
+                        'botCnt': store.state.user.botCnt,
+                        'recordCnt': store.state.user.recordCnt,
+                        'freshNewsCnt': store.state.user.freshNewsCnt,
+                        'isSuperUser': store.state.user.isSuperUser,
                     });
                 },
                 error() {
                     store.dispatch("logout");
+                }
+            });
+        }
+
+        const uploadAvatar = (data) => {
+            let file = data.file;
+            store.dispatch("uploadImage", {
+                file, 
+                userId: store.state.user.id,
+                success(imgUrl) {
+                    personalEditInfo.photo = imgUrl + '?x-oss-process=image/resize,h_500,m_lfit';
                 }
             });
         }
@@ -213,13 +184,12 @@ export default {
                 },
                 success(resp) {
                     if(resp.result === "success") {
+                        updateAvatar();
                         ElMessage({
                             showClose: true,
                             message: '更新成功',
                             type: 'success',
                         });
-                        playerInfo.job = personalEditInfo.job;
-                        playerInfo.desp = personalEditInfo.desp;
                         store.commit("updateUser", {
                             'id': store.state.user.id,
                             'username': personalEditInfo.username,
@@ -227,6 +197,10 @@ export default {
                             'is_login': store.state.user.is_login,
                             'job': personalEditInfo.job,
                             'desp': personalEditInfo.desp,
+                            'botCnt': store.state.user.botCnt,
+                            'recordCnt': store.state.user.recordCnt,
+                            'freshNewsCnt': store.state.user.freshNewsCnt,
+                            'isSuperUser': store.state.user.isSuperUser,
                         });
                     } else {
                         ElMessage({

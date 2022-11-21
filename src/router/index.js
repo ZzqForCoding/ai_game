@@ -7,6 +7,10 @@ import DiscussionView from '@/views/discussion/DiscussionView'
 import FreshNewsView from '@/views/fresh_news/FreshNewsView'
 import MessageBoardView from '@/views/message_board/MessageBoardView'
 import SpaceMainView from '@/views/myspace/SpaceMainView'
+import IntroView from '@/views/intro/IntroView'
+import GameIntroView from '@/views/intro/GameIntroView'
+import CodeHelperView from '@/views/intro/CodeHelperView'
+import FuncIntroView from '@/views/intro/FuncIntroView'
 import NotFound from '@/views/error/NotFound'
 import UserAccountLoginView from '@/views/user/account/UserAccountLoginView'
 import UserAccountRegisterView from '@/views/user/account/UserAccountRegisterView'
@@ -19,7 +23,7 @@ const routes = [
     {
         path: '/',
         name: 'home',
-        redirect: '/record/',
+        redirect: '/intro/',
         meta: {
             description: '首页',
             isRoot: true,
@@ -94,6 +98,42 @@ const routes = [
         component: SpaceMainView,
         meta: {
             description: '我的空间',
+            isRoot: false,
+        }
+    },
+    {
+        path: '/intro/',
+        name: 'intro_index',
+        component: IntroView,
+        meta: {
+            description: '网站说明',
+            isRoot: true,
+        }
+    },
+    {
+        path: '/game_intro/',
+        name: 'game_intro_index',
+        component: GameIntroView,
+        meta: {
+            description: '游戏介绍',
+            isRoot: false,
+        }
+    },
+    {
+        path: '/codehelper/',
+        name: 'code_helper_index',
+        component: CodeHelperView,
+        meta: {
+            description: '代码编写指南',
+            isRoot: false,
+        }
+    },
+    {
+        path: '/func_intro/',
+        name: 'func_intro_index',
+        component: FuncIntroView,
+        meta: {
+            description: '网站功能介绍',
             isRoot: false,
         }
     },
