@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from player.models.player import Player
+from player.models.platform_data import PlatformData
+from datetime import date
 import re
 
 class RegisterView(APIView):
@@ -32,6 +34,17 @@ class RegisterView(APIView):
         user.set_password(password)
         user.save()
         Player.objects.create(user=user, photo="https://cdn.acwing.com/media/user/profile/photo/29231_lg_3e166b549d.jpg")
+
+        # 记录注册人数
+        today = date.today()
+        platformData = PlatformData.objects.filter(date=today)
+        if not platformData.exists():
+            platformData = PlatformData.objects.create(date=today, register_cnt=1)
+        else:
+            platformData = platformData.first()
+            platformData.register_cnt += 1
+        platformData.save()
+
         return Response({
             'result': "success",
         })

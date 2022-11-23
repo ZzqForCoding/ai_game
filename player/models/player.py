@@ -9,6 +9,12 @@ class Player(models.Model):
     token = models.CharField(default="", max_length=500, blank=True, null=True)
     job = models.CharField(max_length=20, blank=True, null=True)
     desp = models.CharField(max_length=200, blank=True, null=True)
+    cpp_code_compile_cnt = models.IntegerField(default=0)
+    cpp_code_compile_success_cnt = models.IntegerField(default=0)
+    java_code_compile_cnt = models.IntegerField(default=0)
+    java_code_compile_success_cnt = models.IntegerField(default=0)
+    py_code_compile_cnt = models.IntegerField(default=0)
+    py_code_compile_success_cnt = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.user) + ' ' + str(self.rating)

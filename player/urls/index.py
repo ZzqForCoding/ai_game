@@ -7,6 +7,7 @@ from player.views.getplayer_page import GetPlayerPageView
 from player.views.get_token import RemTokenObtainPairView
 from player.views.update_token import UpdateTokenView
 from player.views.update_info import UpdateInfoView
+from player.views.get_chart_data import GetChartDataView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -22,6 +23,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='player_register'),
     path('getranklist/', GetRankListView.as_view(), name='player_ranklist'),
     path('getplayerpage/', GetPlayerPageView.as_view(), name='player_page'),
+    path('getchartdata/', GetChartDataView.as_view(), name='player_get_chart_data'),
     path('update_info/', UpdateInfoView.as_view(), name='player_update_info'),
     path('bot/', include('player.urls.bot.index')),
     path('acwing/', include('player.urls.acwing.index')),

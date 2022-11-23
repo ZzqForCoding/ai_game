@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.contrib.auth.models import User
 from player.permissions.one_user_login import OneUserLogin
 from player.models.bot import Bot
+from player.models.player import Player
 
 from player.consumers.game.thrift.code_running_client.code_running_service import CodeRunning
 from thrift import Thrift
@@ -16,12 +18,22 @@ class DebugView(APIView):
     permission_classes = ([OneUserLogin])
 
     def post(self, request):
+        user = request.user
         data = request.POST
 
         id = str(uuid.uuid1())
         code = data['code'].strip()
         lang = data['lang'].strip()
         data = data['data'].strip()
+
+        player = Player.objects.get(user=user)
+        if lang == 'cpp':
+            player.cpp_code_compile_cnt += 1
+        elif lang == 'java':
+            player.java_code_compile_cnt += 1
+        elif lang == 'python':
+            player.py_code_compile_cnt += 1
+
         try:
             # estab connect
             # Make socket
@@ -44,6 +56,13 @@ class DebugView(APIView):
                 client.prepare_data(id, data)
                 runInfo = json.loads(client.run(id))
                 if runInfo['returncode'] == 0:
+                    if lang == 'cpp':
+                        player.cpp_code_compile_success_cnt += 1
+                    elif lang == 'java':
+                        player.java_code_compile_success_cnt += 1
+                    elif lang == 'python':
+                        player.py_code_compile_success_cnt += 1
+
                     resp['status'] = "Finished"
                     resp['output'] = runInfo['output']
                     resp['time'] = runInfo['time']
@@ -60,6 +79,7 @@ class DebugView(APIView):
                 'output': str(e)
             })
         finally:
+            player.save()
             # 关闭容器
             client.stop_container(id)
             transport.close()
