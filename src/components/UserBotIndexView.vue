@@ -141,8 +141,7 @@
                             </el-form>
                             <template #footer>
                                 <span class="dialog-footer">
-                                    <el-button type="warning" @click="debugCode(bot.language, bot.content)"
-                                        :loading="submitCoding">调试</el-button>
+                                    <el-button type="warning" @click="debugCode(bot.language, bot.content)" :loading="submitCoding">调试</el-button>
                                     <el-button type="primary" @click="confirmCreateBot">创建</el-button>
                                     <el-button @click="cancelCreateBot">取消</el-button>
                                 </span>

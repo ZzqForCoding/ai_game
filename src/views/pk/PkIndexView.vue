@@ -14,7 +14,7 @@
                 </template>
 
                 <el-card class="message-body" shadow="never">
-                    <el-scrollbar max-height="250px" ref="msgScroll">
+                    <el-scrollbar max-height="250px">
                         <div class="message-content" v-for="msg in $store.state.pk.msgs" :key="msg.id">
                             <div class="username">
                                 {{ msg.username }}
@@ -74,7 +74,6 @@ export default {
         const botId = route.query.bot_id;
         let socketUrl = "";
         let message = ref('');
-        let msgScroll = ref(null);
 
         store.commit("updateGameResult", { loser: 'none', status: 'none' });
         store.commit("updateOpponent", {
@@ -366,7 +365,6 @@ export default {
             message,
             sendMsg,
             enterSendMsg,
-            msgScroll,
         }
     }
 }

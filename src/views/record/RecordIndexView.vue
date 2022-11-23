@@ -71,7 +71,7 @@
                 </template>
 
                 <el-card class="message-body" shadow="never">
-                    <el-scrollbar max-height="250px" ref="msgScroll">
+                    <el-scrollbar max-height="250px">
                         <div class="message-content" v-for="msg in $store.state.record.hall_msgs" :key="msg.id">
                             <div class="username">
                                 {{ msg.username }}
@@ -94,16 +94,39 @@
                     </el-form>
                 </el-card>
             </el-card>
+            <el-card class="box-card" style="margin-top: 40px;">
+                <template #header>
+                    <div class="card-header">
+                        <span>{{ chartTitle }}</span>
+                        <el-dropdown style="float: right;">
+                            <span class="el-dropdown-link">
+                                <el-button text style="float: right">
+                                    <el-icon style="vertical-align: middle;"><ArrowDownBold /></el-icon>
+                                </el-button>
+                            </span>
+                            <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item @click="selectChart(0)">网站注册及访问量图</el-dropdown-item>
+                                <el-dropdown-item @click="selectChart(1)">语言熟练度图</el-dropdown-item>
+                            </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                        
+                    </div>
+                </template>
+                <div id="myEcharts" :style="{ height: '360px' }"></div>
+            </el-card>
         </el-col>
     </el-row>
 </template>
 
 <script>
-import { onMounted, onUnmounted, ref, unref, reactive, watch } from 'vue';
+import { onMounted, onUnmounted, ref, unref, reactive, watch, nextTick } from 'vue';
 import $ from 'jquery';
 import { useStore } from 'vuex';
 import router from '@/router';
 import RecordList from '@/components/RecordList.vue';
+import * as echarts from "echarts";
 
 export default {
     name: 'RecordIndexView',
@@ -125,11 +148,94 @@ export default {
         const socketUrl = "wss://aigame.zzqahm.top/wss/hall/?token=" + store.state.user.access;
         let message = ref('');
         let canSendMsg = ref(false);
-        let msgScroll = ref(null);
+        let chart = null;
+        let chartTitle = ref('');
         
+        let chartData = [
+            {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['访问量', '注册']
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        magicType: { show: true, type: ['line'] },
+                        restore: { show: true },
+                        saveAsImage: { show: true }
+                    }
+                },
+                calculable: true,
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: []
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value} 人'
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '访问量',
+                        type: 'bar',
+                        data: [],
+                    },
+                    {
+                        name: '注册',
+                        type: 'bar',
+                        data: [],
+                    }
+                ]
+            },
+            {
+                legend: {
+                    data: ['熟练度']
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        saveAsImage: { show: true }
+                    }
+                },
+                radar: {
+                    shape: 'circle',
+                    indicator: [
+                        { name: 'C++', max: 1 },
+                        { name: 'Java', max: 1 },
+                        { name: 'Python', max: 1 },
+                    ]
+                },
+                series: [
+                    {
+                        type: 'radar',
+                        tooltip: {
+                            trigger: 'item'
+                        },
+                        data: [
+                            {
+                                value: [],
+                                name: '熟练度'
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
         const images = ref([
-            {id: 1, url: "https://img.zzqahm.top/aigame_platform/avatar/background3.png"},
-            {id: 2, url: "https://img.zzqahm.top/aigame_platform/avatar/background4.png"},
+            {id: 1, url: "https://img.zzqahm.top/aigame_platform/avatar/background4.png"},
+            {id: 2, url: "https://img.zzqahm.top/aigame_platform/avatar/background5.png"},
             {id: 3, url: "https://img.zzqahm.top/aigame_platform/avatar/background8.jpeg"}
         ]);
 
@@ -208,11 +314,22 @@ export default {
                 canSendMsg.value = false;
                 console.log("disconnected!");
             }
+
+            nextTick(() => {
+                chart = echarts.init(document.getElementById("myEcharts"));
+                get_chart_data();
+            });
         });
+        
+        window.onresize = function() {
+            //自适应大小
+            chart.resize();
+        };
 
         onUnmounted(() => {
             canSendMsg.value = false;
             socket.close();
+            chart.dispose()
         });
 
         const confirmGameDialog = async(game) => {
@@ -237,8 +354,8 @@ export default {
         };
         
         const sendMsg = () => {
-            if(!canSendMsg.value || message.value === "" || message.value.trim() === "") return;
             canSendMsg.value = false;
+            if(!canSendMsg.value || message.value === "" || message.value.trim() === "") return;
             setTimeout(() => {
                 canSendMsg.value = true;
             }, 1500);
@@ -266,6 +383,40 @@ export default {
             });
         }
 
+        const selectChart = idx => {
+            chart.clear();
+            setTimeout(() => {
+                chart.setOption(chartData[idx], true);
+            }, 100);
+            if(idx === 0) {
+                chartTitle.value = "网站注册及访问量图";
+            } else if(idx === 1) {
+                chartTitle.value = "语言熟练度图";
+            }
+        };
+
+        const get_chart_data = () => {
+           $.ajax({
+                 url: 'https://aigame.zzqahm.top/backend/player/getchartdata/',
+                type: "get",
+                headers: {
+                    "Authorization": "Bearer " + store.state.user.access,
+                },
+                success(resp) {
+                    if(resp.result === "success") {
+                        chartData[0].xAxis[0].data = resp['dates'];
+                        chartData[0].series[0].data = resp['login_cnts'];
+                        chartData[0].series[1].data = resp['register_cnts'];
+                        chartData[1].series[0].data[0].value = resp['lang_skilled'];
+                        selectChart(0);
+                   }
+                },
+                error() {
+                    store.dispatch("logout");
+                }
+            });
+         };
+
         return {
             games,
             showCreateGameDialog,
@@ -277,6 +428,8 @@ export default {
             createGameForm,
             enterPlayerSpace,
             images,
+            selectChart,
+            chartTitle,
             rules: {
                 botSelect: [
                     { required: true, message: '请选择Bot！', trigger: 'blur' },
@@ -285,7 +438,6 @@ export default {
             message,
             sendMsg,
             enterSendMsg,
-            msgScroll,
         }
     }
 }
