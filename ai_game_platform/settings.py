@@ -218,3 +218,6 @@ ALIPAY_RETURN_URL = "https://aigame.zzqahm.top/myspace/%d/"
 SIMPLEUI_LOGO = "https://img.zzqahm.top/aigame_platform/avatar/icon1.png"
 
 SIMPLEUI_HOME_INFO = False
+
+ACCESS_KEY_ID = 'LTAI5tLM746uethTCU9J4BiA'
+ACCESS_KEY_SECRET = 'zORXPhF7qvnhzGX95G54oM20K53V72'

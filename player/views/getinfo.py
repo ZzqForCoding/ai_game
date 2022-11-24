@@ -24,9 +24,10 @@ class InfoView(APIView):
             'job': player.job,
             'desp': player.desp,
             'photo': player.photo,
-            'rating': player.rating,
+            # 'rating': player.rating,
             'recordCnt': record_cnt,
             'botCnt': bot_cnt,
             'freshNewsCnt': freshNews_cnt,
             'isSuperUser': user.is_superuser,
+            'phone': player.phone,
         })

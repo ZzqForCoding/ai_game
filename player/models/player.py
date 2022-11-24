@@ -15,6 +15,7 @@ class Player(models.Model):
     java_code_compile_success_cnt = models.IntegerField(default=0)
     py_code_compile_cnt = models.IntegerField(default=0)
     py_code_compile_success_cnt = models.IntegerField(default=0)
+    phone = models.CharField(max_length=20, default="", blank=True, null=True)
 
     def __str__(self):
         return str(self.user) + ' ' + str(self.rating)

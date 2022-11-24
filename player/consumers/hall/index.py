@@ -1,4 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.cache import cache
 import json
 
 class Hall(AsyncWebsocketConsumer):
@@ -9,6 +10,8 @@ class Hall(AsyncWebsocketConsumer):
             self.user = user
             self.room_name = "hall-01"
             await self.channel_layer.group_add(self.room_name, self.channel_name)
+            await self.channel_layer.group_add("notification_%d" % self.user.id, self.channel_name)
+            cache.set("notification_%d" % self.user.id, self.channel_name, 5 * 60)
             print('accept')
         else:
             await self.close()
@@ -17,6 +20,8 @@ class Hall(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         if hasattr(self, 'room_name') and self.room_name:
             await self.channel_layer.group_discard(self.room_name, self.channel_name)
+            await self.channel_layer.group_discard("notification_%d" % self.user.id, self.channel_name)
+            cache.delete("notification_%d" % self.user.id)
 
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
@@ -36,8 +41,13 @@ class Hall(AsyncWebsocketConsumer):
             }
         )
 
+    async def send_heartbeat(self, data):
+        cache.set("notification_%d" % data['userId'], self.channel_name, 5 * 60)
+
     async def receive(self, text_data):
         data = json.loads(text_data)
         event = data['event']
         if event == 'hall_message':
             await self.send_hall_message(data)
+        elif event == 'heartbeat':
+            await self.send_heartbeat(data)

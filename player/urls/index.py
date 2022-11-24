@@ -8,6 +8,8 @@ from player.views.get_token import RemTokenObtainPairView
 from player.views.update_token import UpdateTokenView
 from player.views.update_info import UpdateInfoView
 from player.views.get_chart_data import GetChartDataView
+from player.views.binding_phone import BindingPhoneView
+from player.views.send_msg import SendMsgView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -24,6 +26,8 @@ urlpatterns = [
     path('getranklist/', GetRankListView.as_view(), name='player_ranklist'),
     path('getplayerpage/', GetPlayerPageView.as_view(), name='player_page'),
     path('getchartdata/', GetChartDataView.as_view(), name='player_get_chart_data'),
+    path('binding_phone/', BindingPhoneView.as_view(), name='player_binging_phone'),
+    path('send_msg/', SendMsgView.as_view(), name='player_send_msg'),
     path('update_info/', UpdateInfoView.as_view(), name='player_update_info'),
     path('bot/', include('player.urls.bot.index')),
     path('acwing/', include('player.urls.acwing.index')),
