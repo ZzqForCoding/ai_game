@@ -12,7 +12,8 @@ export default {
         recordCnt: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).recordCnt,
         botCnt: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).botCnt,
         freshNewsCnt: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).freshNewsCnt,
-        isSuperUser: JSON.parse(localStorage.getItem('user')) === null ? 0 : JSON.parse(localStorage.getItem('user')).isSuperUser,
+        isSuperUser: JSON.parse(localStorage.getItem('user')) === null ? false : JSON.parse(localStorage.getItem('user')).isSuperUser,
+        phone: JSON.parse(localStorage.getItem('user')) === null ? "" : JSON.parse(localStorage.getItem('user')).phone,
         access: localStorage.getItem('aigame.access') === null ? "" : localStorage.getItem('aigame.access'),
         refresh: localStorage.getItem('aigame.refresh') === null ? "" : localStorage.getItem('aigame.refresh'),
         is_login: JSON.parse(localStorage.getItem('user')) === null ? false : JSON.parse(localStorage.getItem('user')).is_login,
@@ -32,6 +33,7 @@ export default {
             state.recordCnt = user.recordCnt;
             state.freshNewsCnt = user.freshNewsCnt;
             state.isSuperUser = user.isSuperUser;
+            state.phone = user.phone;
 
             localStorage.setItem("user", JSON.stringify(user));
         },
@@ -45,22 +47,24 @@ export default {
             state.id = 0;
             state.username = "";
             state.photo = "";
+            state.is_login = false;
             store.job = "";
             store.desp = "";
             store.botCnt = 0;
             store.recordCnt = 0;
             store.freshNewsCnt = 0;
+            state.isSuperUser = false;
+            state.phone = "";
             state.access = "";
             state.refresh = "";
-            state.is_login = false;
         },
         setIntervalFunc(state, interval_func) {
-            let t = localStorage.getItem('setIntervalFunc');
+            let t = localStorage.getItem('intervalFunc');
             if (t !== null) {
                 clearInterval(t);
             }
             state.interval_func = interval_func;
-            localStorage.setItem("setIntervalFunc", interval_func);
+            localStorage.setItem("intervalFunc", interval_func);
         },
     },
     actions: {
@@ -113,6 +117,7 @@ export default {
             localStorage.removeItem("user");
 
             context.commit("logout");
+            context.commit("updateHallSocket", null);
             router.push({ name: "user_account_login" });
         },
         refresh_access(context, refresh) {

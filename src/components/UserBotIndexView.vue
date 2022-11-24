@@ -512,6 +512,7 @@ export default {
                             'recordCnt': store.state.user.recordCnt,
                             'freshNewsCnt': store.state.user.freshNewsCnt,
                             'isSuperUser': store.state.user.isSuperUser,
+                            'phone': store.state.user.phone,
                         });
                     } else {
                         ElMessage.error(resp.result);
@@ -552,6 +553,7 @@ export default {
                             'recordCnt': store.state.user.recordCnt,
                             'freshNewsCnt': store.state.user.freshNewsCnt,
                             'isSuperUser': store.state.user.isSuperUser,
+                            'phone': store.state.user.phone,
                         });
                     }
                 },

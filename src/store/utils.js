@@ -5,6 +5,8 @@ export default {
         gameUtils: null,
         matchTime: 0,
         isMatch: false,
+        verifyCodeTime: 300,
+        showVerifyCode: false,
     },
     getters: {
     },
@@ -21,6 +23,13 @@ export default {
         },
         updateMatchTime(state, matchTime) {
             state.matchTime = matchTime;
+        },
+        updateShowVerifyCode(state, showVerifyCode) {
+            state.gameUtils.initVerifyCodeTime();
+            state.showVerifyCode = showVerifyCode;
+        },
+        updateVerifyCodeTime(state, verifyCodeTime) {
+            state.verifyCodeTime = verifyCodeTime;
         },
     },
     actions: {
@@ -39,7 +48,6 @@ export default {
                     let ossUrl = "https://player-avatar.oss-cn-shenzhen.aliyuncs.com";
                     let pos = data.file.name.lastIndexOf('.');
                     let fileName = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)) + data.file.name.substr(pos);
-                    console.log("fileName: ", fileName);
                     let accessUrl = resp.dir + '/' + fileName;
                     let sendData = new FormData();
                     sendData.append("OSSAccessKeyId", resp.accessid);
@@ -59,7 +67,6 @@ export default {
                         processData: false,
                         data: sendData,
                         success(resp) {
-                            console.log("resp: " )
                             data.success(resp.imgUrl, fileName);
                         },
                         error() {

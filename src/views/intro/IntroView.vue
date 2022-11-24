@@ -133,7 +133,6 @@ export default {
                 file, 
                 userId: store.state.user.id,
                 success(imgUrl, fileName) {
-                    console.log(imgUrl, fileName)
                     insertImage({
                         url: imgUrl,
                         desc: fileName,

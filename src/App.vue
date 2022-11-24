@@ -218,8 +218,7 @@ import {
     Expand,
     Fold,
 } from '@element-plus/icons-vue';
-import { GameUtils } from '@/assets/scripts/GameUtils';
-import { ElNotification } from 'element-plus';
+import { ElNotification, ElMessage } from 'element-plus';
 
 export default {
     name: 'App',
@@ -270,11 +269,8 @@ export default {
                 message: h('i', { style: 'color: teal' }, '欢迎来到King Of Bots游戏对战平台！'),
                 offset: 70,
             });
-            if(store.state.utils.gameUtils === null) {
-                store.commit("updateGameUtils", new GameUtils(store));
-            }
         });
-
+        
         return {
             logout,
             page,
@@ -315,6 +311,41 @@ export default {
 
             // 只有登陆了才需要更新token
             if(user !== null) store.dispatch("refresh_access", user.refresh);
+            if(!store.state.record.hall_socket && store.state.user.is_login) {
+                store.commit("updateHallSocket", new WebSocket(store.state.record.hall_socket_url + store.state.user.access));
+                store.state.record.hall_socket.onopen = () => {
+                    console.log("connected!");
+                };
+
+                store.state.record.hall_socket.onmessage = msg => {
+                    const data = JSON.parse(msg.data);
+                    if(data.event === "hall_message") {
+                        store.commit("pushHallMsg", data.msg);
+                    } else if(data.event === "notification") {
+                        ElNotification({
+                            title: data.data.title,
+                            message: h('i', { style: 'color: teal' }, "您的动态【" + data.data.msg + "】被【" + data.data.username + "】回复!"),
+                        })
+                    } else if(data.event === "verifycode_error") {
+                        ElMessage({
+                            showClose: true,
+                            message: data.data.msg,
+                            type: 'error',
+                        })
+                    }
+                }
+
+                store.state.record.hall_socket.onclose = () => {
+                    console.log("disconnected!");
+                }
+                let func = setInterval(() => {
+                    store.state.record.hall_socket.send(JSON.stringify({
+                        event: "heartbeat",
+                        userId: store.state.user.id,
+                    }));
+                }, 4.75 * 60 * 1000);
+                store.commit("updateHallSocketHeartbeat", func);
+            }
         }
     },
 }

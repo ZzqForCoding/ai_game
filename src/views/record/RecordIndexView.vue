@@ -1,7 +1,7 @@
 <template>
     <el-row style="margin-top: 40px;">
         <el-col :span="20" :offset="2">
-            <el-carousel indicator-position="outside" height="150px">
+            <el-carousel indicator-position="outside" height="200px" type="card">
                 <el-carousel-item v-for="image in images" :key="image.id">
                     <img :src="image.url" class="carousel-image-type">
                 </el-carousel-item>
@@ -12,8 +12,8 @@
                 <div class="card-header" style="height: 32px;">
                     <span style="line-height: 32px;">最新对局</span>
                     <el-button class="button" type="primary" style="float: right;" @click="showCreateGameDialog = true">
-                        创建游戏</el-button>
-
+                        创建游戏
+                    </el-button>
                     <el-dialog v-model="showCreateGameDialog" title="新建游戏">
                         <el-form label-position="top" label-width="100px" :model="createGameInfo" :rules="rules"
                             style="max-width: 100%;" ref="createGameForm">
@@ -121,12 +121,13 @@
 </template>
 
 <script>
-import { onMounted, onUnmounted, ref, unref, reactive, watch, nextTick } from 'vue';
+import { onMounted, onUnmounted, ref, unref, reactive, watch, nextTick, h } from 'vue';
 import $ from 'jquery';
 import { useStore } from 'vuex';
 import router from '@/router';
 import RecordList from '@/components/RecordList.vue';
 import * as echarts from "echarts";
+import { ElNotification, ElMessage } from 'element-plus';
 
 export default {
     name: 'RecordIndexView',
@@ -145,7 +146,6 @@ export default {
             botSelect: null,
         });
         let botContent = ref('');
-        const socketUrl = "wss://aigame.zzqahm.top/wss/hall/?token=" + store.state.user.access;
         let message = ref('');
         let canSendMsg = ref(false);
         let chart = null;
@@ -157,7 +157,7 @@ export default {
                     trigger: 'axis'
                 },
                 legend: {
-                    data: ['访问量', '注册']
+                    data: ['访问量', '注册量']
                 },
                 toolbox: {
                     show: true,
@@ -177,9 +177,6 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
-                        axisLabel: {
-                            formatter: '{value} 人'
-                        }
                     }
                 ],
                 series: [
@@ -189,7 +186,7 @@ export default {
                         data: [],
                     },
                     {
-                        name: '注册',
+                        name: '注册量',
                         type: 'bar',
                         data: [],
                     }
@@ -235,11 +232,9 @@ export default {
 
         const images = ref([
             {id: 1, url: "https://img.zzqahm.top/aigame_platform/avatar/background4.png"},
-            {id: 2, url: "https://img.zzqahm.top/aigame_platform/avatar/background5.png"},
+            {id: 2, url: "https://img.zzqahm.top/aigame_platform/avatar/background3.png"},
             {id: 3, url: "https://img.zzqahm.top/aigame_platform/avatar/background8.jpeg"}
         ]);
-
-        let socket = null;
 
         const get_games = () => {
             $.ajax({
@@ -295,24 +290,48 @@ export default {
         onMounted(() => {
             get_games();
             
-            socket = new WebSocket(socketUrl);
-
-            socket.onopen = () => {
-                console.log("connected!");
-                canSendMsg.value = true;
-                store.commit("updateHallSocket", socket);
-            };
-
-            socket.onmessage = msg => {
-                const data = JSON.parse(msg.data);
-                if(data.event === "hall_message") {
-                    store.commit("pushHallMsg", data.msg);
-                }
+            if(!store.state.record.hall_socket && store.state.user.is_login) {
+                store.commit("updateHallSocket", new WebSocket(store.state.record.hall_socket_url + store.state.user.access));
+                let func = setInterval(() => {
+                    store.state.record.hall_socket.send(JSON.stringify({
+                        event: "heartbeat",
+                        userId: store.state.user.id,
+                    }));
+                }, 4.75 * 60 * 1000);
+                store.commit("updateHallSocketHeartbeat", func);
             }
 
-            socket.onclose = () => {
-                canSendMsg.value = false;
-                console.log("disconnected!");
+            if(store.state.record.hall_socket) {
+                canSendMsg.value = true;
+            }
+
+            if(store.state.record.hall_socket) {
+                store.state.record.hall_socket.onopen = () => {
+                    console.log("connected!");
+                };
+
+                store.state.record.hall_socket.onmessage = msg => {
+                    const data = JSON.parse(msg.data);
+                    if(data.event === "hall_message") {
+                        store.commit("pushHallMsg", data.msg);
+                    } else if(data.event === "notification") {
+                        ElNotification({
+                            title: data.data.title,
+                            message: h('i', { style: 'color: teal' }, "您的动态【" + data.data.msg + "】被【" + data.data.username + "】回复!"),
+                        })
+                    } else if(data.event === "verifycode_error") {
+                        ElMessage({
+                            showClose: true,
+                            message: data.data.msg,
+                            type: 'error',
+                        })
+                    }
+                }
+
+                store.state.record.hall_socket.onclose = () => {
+                    canSendMsg.value = false;
+                    console.log("disconnected!");
+                }
             }
 
             nextTick(() => {
@@ -328,7 +347,6 @@ export default {
 
         onUnmounted(() => {
             canSendMsg.value = false;
-            socket.close();
             chart.dispose()
         });
 
@@ -354,8 +372,8 @@ export default {
         };
         
         const sendMsg = () => {
-            canSendMsg.value = false;
             if(!canSendMsg.value || message.value === "" || message.value.trim() === "") return;
+            canSendMsg.value = false;
             setTimeout(() => {
                 canSendMsg.value = true;
             }, 1500);

@@ -3,7 +3,6 @@ import PkIndexView from '@/views/pk/PkIndexView'
 import RankListIndexView from '@/views/ranklist/RankListIndexView'
 import RecordIndexView from '@/views/record/RecordIndexView'
 import RecordContentView from '@/views/record/RecordContentView'
-import DiscussionView from '@/views/discussion/DiscussionView'
 import FreshNewsView from '@/views/fresh_news/FreshNewsView'
 import MessageBoardView from '@/views/message_board/MessageBoardView'
 import SpaceMainView from '@/views/myspace/SpaceMainView'
@@ -62,15 +61,6 @@ const routes = [
         component: RankListIndexView,
         meta: {
             description: '排行榜',
-            isRoot: true,
-        }
-    },
-    {
-        path: '/discussion/',
-        name: 'discussion_index',
-        component: DiscussionView,
-        meta: {
-            description: '讨论区',
             isRoot: true,
         }
     },

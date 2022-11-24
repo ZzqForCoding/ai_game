@@ -12,8 +12,7 @@
                 </template>
                 <el-row style="margin-top: 40px;">
                     <el-col :span="20" :offset="2">
-                        <el-form :label-position="labelPosition" label-width="180px" :model="personalEditInfo" :rules="rules" style="max-width: 600px">
-
+                        <el-form ref="editForm" :label-position="labelPosition" label-width="180px" :model="personalEditInfo" :rules="rules" style="max-width: 600px">
                             <el-form-item label="头像">
                                 <el-upload class="avatar-uploader"
                                     v-model:file-list="avatarList"
@@ -37,8 +36,20 @@
                             <el-form-item label="用户名" prop="username">
                                 <el-input placeholder="Please input username" clearable v-model="personalEditInfo.username" />
                             </el-form-item>
-
-
+                            <el-form-item label="手机号">
+                                <el-input placeholder="Please input phone" clearable v-model="personalEditInfo.phone" :disabled="$store.state.user.phone !== null && $store.state.user.phone !== ''">
+                                    <template #append v-if="$store.state.user.phone === null || $store.state.user.phone === ''">
+                                        <el-button @click="send_msg">
+                                            <span v-if="$store.state.utils.showVerifyCode">已发送({{ $store.state.utils.verifyCodeTime }})</span>
+                                            <span v-else>发送验证码</span>
+                                        </el-button>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <div class="verify-code-prompt" v-if="$store.state.utils.showVerifyCode">验证码在5分钟内有效，请及时填写！</div>
+                            <el-form-item label="验证码" v-if="$store.state.utils.showVerifyCode" prop="verify_code">
+                                <el-input placeholder="Please input verification code" clearable v-model="personalEditInfo.verify_code" />
+                            </el-form-item>
                             <el-form-item label="职业" prop="job">
                                 <el-input placeholder="Please input your job" clearable v-model="personalEditInfo.job" />
                             </el-form-item>
@@ -59,8 +70,9 @@
 
 <script>
 import ProfileCard from '@/components/ProfileCard.vue';
+import { GameUtils } from '@/assets/scripts/GameUtils';
 import { useStore } from 'vuex'; 
-import { reactive, ref, watchEffect } from 'vue';
+import { reactive, ref, watchEffect, unref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
 import $ from 'jquery';
@@ -94,7 +106,10 @@ export default {
             username: store.state.user.username,
             job: store.state.user.job,
             desp: store.state.user.desp,
+            phone: store.state.user.phone,
+            verify_code: '',
         });
+        let editForm = ref(null);
 
         watchEffect(()=>{
             playerInfo.username = store.state.user.username;
@@ -135,21 +150,11 @@ export default {
                         'name': ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)) + '.jpg',
                         'url': personalEditInfo.photo
                     };
-                    store.commit("updateUser", {
-                        'id': store.state.user.id,
-                        'username': store.state.user.username,
-                        'photo': personalEditInfo.photo,
-                        'is_login': store.state.user.is_login,
-                        'job': store.state.user.job,
-                        'desp': store.state.user.desp,
-                        'botCnt': store.state.user.botCnt,
-                        'recordCnt': store.state.user.recordCnt,
-                        'freshNewsCnt': store.state.user.freshNewsCnt,
-                        'isSuperUser': store.state.user.isSuperUser,
-                    });
+                    return false;
                 },
                 error() {
                     store.dispatch("logout");
+                    return true;
                 }
             });
         }
@@ -170,37 +175,145 @@ export default {
             dialogimageUrl.value = file.url;
         }
 
-        const updatePlayerInfo = () => {
+        const updatePlayerInfo = async() => {
+            const form = unref(editForm);
+            await form.validate(valid => {
+                if(valid) {
+                    if(personalEditInfo.username === store.state.user.username &&
+                       personalEditInfo.photo === store.state.user.photo &&
+                       personalEditInfo.job === store.state.user.job &&
+                       personalEditInfo.desp === store.state.user.desp &&
+                       personalEditInfo.phone === store.state.user.phone) {
+                        ElMessage({
+                            message: '没有修改任何信息',
+                            type: 'warning',
+                        })
+                        return;
+                    }
+                    $.ajax({
+                        url: "https://aigame.zzqahm.top/backend/player/update_info/",
+                        type: "POST",
+                        headers: {
+                            'Authorization': "Bearer " + store.state.user.access,
+                        },
+                        data: {
+                            'username': personalEditInfo.username,
+                            'job': personalEditInfo.job,
+                            'desp': personalEditInfo.desp,
+                        },
+                        success(resp) {
+                            if(resp.result === "success") {
+                                if(personalEditInfo.phone !== store.state.user.phone) {
+                                    let ret = bind_phone();
+                                    if(ret) {
+                                        return;
+                                    }
+                                }
+                                if(personalEditInfo.photo !== store.state.user.photo) {
+                                    let ret = updateAvatar();
+                                    if(ret) {
+                                        return;
+                                    }
+                                }
+                                store.commit("updateUser", {
+                                    'id': store.state.user.id,
+                                    'username': personalEditInfo.username,
+                                    'photo': personalEditInfo.photo,
+                                    'is_login': store.state.user.is_login,
+                                    'job': personalEditInfo.job,
+                                    'desp': personalEditInfo.desp,
+                                    'botCnt': store.state.user.botCnt,
+                                    'recordCnt': store.state.user.recordCnt,
+                                    'freshNewsCnt': store.state.user.freshNewsCnt,
+                                    'isSuperUser': store.state.user.isSuperUser,
+                                    'phone': personalEditInfo.phone,
+                                });
+                                ElMessage({
+                                    showClose: true,
+                                    message: '更新成功',
+                                    type: 'success',
+                                });
+                            } else {
+                                ElMessage({
+                                    showClose: true,
+                                    message: resp.result,
+                                    type: 'error',
+                                })
+                            }
+                        },
+                        error() {
+                            store.dispatch("logout");
+                        }
+                    });
+                } 
+            });
+        }
+
+        const bind_phone = () => {
             $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/update_info/",
+                url: "https://aigame.zzqahm.top/backend/player/binding_phone/",
                 type: "POST",
                 headers: {
                     'Authorization': "Bearer " + store.state.user.access,
                 },
                 data: {
-                    'username': personalEditInfo.username,
-                    'job': personalEditInfo.job,
-                    'desp': personalEditInfo.desp,
+                    phone: personalEditInfo.phone,
+                    code: personalEditInfo.verify_code.trim(),
                 },
                 success(resp) {
                     if(resp.result === "success") {
-                        updateAvatar();
+                        store.commit("updateShowVerifyCode", false);
+                        return false;
+                    } else {
                         ElMessage({
                             showClose: true,
-                            message: '更新成功',
+                            message: resp.result,
+                            type: 'error',
+                        })
+                        return true;
+                    }
+                },
+                error() {
+                    store.dispatch("logout");
+                    return true;
+                }
+            });
+        }
+
+        const send_msg = () => {
+            if(store.state.utils.showVerifyCode) return;
+            if(personalEditInfo.phone === null || personalEditInfo.phone === "") {
+                ElMessage({
+                    showClose: true,
+                    message: "请先输入电话号码",
+                    type: 'error',
+                })
+                return;
+            }
+            if(!/^1[3-9]\d{9}$/.test(personalEditInfo.phone)) {
+                ElMessage({
+                    showClose: true,
+                    message: "不是合法的电话号码",
+                    type: 'error',
+                })
+                return;
+            }
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/send_msg/",
+                type: "POST",
+                headers: {
+                    'Authorization': "Bearer " + store.state.user.access,
+                },
+                data: {
+                    'phone': personalEditInfo.phone,
+                },
+                success(resp) {
+                    if(resp.result === "success") {
+                        store.commit("updateShowVerifyCode", true);
+                        ElMessage({
+                            showClose: true,
+                            message: '发送成功',
                             type: 'success',
-                        });
-                        store.commit("updateUser", {
-                            'id': store.state.user.id,
-                            'username': personalEditInfo.username,
-                            'photo': store.state.user.photo,
-                            'is_login': store.state.user.is_login,
-                            'job': personalEditInfo.job,
-                            'desp': personalEditInfo.desp,
-                            'botCnt': store.state.user.botCnt,
-                            'recordCnt': store.state.user.recordCnt,
-                            'freshNewsCnt': store.state.user.freshNewsCnt,
-                            'isSuperUser': store.state.user.isSuperUser,
                         });
                     } else {
                         ElMessage({
@@ -216,6 +329,12 @@ export default {
             });
         }
 
+        onMounted(() => {
+            if(store.state.utils.gameUtils === null) {
+                store.commit("updateGameUtils", new GameUtils(store));
+            }
+        });
+
          return {
             playerInfo,
             beforeAvatarUpload,
@@ -227,6 +346,8 @@ export default {
             avatarList,
             personalEditInfo,
             updatePlayerInfo,
+            editForm,
+            send_msg,
             rules: {
                 username: [
                     { required: true, message: '用户名不得为空！', trigger: 'blur' },
@@ -237,6 +358,9 @@ export default {
                 ],
                 desp: [
                     { max: 200, message: '长度在 200 个字符之内', trigger: 'blur' }
+                ],
+                verify_code: [
+                    { required: true, message: '验证码不得为空！', trigger: 'blur' },
                 ],
             },
         }
@@ -257,5 +381,13 @@ export default {
 
 .avatar-uploader:deep(.el-icon--close-tip) {
     visibility: hidden;
+}
+
+.verify-code-prompt {
+    margin-bottom: 18px;
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    font-weight: 600;
 }
 </style>

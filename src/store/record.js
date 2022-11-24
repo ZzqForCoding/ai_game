@@ -1,6 +1,8 @@
 export default {
     state: {
+        hall_socket_url: "wss://aigame.zzqahm.top/wss/hall/?token=",
         hall_socket: null,
+        hall_socket_heartbeat: null,
         hall_msgs: [],
         is_record: false,
         a_steps: "",
@@ -19,12 +21,19 @@ export default {
     },
     mutations: {
         updateHallSocket(state, socket) {
+            if(!socket && state.hall_socket !== null) {
+                clearInterval(state.hall_socket_heartbeat);
+                state.hall_socket.close();
+            }
             state.hall_socket = socket;
+        },
+        updateHallSocketHeartbeat(state, hall_socket_heartbeat) {
+            state.hall_socket_heartbeat = hall_socket_heartbeat;
         },
         pushHallMsg(state, msg) {
             msg.id = state.hall_msgs.length + 1;
             state.hall_msgs.push(msg);
-        },
+        },      
         updateIsRecord(state, is_record) {
             state.is_record = is_record;
         },
@@ -46,7 +55,7 @@ export default {
         updateIsRobot(state, data) {
             state.a_is_robot = Boolean(data.a_is_robot);
             state.b_is_robot = Boolean(data.b_is_robot);
-        }
+        },
     },
     actions: {
    

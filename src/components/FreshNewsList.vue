@@ -101,11 +101,7 @@
                             <span v-if="child.reply !== item.username" class="reply">回复 <a>{{ child.reply }}</a>
                                 的评论</span>
                             <a class="post-comment-right-reply" @click="openComment(item.id + '-' + child.id)">回复</a>
-
-                            <el-button type="danger" text style="float: right; margin: 20px 20px 0 0;"
-                                v-if="child.userId === $store.state.user.id" @click="openDeleteDialog(child)">
-                                删除
-                            </el-button>
+                            <a class="post-comment-right-del" v-if="child.userId === $store.state.user.id" @click="openDeleteDialog(child)">删除</a>
                         </div>
                         <div class="content">
                             {{ child.content }}
@@ -269,6 +265,7 @@ export default {
                                 'recordCnt': store.state.user.recordCnt,
                                 'freshNewsCnt': store.state.user.freshNewsCnt + 1,
                                 'isSuperUser': store.state.user.isSuperUser,
+                                'phone': store.state.user.phone,
                             });
                         }
                         let element = document.getElementsByClassName('post-comment-input' + openCommentId.value)[0];
@@ -393,6 +390,7 @@ export default {
                                     'recordCnt': store.state.user.recordCnt,
                                     'freshNewsCnt': store.state.user.freshNewsCnt - 1,
                                     'isSuperUser': store.state.user.isSuperUser,
+                                    'phone': store.state.user.phone,
                                 });
                                 break;
                             }
@@ -469,6 +467,7 @@ export default {
                             'recordCnt': store.state.user.recordCnt,
                             'freshNewsCnt': store.state.user.freshNewsCnt + 1,
                             'isSuperUser': store.state.user.isSuperUser,
+                            'phone': store.state.user.phone,
                         });
                     } else {
                         ElMessage.error(resp.result);
@@ -698,7 +697,7 @@ export default {
     margin-top: 10px;
 }
 
-.post-comments .right .info .post-comment-right-reply {
+.post-comments .right .info .post-comment-right-reply, .post-comments .right .info .post-comment-right-del {
     margin-left: 10px;
     color: #95a5a6;
     cursor: pointer;
@@ -706,7 +705,12 @@ export default {
 }
 
 .post-comments .right .info .post-comment-right-reply:hover {
-    color: #337ab7;
+    color: #3366CC;
+    text-decoration: none;
+}
+
+.post-comments .right .info .post-comment-right-del:hover {
+    color: #FF0033;
     text-decoration: none;
 }
 

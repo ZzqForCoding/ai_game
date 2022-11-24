@@ -29,7 +29,7 @@ export default {
                         access: resp.access,
                         refresh: resp.refresh,
                     });
-                    router.push({ name: "home" });
+                    router.push({name: 'record_index'});
                     store.commit("updatePullingInfo", false);
                 } else {
                     router.push({ name: "user_account_login" });

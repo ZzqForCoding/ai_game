@@ -59,6 +59,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
+import { GameUtils } from '@/assets/scripts/GameUtils';
 
 export default {
     name: 'PkIndexView',
@@ -90,6 +91,10 @@ export default {
                 store.commit("updateMatchTime", 0);
                 store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);
+
+                if(store.state.utils.gameUtils === null) {
+                    store.commit("updateGameUtils", new GameUtils(store));
+                }
 
                 socket.onopen = () => {
                     console.log("connected!");
@@ -137,6 +142,7 @@ export default {
                             'recordCnt': store.state.user.recordCnt + 1,
                             'freshNewsCnt': store.state.user.freshNewsCnt,
                             'isSuperUser': store.state.user.isSuperUser,
+                            'phone': store.state.user.phone,
                         });
                     } else if (data.event === "nextRound") {
                         let round = parseInt(data['round']);
@@ -170,6 +176,10 @@ export default {
                 store.commit("updateMatchTime", 0);
                 store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);
+
+                if(store.state.utils.gameUtils === null) {
+                    store.commit("updateGameUtils", new GameUtils(store));
+                }
 
                 socket.onopen = () => {
                     console.log("connected!");
@@ -234,6 +244,7 @@ export default {
                             'recordCnt': store.state.user.recordCnt + 1,
                             'freshNewsCnt': store.state.user.freshNewsCnt,
                             'isSuperUser': store.state.user.isSuperUser,
+                            'phone': store.state.user.phone,
                         });
                     } else if (data.event === "pk_message") {
                         store.commit("pushMsg", data.msg);
@@ -259,6 +270,10 @@ export default {
                 store.commit("clearMsg");
                 socket = new WebSocket(socketUrl);
 
+                if(store.state.utils.gameUtils === null) {
+                    store.commit("updateGameUtils", new GameUtils(store));
+                }
+                
                 socket.onopen = () => {
                     console.log("connected!");
                     store.commit("updateSocket", socket);
@@ -304,6 +319,7 @@ export default {
                             'recordCnt': store.state.user.recordCnt + 1,
                             'freshNewsCnt': store.state.user.freshNewsCnt,
                             'isSuperUser': store.state.user.isSuperUser,
+                            'phone': store.state.user.phone,
                         });
                     } else if (data.event === "nextRound") {
                         let round = parseInt(data['round']);
