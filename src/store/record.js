@@ -82,7 +82,7 @@ export default {
                     const data = JSON.parse(msg.data);
                     if(data.event === "hall_message") {
                         context.commit("pushHallMsg", data.msg);
-                    } else if(data.event === "notification") {
+                    } else if(data.event === "freshnews_notification") {
                         ElNotification({
                             title: data.data.title,
                             message: h('i', { style: 'color: teal' }, "您的动态【" + data.data.msg + "】被【" + data.data.username + "】回复!"),
@@ -93,6 +93,12 @@ export default {
                             message: data.data.msg,
                             type: 'error',
                         })
+                    } else if(data.event === "account_notification") {
+                        ElNotification({
+                            title: data.data.title,
+                            message: h('i', { style: 'color: teal' }, data.data.msg),
+                        })
+                        context.dispatch("logout");
                     }
                 }
 

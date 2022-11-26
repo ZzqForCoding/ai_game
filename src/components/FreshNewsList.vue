@@ -15,8 +15,7 @@
             </div>
         </div>
     </el-card>
-    <ul v-if="freshNews.length > 0" v-infinite-scroll="load" :infinite-scroll-disabled="isOver"
-        style="margin: 0; padding: 0; list-style: none;">
+    <ul v-if="freshNews.length > 0" v-infinite-scroll="load" :infinite-scroll-disabled="isOver" style="margin: 0; padding: 0; list-style: none;">
         <li style="margin-top: 20px;" v-for="item in freshNews" :key="item.id">
             <el-card class="box-card" style="position: relative;">
                 <span class="forward-desp" v-if="item.forwarded_id !== -1">

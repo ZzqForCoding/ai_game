@@ -20,13 +20,13 @@
 </template>
    
 <script>
-// const debounce = (function () {
-//     let timer = 0
-//     return function (callback, ms) {
-//         clearTimeout(timer)
-//         timer = setTimeout(callback, ms)
-//     }
-// })();
+const debounce = (function () {
+    let timer = 0
+    return function (callback, ms) {
+        clearTimeout(timer)
+        timer = setTimeout(callback, ms)
+    }
+})();
 
 export default {
     name: 'SliderVerify',
@@ -89,6 +89,12 @@ export default {
     },
     mounted() {
         this.init();
+        window.onresize = () => {
+            debounce(() => {
+                this.init();
+            }, 120);
+        };
+
     },
     methods: {
         /**
