@@ -65,21 +65,21 @@
                         </el-menu-item-group>
                     </el-sub-menu>
 
-                    <router-link class="link-text" :to="{name: 'record_index'}">
+                    <router-link class="link-text" :to="{name: 'record_index'}" v-if="$store.state.user.is_login">
                         <el-menu-item index="2">
                             <el-icon :size="30"><HomeFilled /></el-icon>
                             <template #title>首页</template>
                         </el-menu-item>
                     </router-link>
                     
-                    <router-link class="link-text" :to="{name: 'fresh_news_index'}">
+                    <router-link class="link-text" :to="{name: 'fresh_news_index'}" v-if="$store.state.user.is_login">
                         <el-menu-item index="3">
                             <el-icon :size="30"><Promotion /></el-icon>
                             <template #title>动态</template>
                         </el-menu-item>
                     </router-link>
 
-                    <router-link class="link-text" :to="{name: 'ranklist_index'}">
+                    <router-link class="link-text" :to="{name: 'ranklist_index'}" v-if="$store.state.user.is_login">
                         <el-menu-item index="4">
                             <el-icon :size="30"><DataLine /></el-icon>
                             <template #title>排行榜</template>
@@ -218,7 +218,7 @@ import {
     Expand,
     Fold,
 } from '@element-plus/icons-vue';
-import { ElNotification, ElMessage } from 'element-plus';
+import { ElNotification } from 'element-plus';
 
 export default {
     name: 'App',
@@ -235,7 +235,6 @@ export default {
 
         const logout = () => {
             store.dispatch("logout");
-            router.push({name: 'user_account_login'});
         };
 
         watch(() => route.name, () => {
@@ -247,10 +246,13 @@ export default {
         }
 
         const showConfirmBack = () => {
-            if(page.value !== "回放界面") 
+            if(page.value === "对战界面") 
                 showBackDialog.value = true
-            else 
+            else if(page.value === "回放界面") {
                 router.push({name: 'record_index'});
+            } else if(page.value === "手机验证码登录" || page.value === "找回密码") {
+                router.push({name: 'user_account_login'});
+            }
         }
 
         const clickBack = () => {
@@ -296,7 +298,7 @@ export default {
             if (differ_time <= 5) {
                 localStorage.removeItem("aigame.access");
                 localStorage.removeItem("aigame.refresh");
-                localStorage.removeItem("setIntervalFunc")
+                localStorage.removeItem("intervalFunc")
                 localStorage.removeItem("user");
             }
         };
@@ -305,47 +307,11 @@ export default {
         };
         // 刷新
         window.onload = () => {
-            // 刷新后定时函数则失效, 因此我们重新调用，因为可能多次进入网页，所以需要清空定时函数
-            window.clearInterval(store.state.user.intervalFunc);
-            let user = JSON.parse(localStorage.getItem("user"));
-
-            // 只有登陆了才需要更新token
-            if(user !== null) store.dispatch("refresh_access", user.refresh);
-            if(!store.state.record.hall_socket && store.state.user.is_login) {
-                store.commit("updateHallSocket", new WebSocket(store.state.record.hall_socket_url + store.state.user.access));
-                store.state.record.hall_socket.onopen = () => {
-                    console.log("connected!");
-                };
-
-                store.state.record.hall_socket.onmessage = msg => {
-                    const data = JSON.parse(msg.data);
-                    if(data.event === "hall_message") {
-                        store.commit("pushHallMsg", data.msg);
-                    } else if(data.event === "notification") {
-                        ElNotification({
-                            title: data.data.title,
-                            message: h('i', { style: 'color: teal' }, "您的动态【" + data.data.msg + "】被【" + data.data.username + "】回复!"),
-                        })
-                    } else if(data.event === "verifycode_error") {
-                        ElMessage({
-                            showClose: true,
-                            message: data.data.msg,
-                            type: 'error',
-                        })
-                    }
-                }
-
-                store.state.record.hall_socket.onclose = () => {
-                    console.log("disconnected!");
-                }
-                let func = setInterval(() => {
-                    store.state.record.hall_socket.send(JSON.stringify({
-                        event: "heartbeat",
-                        userId: store.state.user.id,
-                    }));
-                }, 4.75 * 60 * 1000);
-                store.commit("updateHallSocketHeartbeat", func);
-            }
+            // 用户持久化登录
+            let refresh = localStorage.getItem('aigame.refresh');
+            if(refresh) store.dispatch("refresh_access", refresh);
+            // 检测用户是否在线
+            store.dispatch("connectHallSocket");
         }
     },
 }

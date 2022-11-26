@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import router from '@/router';
 import store from '.';
+import { ElMessage } from 'element-plus';
 
 export default {
     state: {
@@ -77,8 +78,6 @@ export default {
                     password: data.password,
                 },
                 success(resp) {
-                    context.commit("updateToken", resp);
-                    context.dispatch("refresh_access", resp.refresh);
                     data.success(resp);
                 },
                 error() {
@@ -91,7 +90,7 @@ export default {
                 url: "https://aigame.zzqahm.top/backend/player/getinfo/",
                 type: "get",
                 headers: {
-                    "Authorization": "Bearer " + context.state.access,
+                    "Authorization": "Bearer " + context.rootState.user.access,
                 },
                 success(resp) {
                     if (resp.result === "success") {
@@ -110,19 +109,19 @@ export default {
             });
         },
         logout(context) {
-            clearInterval(localStorage.getItem("setIntervalFunc"));
+            clearInterval(localStorage.getItem("intervalFunc"));
             localStorage.removeItem("aigame.access");
             localStorage.removeItem("aigame.refresh");
-            localStorage.removeItem("setIntervalFunc")
+            localStorage.removeItem("intervalFunc")
             localStorage.removeItem("user");
 
             context.commit("logout");
             context.commit("updateHallSocket", null);
+            context.commit("updateHallSocketHeartbeat", null);
             router.push({ name: "user_account_login" });
         },
         refresh_access(context, refresh) {
-            // 每4.5min刷新jwt
-            let func = setInterval(() => {
+            const target = () => {
                 $.ajax({
                     url: "https://aigame.zzqahm.top/backend/player/token/refresh/",
                     type: "post",
@@ -153,8 +152,33 @@ export default {
                         context.dispatch("logout");
                     }
                 });
-            }, 55 * 60 * 1000);
-            context.commit("setIntervalFunc", func);
+            }
+            const setIntervalImmediately = (func, interval) => {
+                func();
+                return setInterval(func, interval);
+            }
+            context.rootState.user.interval_func && clearInterval(context.rootState.user.interval_func);
+            let timer = setIntervalImmediately(target, 55 * 60 * 1000);
+            context.commit("setIntervalFunc", timer);
+        },
+        login_success(context, data) {
+            context.commit("updateToken", data);
+            context.dispatch("refresh_access", data.refresh);
+            ElMessage({
+                showClose: true,
+                message: '登录成功！',
+                type: 'success',
+            });
+            context.dispatch("getinfo", {
+                success() {
+                    router.push({name: 'home'});
+                    // 检测用户是否在线
+                    context.dispatch("connectHallSocket");
+                },
+                error() {
+                    context.dispatch("logout");
+                }
+            });
         },
     },
     modules: {

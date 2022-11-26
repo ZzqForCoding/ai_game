@@ -25,12 +25,7 @@ export default {
             },
             success(resp) {
                 if(resp.result === "success") {
-                    store.commit("updateToken", {
-                        access: resp.access,
-                        refresh: resp.refresh,
-                    });
-                    router.push({name: 'record_index'});
-                    store.commit("updatePullingInfo", false);
+                    store.dispatch("login_success", resp);
                 } else {
                     router.push({ name: "user_account_login" });
                 }

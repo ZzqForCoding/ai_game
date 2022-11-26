@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { ElMessage } from 'element-plus';
 
 export default {
     state: {
@@ -86,6 +87,55 @@ export default {
                 type: "get",
                 success(resp) {
                     data.success(resp);
+                },
+                error() {
+                    context.dispatch("logout");
+                }
+            });
+        },
+        send_msg(context, data) {
+            if(context.rootState.utils.showVerifyCode) return;
+            if(data.phone === null || data.phone === "") {
+                ElMessage({
+                    showClose: true,
+                    message: "请先输入电话号码",
+                    type: 'error',
+                })
+                return;
+            }
+            if(!/^1[3-9]\d{9}$/.test(data.phone)) {
+                ElMessage({
+                    showClose: true,
+                    message: "不是合法的电话号码",
+                    type: 'error',
+                })
+                return;
+            }
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/send_msg/",
+                type: "POST",
+                headers: {
+                    'Authorization': data.flag === "login" || data.flag === "update_password" ? "" : "Bearer " + context.rootState.user.access,
+                },
+                data: {
+                    phone: data.phone,
+                    flag: data.flag,
+                },
+                success(resp) {
+                    if(resp.result === "success") {
+                        context.commit("updateShowVerifyCode", true);
+                        ElMessage({
+                            showClose: true,
+                            message: '发送成功',
+                            type: 'success',
+                        });
+                    } else {
+                        ElMessage({
+                            showClose: true,
+                            message: resp.result,
+                            type: 'error',
+                        })
+                    }
                 },
                 error() {
                     context.dispatch("logout");

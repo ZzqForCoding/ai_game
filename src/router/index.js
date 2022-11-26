@@ -6,6 +6,7 @@ import RecordContentView from '@/views/record/RecordContentView'
 import FreshNewsView from '@/views/fresh_news/FreshNewsView'
 import MessageBoardView from '@/views/message_board/MessageBoardView'
 import SpaceMainView from '@/views/myspace/SpaceMainView'
+import PersonalInfoView from '@/views/user/PersonalInfoView'
 import IntroView from '@/views/intro/IntroView'
 import GameIntroView from '@/views/intro/GameIntroView'
 import CodeHelperView from '@/views/intro/CodeHelperView'
@@ -14,8 +15,9 @@ import NotFound from '@/views/error/NotFound'
 import UserAccountLoginView from '@/views/user/account/UserAccountLoginView'
 import UserAccountRegisterView from '@/views/user/account/UserAccountRegisterView'
 import UserAccountAcWingWebReceiveCodeView from '@/views/user/account/UserAccountAcWingWebReceiveCodeView'
-import PersonalInfoView from '@/views/user/PersonalInfoView'
 import UserAccountQQReceiveCodeView from '@/views/user/account/UserAccountQQReceiveCodeView'
+import UserAccountPhoneLoginView from '@/views/user/account/UserAccountPhoneLoginView'
+import UserAccountUpdatePasswordView from '@/views/user/account/UserAccountUpdatePasswordView'
 import store from '@/store'
 
 const routes = [
@@ -134,6 +136,24 @@ const routes = [
         meta: {
             description: '登录',
             isRoot: true,
+        }
+    },
+    {
+        path: '/user/account/forget_password/',
+        name: 'user_account_forget_password',
+        component: UserAccountUpdatePasswordView,
+        meta: {
+            description: '找回密码',
+            isRoot: false,
+        }
+    },
+    {
+        path: '/user/account/phone_login/',
+        name: 'user_account_phone_login',
+        component: UserAccountPhoneLoginView,
+        meta: {
+            description: '手机验证码登录',
+            isRoot: false,
         }
     },
     {

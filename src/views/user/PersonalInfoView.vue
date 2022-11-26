@@ -39,7 +39,7 @@
                             <el-form-item label="手机号">
                                 <el-input placeholder="Please input phone" clearable v-model="personalEditInfo.phone" :disabled="$store.state.user.phone !== null && $store.state.user.phone !== ''">
                                     <template #append v-if="$store.state.user.phone === null || $store.state.user.phone === ''">
-                                        <el-button @click="send_msg">
+                                        <el-button @click="send_msg(personalEditInfo.phone)">
                                             <span v-if="$store.state.utils.showVerifyCode">已发送({{ $store.state.utils.verifyCodeTime }})</span>
                                             <span v-else>发送验证码</span>
                                         </el-button>
@@ -280,52 +280,10 @@ export default {
             });
         }
 
-        const send_msg = () => {
-            if(store.state.utils.showVerifyCode) return;
-            if(personalEditInfo.phone === null || personalEditInfo.phone === "") {
-                ElMessage({
-                    showClose: true,
-                    message: "请先输入电话号码",
-                    type: 'error',
-                })
-                return;
-            }
-            if(!/^1[3-9]\d{9}$/.test(personalEditInfo.phone)) {
-                ElMessage({
-                    showClose: true,
-                    message: "不是合法的电话号码",
-                    type: 'error',
-                })
-                return;
-            }
-            $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/send_msg/",
-                type: "POST",
-                headers: {
-                    'Authorization': "Bearer " + store.state.user.access,
-                },
-                data: {
-                    'phone': personalEditInfo.phone,
-                },
-                success(resp) {
-                    if(resp.result === "success") {
-                        store.commit("updateShowVerifyCode", true);
-                        ElMessage({
-                            showClose: true,
-                            message: '发送成功',
-                            type: 'success',
-                        });
-                    } else {
-                        ElMessage({
-                            showClose: true,
-                            message: resp.result,
-                            type: 'error',
-                        })
-                    }
-                },
-                error() {
-                    store.dispatch("logout");
-                }
+        const send_msg = phone => {
+            store.dispatch("send_msg", {
+                phone,
+                flag: "binding",
             });
         }
 

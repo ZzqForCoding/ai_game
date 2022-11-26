@@ -121,13 +121,13 @@
 </template>
 
 <script>
-import { onMounted, onUnmounted, ref, unref, reactive, watch, nextTick, h } from 'vue';
+import { onMounted, onUnmounted, ref, unref, reactive, watch, nextTick } from 'vue';
 import $ from 'jquery';
 import { useStore } from 'vuex';
 import router from '@/router';
 import RecordList from '@/components/RecordList.vue';
 import * as echarts from "echarts";
-import { ElNotification, ElMessage } from 'element-plus';
+import { ElMessage } from 'element-plus';
 
 export default {
     name: 'RecordIndexView',
@@ -147,7 +147,6 @@ export default {
         });
         let botContent = ref('');
         let message = ref('');
-        let canSendMsg = ref(false);
         let chart = null;
         let chartTitle = ref('');
         
@@ -289,50 +288,6 @@ export default {
 
         onMounted(() => {
             get_games();
-            
-            if(!store.state.record.hall_socket && store.state.user.is_login) {
-                store.commit("updateHallSocket", new WebSocket(store.state.record.hall_socket_url + store.state.user.access));
-                let func = setInterval(() => {
-                    store.state.record.hall_socket.send(JSON.stringify({
-                        event: "heartbeat",
-                        userId: store.state.user.id,
-                    }));
-                }, 4.75 * 60 * 1000);
-                store.commit("updateHallSocketHeartbeat", func);
-            }
-
-            if(store.state.record.hall_socket) {
-                canSendMsg.value = true;
-            }
-
-            if(store.state.record.hall_socket) {
-                store.state.record.hall_socket.onopen = () => {
-                    console.log("connected!");
-                };
-
-                store.state.record.hall_socket.onmessage = msg => {
-                    const data = JSON.parse(msg.data);
-                    if(data.event === "hall_message") {
-                        store.commit("pushHallMsg", data.msg);
-                    } else if(data.event === "notification") {
-                        ElNotification({
-                            title: data.data.title,
-                            message: h('i', { style: 'color: teal' }, "您的动态【" + data.data.msg + "】被【" + data.data.username + "】回复!"),
-                        })
-                    } else if(data.event === "verifycode_error") {
-                        ElMessage({
-                            showClose: true,
-                            message: data.data.msg,
-                            type: 'error',
-                        })
-                    }
-                }
-
-                store.state.record.hall_socket.onclose = () => {
-                    canSendMsg.value = false;
-                    console.log("disconnected!");
-                }
-            }
 
             nextTick(() => {
                 chart = echarts.init(document.getElementById("myEcharts"));
@@ -346,7 +301,6 @@ export default {
         };
 
         onUnmounted(() => {
-            canSendMsg.value = false;
             chart.dispose()
         });
 
@@ -372,10 +326,19 @@ export default {
         };
         
         const sendMsg = () => {
-            if(!canSendMsg.value || message.value === "" || message.value.trim() === "") return;
-            canSendMsg.value = false;
+            if(!store.state.record.hall_can_send_msg || message.value === "" || message.value.trim() === "") {
+                if(!store.state.record.hall_socket) {
+                    store.dispatch("connectHallSocket");
+                    ElMessage({
+                        message: 'websocket正在重新连接，请稍后在尝试！',
+                        type: 'warning',
+                    })
+                }
+                return;
+            }
+                store.commit("updateHallCanSendMsg", false);
             setTimeout(() => {
-                canSendMsg.value = true;
+                store.commit("updateHallCanSendMsg", true);
             }, 1500);
             store.state.record.hall_socket.send(JSON.stringify({
                 event: "hall_message",

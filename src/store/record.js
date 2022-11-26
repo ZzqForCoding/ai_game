@@ -1,9 +1,13 @@
+import { ElNotification, ElMessage } from 'element-plus';
+import { h } from 'vue';
+
 export default {
     state: {
         hall_socket_url: "wss://aigame.zzqahm.top/wss/hall/?token=",
         hall_socket: null,
         hall_socket_heartbeat: null,
         hall_msgs: [],
+        hall_can_send_msg: false,
         is_record: false,
         a_steps: "",
         b_steps: "",
@@ -22,13 +26,17 @@ export default {
     mutations: {
         updateHallSocket(state, socket) {
             if(!socket && state.hall_socket !== null) {
-                clearInterval(state.hall_socket_heartbeat);
+                state.hall_can_send_msg = false;
                 state.hall_socket.close();
             }
             state.hall_socket = socket;
         },
         updateHallSocketHeartbeat(state, hall_socket_heartbeat) {
+            if(state.hall_socket_heartbeat) clearInterval(state.hall_socket_heartbeat);
             state.hall_socket_heartbeat = hall_socket_heartbeat;
+        },
+        updateHallCanSendMsg(state, hall_can_send_msg) {
+            state.hall_can_send_msg = hall_can_send_msg;
         },
         pushHallMsg(state, msg) {
             msg.id = state.hall_msgs.length + 1;
@@ -58,7 +66,55 @@ export default {
         },
     },
     actions: {
-   
+        connectHallSocket(context) {
+            let state = context.rootState;
+            if(!state.record.hall_socket && state.user.is_login) {
+                context.commit("updateHallSocket", new WebSocket(state.record.hall_socket_url + state.user.access));
+                state.record.hall_socket.onopen = () => {
+                    console.log("connected!");
+                    ElMessage({
+                        message: 'websocket连接成功',
+                        type: 'success',
+                    });
+                };
+
+                state.record.hall_socket.onmessage = msg => {
+                    const data = JSON.parse(msg.data);
+                    if(data.event === "hall_message") {
+                        context.commit("pushHallMsg", data.msg);
+                    } else if(data.event === "notification") {
+                        ElNotification({
+                            title: data.data.title,
+                            message: h('i', { style: 'color: teal' }, "您的动态【" + data.data.msg + "】被【" + data.data.username + "】回复!"),
+                        })
+                    } else if(data.event === "verifycode_error") {
+                        ElMessage({
+                            showClose: true,
+                            message: data.data.msg,
+                            type: 'error',
+                        })
+                    }
+                }
+
+                state.record.hall_socket.onclose = () => {
+                    console.log("disconnected!");
+                    ElMessage({
+                        message: 'websocket连接断开，请刷新页面或重新登录！',
+                        type: 'warning',
+                    })
+                    context.commit("updateHallSocket", null);
+                    context.commit("updateHallSocketHeartbeat", null);
+                }
+                let func = setInterval(() => {
+                    state.record.hall_socket.send(JSON.stringify({
+                        event: "heartbeat",
+                        userId: state.user.id,
+                    }));
+                }, 4.75 * 60 * 1000);
+                context.commit("updateHallSocketHeartbeat", func);
+                context.commit("updateHallCanSendMsg", true);
+            }
+        }
     },
     modules: {
     }

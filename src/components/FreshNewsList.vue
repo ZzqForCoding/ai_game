@@ -98,7 +98,7 @@
                         <div class="info">
                             <h6 class="info-scale" @click="enterPlayerSpace(child.userId)">{{ child.username }}</h6>
                             <span class="time">{{ child.since }}</span>
-                            <span v-if="child.reply !== item.username" class="reply">回复 <a>{{ child.reply }}</a>
+                            <span v-if="child.reply !== item.username" class="reply">回复 <a class="info-scale" @click="enterPlayerSpace(child.reply_id)">{{ child.reply }}</a>
                                 的评论</span>
                             <a class="post-comment-right-reply" @click="openComment(item.id + '-' + child.id)">回复</a>
                             <a class="post-comment-right-del" v-if="child.userId === $store.state.user.id" @click="openDeleteDialog(child)">删除</a>
