@@ -6,8 +6,13 @@ from django.db.models import Q
 from player.models.player import Player
 from player.models.platform_data import PlatformData
 import datetime
+import pika
+import json
 
 class LoginView(APIView):
+    def __init__(self):
+        self.credentials = pika.PlainCredentials('admin', 'zxc123')
+
     def post(self, request):
         data = request.POST
         username = data.get("username", "").strip()
@@ -31,6 +36,24 @@ class LoginView(APIView):
             refresh = str(refresh)
             player.token = "Bearer %s" % token
             player.save()
+
+            # 若当前已在线，则通知给用户
+            is_online = cache.get('notification_%d' % player.user.id, '')
+            if is_online:
+                connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21',
+                    port=20105, credentials=self.credentials))
+                channel = connection.channel()
+                body = {
+                    'event': "account_notification",
+                    'target_user_id': player.user.id,
+                    'data': {
+                        'title': "[通知] 帐号异常",
+                        'msg': '您的帐号再别的地方登陆，若不是您请修改密码',
+                    },
+                }
+                channel.basic_publish(exchange='', routing_key='notification_queue', body=json.dumps(body),
+                        properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
+                connection.close()
 
             # 记录登录人数
             users = cache.get('login_users', [])

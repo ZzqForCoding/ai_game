@@ -39,7 +39,7 @@ class PostView(APIView):
             substr_msg = parent.content[:5]
             if len(substr_msg) == 5: substr_msg += '...'
             body = {
-                'event': "notification",
+                'event': "freshnews_notification",
                 'target_user_id': parent.user.id,
                 'data': {
                     'userId': user.id,
