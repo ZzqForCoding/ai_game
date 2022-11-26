@@ -15,6 +15,8 @@ sys.path.append(base_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ai_game_platform.settings")
 django.setup()  # os.environ['DJANGO_SETTINGS_MODULE']
 
+from django.conf import settings
+
 def main():
     credentials = pika.PlainCredentials('admin', 'zxc123')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21', port=20105,
@@ -22,9 +24,6 @@ def main():
 
     channel = connection.channel()
     channel.queue_declare(queue='send_msg_queue', durable=True)
-
-    ali_credential = AccessKeyCredential('LTAI5t5deyvqJMKrSMVCj6Kx', 'IIqFp7GKU5Nap7kpxLyrKLKjY9sJvc')
-    client = AcsClient(region_id='cn-shenzhen', credential=ali_credential)
 
     def callback(ch, method, properties, body):
         data = json.loads(body.decode())
@@ -35,12 +34,19 @@ def main():
         code = random.randint(1000, 9999)
         request.set_TemplateCode("SMS_259640123")
         request.set_TemplateParam("{\"code\":\"%d\"}" % code)
-        response = client.do_action_with_exception(request)
-        response = json.loads(response.decode())
-        if response["Code"] == "OK":
-            cache.set(data['phone'], code, 5 * 60)
-            print("send success! phone: %s, response: %s" % (data['phone'], response))
-        elif response["Code"] == "isv.BUSINESS_LIMIT_CONTROL":
+
+        lenth = len(settings.ACCESS_KEY_ID)
+        flag = False
+        for i in range(lenth):
+            ali_credential = AccessKeyCredential(settings.ACCESS_KEY_ID[i], settings.ACCESS_KEY_SECRET[i])
+            client = AcsClient(region_id='cn-shenzhen', credential=ali_credential)
+            response = client.do_action_with_exception(request)
+            response = json.loads(response.decode())
+            if response["Code"] == "OK":
+                cache.set(data['phone'], code, 5 * 60)
+                print("send success! phone: %s, idx: %d, response: %s" % (data['phone'], i, response))
+                flag = True
+        if not flag:
             body = {
                 "event": "verifycode_error",
                 "target_user_id": data['target_user_id'],
@@ -48,6 +54,7 @@ def main():
                     "msg": "点击太过频繁，请换个时间或方式登录吧!",
                 }
             }
+            print("click buisy: %s" % data['phone'])
             channel.basic_publish(exchange='', routing_key='notification_queue', body=json.dumps(body),
                     properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
         ch.basic_ack(delivery_tag=method.delivery_tag)

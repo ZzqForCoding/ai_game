@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from django.db.models import Q
 from player.models.player import Player
 from player.models.platform_data import PlatformData
 from datetime import date
@@ -20,9 +21,9 @@ class RegisterView(APIView):
             return Response({
                 'result': "两个密码不一致"
             })
-        if User.objects.filter(username=username).exists():
+        if Player.objects.filter(Q(user__username=username) | Q(phone=username)).exists():
             return Response({
-                'result': '用户名已存在'
+                'result': '用户名或手机号已存在'
             })
 
         if not re.match(r'[a-zA-Z0-9]{6,}', password):

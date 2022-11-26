@@ -12,8 +12,8 @@ class BindingPhoneView(APIView):
         user = request.user
         data = request.POST
 
-        code = data.get('code', '').strip()
-        phone = data.get('phone', '').strip()
+        code = data.get('code', '')
+        phone = data.get('phone', '')
 
         if not phone:
             return Response({
@@ -33,7 +33,7 @@ class BindingPhoneView(APIView):
             return Response({
                 'result': "验证码不一致"
             })
-
+        cache.delete(phone)
         player = Player.objects.get(user=user)
         player.phone = phone
         player.save()

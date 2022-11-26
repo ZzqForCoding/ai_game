@@ -50,6 +50,7 @@ class GetListView(APIView):
                         'username': player.user.username,
                         'content': child.content,
                         'since': time_since_zh(child.createdtime),
+                        'reply_id': child.reply_to.id,
                         'reply': child.reply_to.username,
                         'is_like': True if pl else False
                     })
