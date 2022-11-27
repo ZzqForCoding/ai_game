@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from player.models.player import Player
+from player.models.platform_data import PlatformData
+import datetime
 import re
 import pika
 import json
@@ -44,7 +46,7 @@ class PhoneLoginView(APIView):
             connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21',
                 port=20105, credentials=self.credentials))
             channel = connection.channel()
-            body = { 
+            body = {
                 'event': "account_notification",
                 'target_user_id': player.user.id,
                 'data': {

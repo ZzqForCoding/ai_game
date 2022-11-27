@@ -15,13 +15,13 @@ class GetChartDataView(APIView):
 
         cpp_skilled = 0
         if player.cpp_code_compile_cnt != 0:
-            cpp_skilled = player.cpp_code_compile_success_cnt / player.cpp_code_compile_cnt
+            cpp_skilled = round(player.cpp_code_compile_success_cnt / player.cpp_code_compile_cnt, 2)
         py_skilled = 0
         if player.py_code_compile_cnt != 0:
-            py_skilled = player.py_code_compile_success_cnt / player.py_code_compile_cnt
+            py_skilled = round(player.py_code_compile_success_cnt / player.py_code_compile_cnt, 2)
         java_skilled = 0
         if player.java_code_compile_cnt != 0:
-            java_skilled = player.java_code_compile_success_cnt / player.java_code_compile_cnt
+            java_skilled = round(player.java_code_compile_success_cnt / player.java_code_compile_cnt, 2)
 
         resp['lang_skilled'] = [
             cpp_skilled,

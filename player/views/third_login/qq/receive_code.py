@@ -1,10 +1,13 @@
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.http import JsonResponse
-import requests
 from django.contrib.auth.models import User
 from player.models.player import Player
+from player.models.platform_data import PlatformData
 from random import randint
-from rest_framework_simplejwt.tokens import RefreshToken
+from datetime import date
+import datetime
+import requests
 
 def receive_code(request):
     data = request.GET
@@ -46,6 +49,21 @@ def receive_code(request):
         refresh = str(refresh)
         player.token = "Bearer %s" % (token)
         player.save()
+        # 记录登录人数
+        users = cache.get('login_users', [])
+        if player.user.id not in users:
+            today = datetime.date.today()
+            platformData = PlatformData.objects.filter(date=today)
+            if not platformData.exists():
+                platformData = PlatformData.objects.create(date=today, login_cnt=1)
+            else:
+                platformData = platformData.first()
+                platformData.login_cnt += 1
+            platformData.save()
+            users.append(player.user.id)
+            st = datetime.datetime.now()
+            ed = datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=1), datetime.datetime.min.time())
+            cache.set('login_users', users, (ed - st).seconds)
         return JsonResponse({
             'result': "success",
             'access': token,
@@ -93,21 +111,15 @@ def receive_code(request):
                 properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
         connection.close()
 
-    # 记录登录人数
-    users = cache.get('login_users', [])
-    if player.user.id not in users:
-        today = datetime.date.today()
-        platformData = PlatformData.objects.filter(date=today)
-        if not platformData.exists():
-            platformData = PlatformData.objects.create(date=today, login_cnt=1)
-        else:
-            platformData = platformData.first()
-            platformData.login_cnt += 1
-        platformData.save()
-        users.append(player.user.id)
-        st = datetime.datetime.now()
-        ed = datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=1), datetime.datetime.min.time())
-        cache.set('login_users', users, (ed - st).seconds)
+    # 记录注册人数
+    today = date.today()
+    platformData = PlatformData.objects.filter(date=today)
+    if not platformData.exists():
+        platformData = PlatformData.objects.create(date=today, register_cnt=1)
+    else:
+        platformData = platformData.first()
+        platformData.register_cnt += 1
+    platformData.save()
 
     return JsonResponse({
         'result': "success",
