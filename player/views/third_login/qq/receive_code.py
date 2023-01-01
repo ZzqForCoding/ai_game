@@ -8,6 +8,8 @@ from random import randint
 from datetime import date
 import datetime
 import requests
+import pika
+import json
 
 def receive_code(request):
     data = request.GET
@@ -44,6 +46,26 @@ def receive_code(request):
     players = Player.objects.filter(openid=openid)
     if players.exists():
         player = players[0]
+
+        # 若当前已在线，则通知给用户
+        is_online = cache.get('notification_%d' % player.user.id, '')
+        if is_online:
+            credentials = pika.PlainCredentials('admin', 'zxc123')
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21',
+                port=20105, credentials=credentials))
+            channel = connection.channel()
+            body = {
+                'event': "account_notification",
+                'target_user_id': player.user.id,
+                'data': {
+                    'title': "[通知] 帐号异常",
+                    'msg': '您的帐号再别的地方登陆，若不是您请修改密码',
+                },
+            }
+            channel.basic_publish(exchange='', routing_key='notification_queue', body=json.dumps(body),
+                    properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
+            connection.close()
+
         refresh = RefreshToken.for_user(player.user)
         token = str(refresh.access_token)
         refresh = str(refresh)
@@ -91,25 +113,6 @@ def receive_code(request):
     refresh = str(refresh)
     player.token = "Bearer %s" % token
     player.save()
-
-    # 若当前已在线，则通知给用户
-    is_online = cache.get('notification_%d' % player.user.id, '')
-    if is_online:
-        credentials = pika.PlainCredentials('admin', 'zxc123')
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21',
-            port=20105, credentials=credentials))
-        channel = connection.channel()
-        body = {
-            'event': "account_notification",
-            'target_user_id': player.user.id,
-            'data': {
-                'title': "[通知] 帐号异常",
-                'msg': '您的帐号再别的地方登陆，若不是您请修改密码',
-            },
-        }
-        channel.basic_publish(exchange='', routing_key='notification_queue', body=json.dumps(body),
-                properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
-        connection.close()
 
     # 记录注册人数
     today = date.today()

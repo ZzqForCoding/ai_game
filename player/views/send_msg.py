@@ -57,7 +57,6 @@ class SendMsgView(APIView):
         channel.basic_publish(exchange='', routing_key='send_msg_queue', body=json.dumps(body),
                 properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
         connection.close()
-        print(123)
         return Response({
             'result': "success"
         })

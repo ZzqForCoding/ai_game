@@ -30,7 +30,7 @@ class PhoneLoginView(APIView):
         cache_code = str(cache.get(phone, ''))
         if code != cache_code:
             return Response({
-                'result': "验证码不一致"
+                'result': "验证码错误"
             })
         cache.delete(phone)
         player = Player.objects.get(phone=phone)
