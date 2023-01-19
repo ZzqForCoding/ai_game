@@ -43,7 +43,7 @@ class CodeRunningHandler:
 if __name__ == '__main__':
     handler = CodeRunningHandler()
     processor = CodeRunning.Processor(handler)
-    transport = TSocket.TServerSocket(host='172.17.0.2', port=9090)
+    transport = TSocket.TServerSocket(host='172.17.0.4', port=9090)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
