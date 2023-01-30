@@ -21,7 +21,7 @@ from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 
 def main():
     credentials = pika.PlainCredentials('admin', 'zxc123')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21', port=20105,
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend', port=15671,
         credentials=credentials))
 
     channel = connection.channel()

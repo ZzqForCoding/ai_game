@@ -37,7 +37,7 @@ class DebugView(APIView):
         try:
             # estab connect
             # Make socket
-            transport = TSocket.TSocket('120.76.157.21', 20104)
+            ransport = TSocket.TSocket('backend', 15671)
             # Buffering is critical. Raw sockets are very slow
             transport = TTransport.TBufferedTransport(transport)
             # Wrap in a protocol

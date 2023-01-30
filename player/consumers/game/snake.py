@@ -46,7 +46,7 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
     async def start_match(self, data):
         if cache.get(self.user.id):
             return
-        transport = TSocket.TSocket('localhost', 9090)
+        transport = TSocket.TSocket('backend', 9090)
         transport = TTransport.TBufferedTransport(transport)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
         client = Match.Client(protocol)
@@ -70,7 +70,7 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
         transport.close()
 
     async def stop_match(self, data):
-        transport = TSocket.TSocket('localhost', 9090)
+        transport = TSocket.TSocket('backend', 9090)
         transport = TTransport.TBufferedTransport(transport)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
         client = Match.Client(protocol)

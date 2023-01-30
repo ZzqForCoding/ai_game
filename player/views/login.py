@@ -40,8 +40,8 @@ class LoginView(APIView):
             # 若当前已在线，则通知给用户
             is_online = cache.get('notification_%d' % player.user.id, '')
             if is_online:
-                connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21',
-                    port=20105, credentials=self.credentials))
+                connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend',
+                    port=15671, credentials=self.credentials))
                 channel = connection.channel()
                 body = {
                     'event': "account_notification",

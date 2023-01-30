@@ -33,8 +33,8 @@ class PostView(APIView):
             freshNews.parent_id = parent.get_root().id
             freshNews.reply_to = parent.user
 
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21',
-                port=20105, credentials=self.credentials))
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend',
+                port=15671, credentials=self.credentials))
             channel = connection.channel()
             substr_msg = parent.content[:5]
             if len(substr_msg) == 5: substr_msg += '...'

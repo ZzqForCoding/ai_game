@@ -71,7 +71,7 @@ class Game(threading.Thread):
 
     def estabCodeRunningConnect(self, player):
         # Make socket
-        transport = TSocket.TSocket('120.76.157.21', 20104)
+        transport = TSocket.TSocket('backend', port=9090)
         # Buffering is critical. Raw sockets are very slow
         player.transport = TTransport.TBufferedTransport(transport)
         # Wrap in a protocol

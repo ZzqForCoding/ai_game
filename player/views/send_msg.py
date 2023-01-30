@@ -47,8 +47,8 @@ class SendMsgView(APIView):
                 'result': "由于平台太穷了，只有管理员能够发送短信验证码"
             })
 
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='120.76.157.21',
-            port=20105, credentials=self.credentials))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend',
+            port=15671, credentials=self.credentials))
         channel = connection.channel()
         body = {
             'target_user_id': player.user.id,
