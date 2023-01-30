@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 **/__pycache__
-*.swp
-*.o
-main
-=======
 *.swp
 *.o
 main
 */__pycache__
 *.pyc
->>>>>>> code_runner/master
