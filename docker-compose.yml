@@ -1,0 +1,46 @@
+version: "2.15.1"
+
+services:
+  backend:
+    build:
+      dockerfile: ai_game_backend_dockerfile
+    ports:
+      - 20010:22
+      - 80:80
+      - 443:443
+      - 20013:15671
+      - 20014:15672
+    volumes:
+      - ./ai_game_backend_code:/code/backend_venv
+      - ./ai_game_web_code:/code/web_code
+      - ./conf/cert:/etc/nginx/cert
+      - ./conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./conf/redis.conf:/etc/redis/redis.conf
+      - ai_game_redis:/data
+    networks:
+      - internal
+    environment:
+      - TZ=Asia/Shanghai
+  code_runner:
+    build:
+      dockerfile: ai_game_runner_dockerfile
+    ports:
+      - 20011:22
+      - 20012:9090
+    volumes:
+      - ./ai_game_runner_code/src:/code/code_runner_venv \
+      - /var/run/docker.sock:/var/run/docker.sock \
+      - /usr/bin/docker:/usr/bin/docker \
+    environment:
+      - TZZ=Asia/Shanghai
+    privileged: true
+    networks:
+      - internal
+
+volumes:
+  ai_game_redis:
+
+networks:
+  internal:
+    aliases:
+      backend
