@@ -1,5 +1,5 @@
 #! /bin/bash
 
-ssh gobang 'cd ai_game_platform && ./scripts/del_web.sh'
+ssh aigame 'cd /code/backend_venv && ./scripts/del_web.sh'
 
-scp -r dist/* gobang:ai_game_platform/web/
+scp -r dist/* aigame:/code/backend_venv/web/
