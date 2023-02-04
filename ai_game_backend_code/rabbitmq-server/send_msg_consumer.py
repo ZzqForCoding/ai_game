@@ -10,12 +10,12 @@ from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.auth.credentials import StsTokenCredential
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 
+import secret
+
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ai_game_platform.settings")
 django.setup()  # os.environ['DJANGO_SETTINGS_MODULE']
-
-from django.conf import settings
 
 def main():
     credentials = pika.PlainCredentials('zzq', 'zxc123')
@@ -35,10 +35,10 @@ def main():
         request.set_TemplateCode("SMS_259640123")
         request.set_TemplateParam("{\"code\":\"%d\"}" % code)
 
-        lenth = len(settings.ACCESS_KEY_ID)
+        lenth = len(secret.ACCESS_KEY_ID)
         flag = False
         for i in range(lenth):
-            ali_credential = AccessKeyCredential(settings.ACCESS_KEY_ID[i], settings.ACCESS_KEY_SECRET[i])
+            ali_credential = AccessKeyCredential(secret.ACCESS_KEY_ID[i], secret.ACCESS_KEY_SECRET[i])
             client = AcsClient(region_id='cn-shenzhen', credential=ali_credential)
             response = client.do_action_with_exception(request)
             response = json.loads(response.decode())

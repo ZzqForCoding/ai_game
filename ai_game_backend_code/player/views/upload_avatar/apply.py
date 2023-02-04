@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.conf import settings
 from random import randint
 from player.permissions.one_user_login import OneUserLogin
+import secret
 
 import base64
 import time
@@ -12,8 +12,8 @@ import hmac
 from hashlib import sha1 as sha
 
 # 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维，请登录RAM控制台创建RAM用户。
-access_key_id = settings.ACCESS_KEY_ID[0]
-access_key_secret = settings.ACCESS_KEY_SECRET[0]
+access_key_id = secret.ACCESS_KEY_ID[0]
+access_key_secret = secret.ACCESS_KEY_SECRET[0]
 # 填写Host地址，格式为https://bucketname.endpoint。
 host = 'https://player-avatar.oss-cn-shenzhen.aliyuncs.com';
 # 设置上传回调URL，即回调服务器地址，用于处理应用服务器与OSS之间的通信。OSS会在文件上传完成后，把文件上传信息通过此回调URL发送给应用服务器。
