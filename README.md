@@ -40,6 +40,7 @@ docker-compose up -d
 
 **注意：** `conf`文件夹下的nginx配置文件与redis配置文件有需要修改可以直接修改，nginx里配置了域名与https证书；容器可以通过`docker exec -it 容器名或id /bin/bash`命令进入容器，通过`tmux a`可查看正在运行服务
 
+<br>
 
 ## 常见问题
 
