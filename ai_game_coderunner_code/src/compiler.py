@@ -1,7 +1,7 @@
 config = {
     'cpp': {
         'suffix': 'cpp',
-        'images': ['code_runner'],
+        'images': ['zzq10/ubuntu:cpp'],
         'time_limit': 0,
         'sub_time_limit': 1000,
         'memory_limit': 256,
@@ -11,7 +11,7 @@ config = {
     },
     'python': {
         'suffix': 'py',
-        'images': ['code_runner'],
+        'images': ['zzq10/ubuntu:python'],
         'time_limit': 0,
         'sub_time_limit': 4000,
         'memory_limit': 256,
@@ -19,7 +19,7 @@ config = {
     },
     'java': {
         'suffix': 'java',
-        'images': ['code_runner'],
+        'images': ['zzq10/ubuntu:java'],
         'time_limit': 0,
         'sub_time_limit': 1000,
         'memory_limit': 256,

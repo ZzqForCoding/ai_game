@@ -24,6 +24,7 @@ class CodeRunningHandler:
         if sandbox is not None:
             result = sandbox.compile()
             if result != 'ok':
+                print("compile: ", result)
                 return result
         return ""
 
@@ -38,12 +39,13 @@ class CodeRunningHandler:
         sandbox = Sandbox.bots.get(uuid)
         if sandbox is not None:
             output = sandbox.run().strip()
+            print(output)
         return output
 
 if __name__ == '__main__':
     handler = CodeRunningHandler()
     processor = CodeRunning.Processor(handler)
-    transport = TSocket.TServerSocket(host='backend', port=9090)
+    transport = TSocket.TServerSocket(host='0.0.0.0', port=9090)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 

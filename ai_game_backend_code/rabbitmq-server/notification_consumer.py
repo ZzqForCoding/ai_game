@@ -20,8 +20,8 @@ from aliyunsdkcore.auth.credentials import StsTokenCredential
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 
 def main():
-    credentials = pika.PlainCredentials('admin', 'zxc123')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend', port=15671,
+    credentials = pika.PlainCredentials('zzq', 'zxc123')
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='127.0.0.1', port=5672,
         credentials=credentials))
 
     channel = connection.channel()

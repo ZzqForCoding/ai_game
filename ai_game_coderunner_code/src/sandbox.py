@@ -40,6 +40,7 @@ class Sandbox:
     def create(self):
         if self.container:
             return
+        """
         docker_images = self.get_local_images()
         use_images = self.config['images']
         # 在docker_images中过滤出存在于use_images中的镜像
@@ -53,6 +54,9 @@ class Sandbox:
             # 拉镜像
             pass
         self.image = image
+        """
+
+        self.image = self.config['images'][0]
 
         result = self.run_container(self.image)
         if result != 'ok':
@@ -143,6 +147,7 @@ class Sandbox:
         }
         return json.dumps(ret)
 
+    """
     # 获取docker镜像列表
     def get_local_images(self):
         # --no-trunc表示不截断
@@ -167,9 +172,11 @@ class Sandbox:
                 'size': size
             })
         return images_list
+    """
 
     # 启动容器
     def run_container(self, image):
+        print("run")
         p = subprocess.run('docker run -itd %s /bin/bash' % image, stdout=PIPE, stderr=PIPE, shell=True, encoding='utf-8')
         if p.returncode != 0:
             if debug:

@@ -52,7 +52,7 @@ class ApplyView(APIView):
         policy = json.dumps(policy_dict).strip()
         policy_encode = base64.b64encode(policy.encode())
         h = hmac.new(access_key_secret.encode(), policy_encode, sha)
-        sign_result = base64.encodestring(h.digest()).strip()
+        sign_result = base64.encodebytes(h.digest()).strip()
 
         callback_dict = {}
         callback_dict['callbackUrl'] = callback_url;

@@ -18,8 +18,8 @@ django.setup()  # os.environ['DJANGO_SETTINGS_MODULE']
 from django.conf import settings
 
 def main():
-    credentials = pika.PlainCredentials('admin', 'zxc123')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend', port=15671,
+    credentials = pika.PlainCredentials('zzq', 'zxc123')
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='127.0.0.1', port=5672,
         credentials=credentials))
 
     channel = connection.channel()
@@ -44,7 +44,6 @@ def main():
             response = json.loads(response.decode())
             if response["Code"] == "OK":
                 cache.set(data['phone'], code, 5 * 60)
-                print("send success! phone: %s, idx: %d, response: %s" % (data['phone'], i, response))
                 flag = True
         if not flag:
             body = {

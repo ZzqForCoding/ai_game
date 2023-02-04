@@ -11,7 +11,7 @@ import json
 
 class PhoneLoginView(APIView):
     def __init__(self):
-        self.credentials = pika.PlainCredentials('admin', 'zxc123')
+        self.credentials = pika.PlainCredentials('zzq', 'zxc123')
 
     # ToDo: 未登录不能接收到频繁点击登录的通知
     def post(self, request):
@@ -43,8 +43,8 @@ class PhoneLoginView(APIView):
         # 若当前已在线，则通知给用户
         is_online = cache.get('notification_%d' % player.user.id, '')
         if is_online:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend',
-                port=15671, credentials=self.credentials))
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host='127.0.0.1',
+                port=5672, credentials=self.credentials))
             channel = connection.channel()
             body = {
                 'event': "account_notification",

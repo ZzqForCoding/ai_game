@@ -50,9 +50,9 @@ def receive_code(request):
         # 若当前已在线，则通知给用户
         is_online = cache.get('notification_%d' % player.user.id, '')
         if is_online:
-            credentials = pika.PlainCredentials('admin', 'zxc123')
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend',
-                port=15671, credentials=credentials))
+            credentials = pika.PlainCredentials('zzq', 'zxc123')
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host='127.0.0.1',
+                port=5672, credentials=credentials))
             channel = connection.channel()
             body = {
                 'event': "account_notification",

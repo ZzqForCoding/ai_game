@@ -9,7 +9,7 @@ class PostView(APIView):
     permission_classes = ([OneUserLogin])
 
     def __init__(self):
-        self.credentials = pika.PlainCredentials('admin', 'zxc123')
+        self.credentials = pika.PlainCredentials('zzq', 'zxc123')
 
     def post(self, request):
         data = request.POST
@@ -33,8 +33,8 @@ class PostView(APIView):
             freshNews.parent_id = parent.get_root().id
             freshNews.reply_to = parent.user
 
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host='backend',
-                port=15671, credentials=self.credentials))
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host='127.0.0.1',
+                port=5672, credentials=self.credentials))
             channel = connection.channel()
             substr_msg = parent.content[:5]
             if len(substr_msg) == 5: substr_msg += '...'

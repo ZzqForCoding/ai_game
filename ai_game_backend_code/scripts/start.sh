@@ -1,11 +1,16 @@
 #! /bin/bash
 
 #项目路径
-WORKDIR=/code/backend_venv
+WORKDIR=/code
 
 #tmux session的名字
 TMUX_RUN_SESSION_NAME=ai_game_backend_workspace
 TMUX_DEV_SESSION_NAME=ai_game_backend_workspace_dev
+
+sudo service rabbitmq-server start
+rabbitmqctl add_user zzq zxc123
+rabbitmqctl set_user_tags zzq administrator
+rabbitmqctl set_permissions -p / zzq ".*" ".*" ".*"
 
 cd $WORKDIR || exit
 
@@ -31,17 +36,17 @@ tmux split-window -h
 
 # 向选择的窗口发送指令
 tmux select-pane -t 8
-sudo /etc/init.d/nginx start
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "sudo /etc/init.d/nginx start" C-m
 tmux select-pane -t 9
-sudo redis-server /etc/redis/redis.conf
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "sudo /etc/init.d/redis-server start" C-m
 tmux select-pane -t 10
-sudo sudo service rabbitmq-server start
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "sudo service rabbitmq-server start" C-m
 tmux select-pane -t 6
 tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 manage.py shell" C-m
-tmux send-keys -t $TMUX_SESSION_NAME "from django.core.cache import cache" C-m
-tmux send-keys -t $TMUX_SESSION_NAME "cache.keys('*')" C-m
-tmux send-keys -t $TMUX_SESSION_NAME "cache.clear()" C-m
-tmux send-keys -t $TMUX_SESSION_NAME "cache.has_key('')" C-m
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "from django.core.cache import cache" C-m
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "cache.keys('*')" C-m
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "cache.clear()" C-m
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "cache.has_key('')" C-m
 tmux select-pane -t 7
 tmux send-keys -t $TMUX_RUN_SESSION_NAME "./scripts/compress_game_js.sh" C-m
 tmux select-pane -t 1
@@ -58,13 +63,9 @@ tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 rabbitmq-server/notification_c
 
 tmux new-session -d -s $TMUX_DEV_SESSION_NAME
 tmux split-window -h
-tmux split-window -t $TMUX_DEV_SESSION_NAME:0.1 -v
-tmux select-pane -t 1
-tmux send-keys -t $TMUX_RUN_SESSION_NAME "rm .main.py.swp" C-m
-tmux send-keys -t $TMUX_RUN_SESSION_NAME "vim main.py" C-m
+tmux split-window -v
 tmux select-pane -t 2
-tmux send-keys -t $TMUX_RUN_SESSION_NAME "rm .sandbox.py.swp" C-m
-tmux send-keys -t $TMUX_RUN_SESSION_NAME "vim sandbox.py" C-m
+tmux send-keys -t $TMUX_DEV_SESSION_NAME "python3 manage.py shell" C-m
 
 echo "66666666"
 
