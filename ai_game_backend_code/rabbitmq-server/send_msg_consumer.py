@@ -10,12 +10,12 @@ from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.auth.credentials import StsTokenCredential
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 
-import secret
-
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ai_game_platform.settings")
 django.setup()  # os.environ['DJANGO_SETTINGS_MODULE']
+
+import secret
 
 def main():
     credentials = pika.PlainCredentials('zzq', 'zxc123')

@@ -14,11 +14,6 @@ import pika
 import random
 import json
 
-from aliyunsdkcore.client import AcsClient
-from aliyunsdkcore.auth.credentials import AccessKeyCredential
-from aliyunsdkcore.auth.credentials import StsTokenCredential
-from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
-
 def main():
     credentials = pika.PlainCredentials('zzq', 'zxc123')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='127.0.0.1', port=5672,
@@ -26,9 +21,6 @@ def main():
 
     channel = connection.channel()
     channel.queue_declare(queue='notification_queue', durable=True)
-
-    ali_credential = AccessKeyCredential('LTAI5t5deyvqJMKrSMVCj6Kx', 'IIqFp7GKU5Nap7kpxLyrKLKjY9sJvc')
-    client = AcsClient(region_id='cn-shenzhen', credential=ali_credential)
 
     def callback(ch, method, properties, body):
         data = json.loads(body.decode())
