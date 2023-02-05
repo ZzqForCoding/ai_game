@@ -46,7 +46,6 @@ docker-compose up -d
 
 若redis写日志出现报错：`Redis:Failed opening .rdb for saving: Permission denied`，执行以下命令可解决
 ```shell
-cd db_data文件夹所在目录
 sudo chmod 777 /data
 sudo chmod 777 /data/dump.rdb
 ```
