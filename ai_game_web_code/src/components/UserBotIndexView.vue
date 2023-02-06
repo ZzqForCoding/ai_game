@@ -384,7 +384,7 @@ export default {
         let out_trade_no = route.query.out_trade_no;
         if (out_trade_no) {
             $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/bot/get_trade_state",
+                url: "https://aigame.zzqahm.top/backend/player/bot/get_trade_state?out_trade_no" + "=" + out_trade_no,
                 type: "get",
                 headers: {
                     "Authorization": "Bearer " + store.state.user.access,
