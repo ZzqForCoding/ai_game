@@ -212,7 +212,7 @@
 <script>
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
-import router from './router/index'
+import router from './router/index';
 import { watch, ref, onMounted, h } from 'vue';
 import {
     Expand,

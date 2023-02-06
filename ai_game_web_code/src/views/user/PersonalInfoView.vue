@@ -130,7 +130,7 @@ export default {
  
         const handleChangePic = (file, fileList) => {
             if(fileList.length > 1) {
-                fileList.splice(0, 1);
+                fileList.splice(1, 1);
             }
         }
 

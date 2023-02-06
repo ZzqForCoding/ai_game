@@ -8,7 +8,7 @@
                             我的Bot
                             <span v-if="canCreateBotCnt !== 0">({{ canCreateBotCnt }})</span>
                         </span>
-                        <el-button v-if="!isExpand" type="warning" class="button"
+                        <el-button v-if="userId === $store.state.user.id && !isExpand" type="warning" class="button"
                             style="float: right; margin-left: 10px;" size="small" plain @click="expandBot">
                             扩容
                         </el-button>
@@ -327,8 +327,10 @@ export default {
     setup(props) {
         ace.config.set(
             "basePath",
-            "https://cdn.jsdelivr.net/npm/ace-builds@" + require('ace-builds').version + "/src-noconflict/");
+            "https://cdn.jsdelivr.net/npm/ace-builds@" + require('ace-builds').version + "/src-noconflict/"
+        );
         const store = useStore();
+        const route = useRoute();
         let bots = ref([]);
         let games = ref([]);
         let search = ref('');
@@ -351,6 +353,7 @@ export default {
         let codeTime = ref(0);
         let canCreateBotCnt = ref(0);
         let isExpand = ref(null);
+        let out_trade_no = route.query.out_trade_no;
 
         const editorInit = (editor) => {
             editor.renderer.setShowPrintMargin(false);
@@ -379,14 +382,6 @@ export default {
             });
             editor.setKeyboardHandler("ace/keyboard/" + editor_mode.value);
             editor.setTheme("ace/theme/" + skin.value);
-        }
-        const route = useRoute();
-        let out_trade_no = route.query.out_trade_no;
-        if (out_trade_no) {
-            ElMessage({
-                message: '支付成功',
-                type: 'success',
-            });
         }
 
         const changeEditSkin = () => {
@@ -466,24 +461,30 @@ export default {
 
 
         onMounted(() => {
-            $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/bot/isexpand/",
-                type: "get",
-                headers: {
-                    "Authorization": "Bearer " + store.state.user.access,
-                },
-                success(resp) {
-                    if (resp.result === "success") {
-                        isExpand.value = resp.status;
-                    }
-                },
-                error() {
-                    store.dispatch("logout");
-                }
-            });
             if (props.userId === store.state.user.id) {
+                $.ajax({
+                    url: "https://aigame.zzqahm.top/backend/player/bot/isexpand/",
+                    type: "get",
+                    headers: {
+                        "Authorization": "Bearer " + store.state.user.access,
+                    },
+                    success(resp) {
+                        if (resp.result === "success") {
+                            isExpand.value = resp.status;
+                        }
+                    },
+                    error() {
+                        store.dispatch("logout");
+                    }
+                });
                 refresh_bots();
                 refresh_games();
+                if (out_trade_no) {
+                    ElMessage({
+                        message: '支付成功',
+                        type: 'success',
+                    });
+                }
             }
         });
 

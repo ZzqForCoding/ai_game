@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import router from '@/router';
 import store from '.';
-import { ElMessage } from 'element-plus';
 
 export default {
     state: {
@@ -164,11 +163,6 @@ export default {
         login_success(context, data) {
             context.commit("updateToken", data);
             context.dispatch("refresh_access", data.refresh);
-            ElMessage({
-                showClose: true,
-                message: '登录成功！',
-                type: 'success',
-            });
             context.dispatch("getinfo", {
                 success() {
                     router.push({name: 'home'});
