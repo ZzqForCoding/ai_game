@@ -8,6 +8,7 @@ from player.views.bot.debug import DebugView
 from player.views.bot.alipay.apply_alipay import ApplyAliPayView
 from player.views.bot.alipay.alipay_back import AliPayBackView
 from player.views.bot.is_expand import IsExpandView
+from player.views.bot.get_trade_state import GetTradeStateView
 
 urlpatterns = [
     path('add/', AddView.as_view(), name='bot_add'),
@@ -19,4 +20,5 @@ urlpatterns = [
     path('alipay/', ApplyAliPayView.as_view(), name='pay_jump'),
     path('alipay/back/', AliPayBackView.as_view(), name='pay_result'),
     path('isexpand/', IsExpandView.as_view(), name='bot_isexpand'),
+    path('get_trade_state/', GetTradeStateView.as_view(), name='bot_get_trade_state'),
 ]
