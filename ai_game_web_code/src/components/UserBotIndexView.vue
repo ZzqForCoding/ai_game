@@ -27,7 +27,8 @@
                                 <el-form-item label="游戏" prop="game">
                                     <el-radio-group v-model="bot.game">
                                         <el-radio-button v-for="game in games" :key="game.id" :label="game.id">{{
-                                        game.name }}</el-radio-button>
+                                            game.name
+                                        }}</el-radio-button>
                                     </el-radio-group>
                                 </el-form-item>
                                 <el-form-item label="简介" prop="description">
@@ -107,7 +108,7 @@
                                                 </span>
                                                 <span
                                                     :style="codeStatus === 'Finished' ? 'color: rgb(68, 157, 68); font-weight: 600;' : codeStatus === 'Running...' ? 'color: rgb(51, 122, 183); font-weight: 600;' : 'color: rgb(208, 84, 81); font-weight: 600;'">
-                                                    {{codeStatus}}
+                                                    {{ codeStatus }}
                                                 </span>
                                                 <button class="card-close-btn" @click="closeDebugPannel"> x </button>
                                             </div>
@@ -133,7 +134,7 @@
                                             </div>
                                             <div style="margin-top: 5px;" v-if="codeStatus === 'Finished'">
                                                 运行时间：
-                                                <span>{{codeTime}}ms</span>
+                                                <span>{{ codeTime }}ms</span>
                                             </div>
                                         </div>
                                     </div>
@@ -141,7 +142,8 @@
                             </el-form>
                             <template #footer>
                                 <span class="dialog-footer">
-                                    <el-button type="warning" @click="debugCode(bot.language, bot.content)" :loading="submitCoding">调试</el-button>
+                                    <el-button type="warning" @click="debugCode(bot.language, bot.content)"
+                                        :loading="submitCoding">调试</el-button>
                                     <el-button type="primary" @click="confirmCreateBot">创建</el-button>
                                     <el-button @click="cancelCreateBot">取消</el-button>
                                 </span>
@@ -240,7 +242,7 @@
                                         </span>
                                         <span
                                             :style="codeStatus === 'Finished' ? 'color: rgb(68, 157, 68); font-weight: 600;' : codeStatus === 'Running...' ? 'color: rgb(51, 122, 183); font-weight: 600;' : 'color: rgb(208, 84, 81); font-weight: 600;'">
-                                            {{codeStatus}}
+                                            {{ codeStatus }}
                                         </span>
                                         <button class="card-close-btn" @click="closeDebugPannel"> x </button>
                                     </div>
@@ -265,7 +267,7 @@
                                     </div>
                                     <div style="margin-top: 5px;" v-if="codeStatus === 'Finished'">
                                         运行时间：
-                                        <span>{{codeTime}}ms</span>
+                                        <span>{{ codeTime }}ms</span>
                                     </div>
                                 </div>
                             </div>
@@ -306,7 +308,8 @@
 import $ from 'jquery';
 import { ref, reactive, onMounted, computed, unref } from 'vue';
 import { useStore } from 'vuex';
-import { ElMessage } from 'element-plus';
+import { useRoute } from 'vue-router';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { VAceEditor } from 'vue3-ace-editor';
 import * as ace from 'ace-builds';
 
@@ -372,14 +375,43 @@ export default {
 
             editor.setOptions({
                 'fontSize': `${fontsize.value}pt`,
-               'tabSize': parseInt(editor_space.value),
+                'tabSize': parseInt(editor_space.value),
             });
             editor.setKeyboardHandler("ace/keyboard/" + editor_mode.value);
             editor.setTheme("ace/theme/" + skin.value);
         }
+        const route = useRoute();
+        let out_trade_no = route.query.out_trade_no;
+        if (out_trade_no) {
+            $.ajax({
+                url: "https://aigame.zzqahm.top/backend/player/bot/get_trade_state",
+                type: "get",
+                headers: {
+                    "Authorization": "Bearer " + store.state.user.access,
+                },
+                success(resp) {
+                    if (resp.result === "success") {
+                        ElMessage({
+                            showClose: true,
+                            message: '支付成功',
+                            type: 'success',
+                        });
+                    } else {
+                        ElMessage({
+                            showClose: true,
+                            message: '支付失败',
+                            type: 'error',
+                        });
+                    }
+                },
+                error() {
+                    store.dispatch("logout");
+                }
+            });
+        }
 
         const changeEditSkin = () => {
-           editor.setTheme("ace/theme/" + skin.value);
+            editor.setTheme("ace/theme/" + skin.value);
             localStorage.setItem("editor_skin_for_" + store.state.user.username, skin.value);
         }
 
@@ -414,7 +446,7 @@ export default {
             language: "",
             content: "",
         });
-        
+
         const refresh_bots = () => {
             $.ajax({
                 url: "https://aigame.zzqahm.top/backend/player/bot/getlist/" + props.userId,
@@ -423,7 +455,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         bots.value = resp.bots;
                         if (isExpand.value) canCreateBotCnt.value = 15 - bots.value.length;
                         else canCreateBotCnt.value = 10 - bots.value.length;
@@ -443,7 +475,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         games.value = resp.games;
                     }
                 },
@@ -462,7 +494,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         isExpand.value = resp.status;
                     }
                 },
@@ -470,7 +502,7 @@ export default {
                     store.dispatch("logout");
                 }
             });
-            if(props.userId === store.state.user.id) {
+            if (props.userId === store.state.user.id) {
                 refresh_bots();
                 refresh_games();
             }
@@ -491,7 +523,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         bot.title = "";
                         bot.game = 0;
                         bot.description = "";
@@ -535,7 +567,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         refresh_bots();
                         ElMessage({
                             showClose: true,
@@ -578,7 +610,7 @@ export default {
                     "Authorization": "Bearer " + store.state.user.access,
                 },
                 success(resp) {
-                    if(resp.result === "success") {
+                    if (resp.result === "success") {
                         refresh_bots();
                         ElMessage({
                             showClose: true,
@@ -620,17 +652,17 @@ export default {
             currentOpBot.value = row;
         }
 
-        const confirmCreateBot = async() => {
+        const confirmCreateBot = async () => {
             const form = unref(createForm);
             await form.validate(valid => {
-                if(bot.content === "") {
+                if (bot.content === "") {
                     ElMessage({
                         showClose: true,
                         message: '代码不能为空',
                         type: 'error',
                     })
                     return;
-                } else if(bot.content.length > 10000) {
+                } else if (bot.content.length > 10000) {
                     ElMessage({
                         showClose: true,
                         message: '代码不能超过10000',
@@ -638,7 +670,7 @@ export default {
                     })
                     return;
                 }
-                if(valid) {
+                if (valid) {
                     showCreateDialog.value = false;
                     add_bot();
                 }
@@ -646,7 +678,7 @@ export default {
         }
 
         const checkVal = (rule, value, callback) => {
-            if(bot.game === 0) {
+            if (bot.game === 0) {
                 callback(new Error('请选择游戏！'))
             } else {
                 callback();
@@ -661,17 +693,17 @@ export default {
             closeDebugPannel();
         }
 
-        const confirmEditBot = async() => {
+        const confirmEditBot = async () => {
             const form = unref(editForm);
             await form.validate(valid => {
-                if(currentOpBot.value.content === "") {
+                if (currentOpBot.value.content === "") {
                     ElMessage({
                         showClose: true,
                         message: '代码不能为空',
                         type: 'error',
                     })
                     return;
-                } else if(currentOpBot.value.content.length > 10000) {
+                } else if (currentOpBot.value.content.length > 10000) {
                     ElMessage({
                         showClose: true,
                         message: '代码不能超过10000',
@@ -679,7 +711,7 @@ export default {
                     })
                     return;
                 }
-                if(valid) {
+                if (valid) {
                     showEditDialog.value = false;
                     update_bot(currentOpBot.value);
                 }
@@ -705,12 +737,12 @@ export default {
         }
 
         const debugCode = (lang, code) => {
-            if(code === "") {
+            if (code === "") {
                 ElMessage.error("代码为空，无法调试");
                 submitCoding.value = false;
                 return;
             }
-            if(lang === "") {
+            if (lang === "") {
                 ElMessage.error("请选择语言");
                 submitCoding.value = false;
                 return;
@@ -735,7 +767,7 @@ export default {
                     codeStatus.value = resp.status;
                     codeOutput.value = resp.output;
                     submitCoding.value = false;
-                    if(codeStatus.value === "Finished") {
+                    if (codeStatus.value === "Finished") {
                         codeTime.value = resp.time;
                     }
                 },
@@ -753,19 +785,27 @@ export default {
         }
 
         const expandBot = () => {
-            $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/bot/alipay/",
-                type: "post",
-                headers: {
-                    "Authorization": "Bearer " + store.state.user.access,
+
+            ElMessageBox.alert('此支付基于支付宝沙箱支付，我们常用的支付宝不能支付，因此提供测试账号：llglqt1652@sandbox.com，密码：111111，支付密码：111111', '提示', {
+                confirmButtonText: '确认支付',
+                callback: (res) => {
+                    if (res) {
+                        $.ajax({
+                            url: "https://aigame.zzqahm.top/backend/player/bot/alipay/",
+                            type: "post",
+                            headers: {
+                                "Authorization": "Bearer " + store.state.user.access,
+                            },
+                            success(resp) {
+                                window.location = resp.pay_url;
+                            },
+                            error() {
+                                store.dispatch("logout");
+                            }
+                        });
+                    }
                 },
-                success(resp) {
-                    window.location = resp.pay_url;
-                },
-                error() {
-                    store.dispatch("logout");
-                }
-            });
+            })
         }
 
         return {

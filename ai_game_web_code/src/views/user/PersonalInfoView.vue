@@ -28,7 +28,6 @@
                                         </div>
                                     </template>
                                 </el-upload>
-
                                 <el-dialog v-model="showImgDialog">
                                     <img w-full :src="dialogimageUrl" alt="Preview Image" />
                                 </el-dialog>
@@ -73,7 +72,7 @@ import ProfileCard from '@/components/ProfileCard.vue';
 import { GameUtils } from '@/assets/scripts/GameUtils';
 import { useStore } from 'vuex'; 
 import { reactive, ref, watchEffect, unref, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
 import $ from 'jquery';
 
@@ -135,39 +134,44 @@ export default {
             }
         }
 
-        const updateAvatar = () => {
-            $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/img/update_avatar/", 
-                type: "POST",
-                headers: {
-                    "Authorization": "Bearer " + store.state.user.access,
-                },
-                data: {
-                    imgUrl: personalEditInfo.photo,  
-                },
-                success() {
-                    avatarList.value[0] = {
-                        'name': ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)) + '.jpg',
-                        'url': personalEditInfo.photo
-                    };
-                    return false;
-                },
-                error() {
-                    store.dispatch("logout");
-                    return true;
-                }
-            });
-        }
+        // const updateAvatar = () => {
+        //     $.ajax({
+        //         url: "https://aigame.zzqahm.top/backend/player/img/update_avatar/", 
+        //         type: "POST",
+        //         headers: {
+        //             "Authorization": "Bearer " + store.state.user.access,
+        //         },
+        //         data: {
+        //             imgUrl: personalEditInfo.photo,  
+        //         },
+        //         success() {
+        //             avatarList.value[0] = {
+        //                 'name': ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)) + '.jpg',
+        //                 'url': personalEditInfo.photo
+        //             };
+        //             return false;
+        //         },
+        //         error() {
+        //             store.dispatch("logout");
+        //             return true;
+        //         }
+        //     });
+        // }
 
         const uploadAvatar = (data) => {
             let file = data.file;
-            store.dispatch("uploadImage", {
-                file, 
-                userId: store.state.user.id,
-                success(imgUrl) {
-                    personalEditInfo.photo = imgUrl + '?x-oss-process=image/resize,h_500,m_lfit';
-                }
-            });
+            ElMessageBox.alert('由于平台无法盈利，因此租不起OSS对象存储服务器，因此暂时停止提供更改头像功能', '提示', {
+                confirmButtonText: '取消',
+                callback: () => {
+                    store.dispatch("uploadImage", {
+                        file, 
+                        userId: store.state.user.id,
+                        success(imgUrl) {
+                            personalEditInfo.photo = imgUrl + '?x-oss-process=image/resize,h_500,m_lfit';
+                        }
+                    });
+                },
+            })
         }
 
         const handlePreviewPic = (file) => {
@@ -180,7 +184,7 @@ export default {
             await form.validate(valid => {
                 if(valid) {
                     if(personalEditInfo.username === store.state.user.username &&
-                       personalEditInfo.photo === store.state.user.photo &&
+                       /* personalEditInfo.photo === store.state.user.photo && */
                        personalEditInfo.job === store.state.user.job &&
                        personalEditInfo.desp === store.state.user.desp &&
                        personalEditInfo.phone === store.state.user.phone) {
@@ -209,12 +213,12 @@ export default {
                                         return;
                                     }
                                 }
-                                if(personalEditInfo.photo !== store.state.user.photo) {
-                                    let ret = updateAvatar();
-                                    if(ret) {
-                                        return;
-                                    }
-                                }
+                                // if(personalEditInfo.photo !== store.state.user.photo) {
+                                //     let ret = updateAvatar();
+                                //     if(ret) {
+                                //         return;
+                                //     }
+                                // }
                                 store.commit("updateUser", {
                                     'id': store.state.user.id,
                                     'username': personalEditInfo.username,
