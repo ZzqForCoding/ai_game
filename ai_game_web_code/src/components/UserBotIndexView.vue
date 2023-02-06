@@ -383,30 +383,9 @@ export default {
         const route = useRoute();
         let out_trade_no = route.query.out_trade_no;
         if (out_trade_no) {
-            $.ajax({
-                url: "https://aigame.zzqahm.top/backend/player/bot/get_trade_state?out_trade_no" + "=" + out_trade_no,
-                type: "get",
-                headers: {
-                    "Authorization": "Bearer " + store.state.user.access,
-                },
-                success(resp) {
-                    if (resp.result === "success") {
-                        ElMessage({
-                            showClose: true,
-                            message: '支付成功',
-                            type: 'success',
-                        });
-                    } else {
-                        ElMessage({
-                            showClose: true,
-                            message: '支付失败',
-                            type: 'error',
-                        });
-                    }
-                },
-                error() {
-                    store.dispatch("logout");
-                }
+            ElMessage({
+                message: '支付成功',
+                type: 'success',
             });
         }
 
@@ -785,7 +764,6 @@ export default {
         }
 
         const expandBot = () => {
-
             ElMessageBox.alert('此支付基于支付宝沙箱支付，我们常用的支付宝不能支付，因此提供测试账号：llglqt1652@sandbox.com，密码：111111，支付密码：111111', '提示', {
                 confirmButtonText: '确认支付',
                 callback: (res) => {
