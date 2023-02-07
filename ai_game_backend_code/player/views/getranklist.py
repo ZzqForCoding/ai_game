@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from player.permissions.one_user_login import OneUserLogin
+from utils.permissions.one_user_login import OneUserLogin
 from ai_game_platform import settings
 from player.models.player import Player
 import json

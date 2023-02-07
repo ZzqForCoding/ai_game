@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from random import randint
-from player.permissions.one_user_login import OneUserLogin
+from utils.permissions.one_user_login import OneUserLogin
 import secret
 
 import base64

@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from record.models.record import Record
 from record.pagination.record_pagination import RecordPagination
-from player.permissions.one_user_login import OneUserLogin
+from utils.permissions.one_user_login import OneUserLogin
 from player.models.player import Player
 import json
 

@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from player.permissions.one_user_login import OneUserLogin
+from utils.permissions.one_user_login import OneUserLogin
 from player_voice.models.fresh_news import FreshNews
 from player_voice.models.player_like_fresh_news import Player_Like_Fresh_News
 

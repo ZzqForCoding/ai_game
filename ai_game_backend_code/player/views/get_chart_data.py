@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from player.permissions.one_user_login import OneUserLogin
+from utils.permissions.one_user_login import OneUserLogin
 from player.models.platform_data import PlatformData
 from player.models.player import Player
 import datetime

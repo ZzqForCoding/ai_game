@@ -4,7 +4,7 @@ from player_voice.pagination.fresh_news_pagination import FreshNewsPagination
 from player_voice.models.fresh_news import FreshNews
 from player_voice.models.player_like_fresh_news import Player_Like_Fresh_News
 from player_voice.utils.time_since import time_since_zh
-from player.permissions.one_user_login import OneUserLogin
+from utils.permissions.one_user_login import OneUserLogin
 from player.models.player import Player
 from mptt.templatetags.mptt_tags import cache_tree_children
 
