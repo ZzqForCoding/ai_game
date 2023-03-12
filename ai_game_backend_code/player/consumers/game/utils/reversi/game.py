@@ -356,6 +356,7 @@ class Game(threading.Thread):
                     self.loser = 'A' if self.currentRound == self.playerA.id else 'B'
                     self.sendResult()
                     return
+                # 若无子可下，则跳入下一回合，但是会无线循环
                 elif t == 2:
                     tr = None
                     self.toggleRoundLock.acquire()
@@ -392,3 +393,10 @@ class Game(threading.Thread):
             gameCnt = cache.get('game_cnt', 0)
             if gameCnt > 0:
                 cache.set('game_cnt', gameCnt - 1)
+
+            resp = {
+                'event': "finish_game",
+                'idA': self.playerA.id,
+                'idB': self.playerB.id,
+            }
+            self.sendAllMessage(resp)

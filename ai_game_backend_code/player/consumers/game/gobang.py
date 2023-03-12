@@ -175,11 +175,12 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
 
+    # bug不执行
     async def finish_game(self, data):
         if data["idA"] in self.users.keys():
-            del self.users[data["idA"]]
+            del MultiPlayerSnakeGame.users[data["idA"]]
         if data["idB"] in self.users.keys():
-            del self.users[data["idB"]]
+            del MultiPlayerSnakeGame.users[data["idB"]]
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -192,3 +193,5 @@ class MultiPlayerGobangGame(AsyncWebsocketConsumer):
             await self.send_message(data)
         elif event == "next_round":
             await self.next_round(Cell(data['x'], data['y']))
+        elif event == 'finish_game':
+            await self.finish_game(data)

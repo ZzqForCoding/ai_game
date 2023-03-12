@@ -107,6 +107,7 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
 
+    # 已弃用，过去版本接收代码执行服务的运行结果接口
     async def receive_bot_move(self, data):
         dir = data['result']
         try:
@@ -201,11 +202,12 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
                 }
             )
 
+    # bug不执行
     async def finish_game(self, data):
         if data["idA"] in self.users.keys():
-            del self.users[data["idA"]]
+            del MultiPlayerSnakeGame.users[data["idA"]]
         if data["idB"] in self.users.keys():
-            del self.users[data["idB"]]
+            del MultiPlayerSnakeGame.users[data["idB"]]
 
     # 前端发送的信息
     async def receive(self, text_data):
@@ -219,3 +221,5 @@ class MultiPlayerSnakeGame(AsyncWebsocketConsumer):
             await self.move(data['direction'])
         elif event == "pk_message":
             await self.send_message(data)
+        elif event == "finish_game":
+            await self.finish_game(data)

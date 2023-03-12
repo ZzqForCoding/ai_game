@@ -347,6 +347,13 @@ class Game(threading.Thread):
             if gameCnt > 0:
                 cache.set('game_cnt', gameCnt - 1)
 
+            resp = {
+                'event': "finish_game",
+                'idA': self.playerA.id,
+                'idB': self.playerB.id,
+            }
+            self.sendAllMessage(resp)
+
     # 获取地图
     def getG(self):
         return self.g
