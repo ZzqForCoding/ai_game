@@ -163,7 +163,7 @@ tmux a
 ctrl + a + s
 # 退出tmux终端
 ctrl + a + d
-# 退出容器容器
+# 退出容器
 ctrl + p + q
 ```
 
