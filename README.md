@@ -1,6 +1,6 @@
 # 编程对战平台介绍
 
-[项目地址](https://github.com/ZzqForCoding/ai_game)
+[docker hub地址](https://hub.docker.com/repository/docker/zzq10/ai_game/general)
 
 
 ## 平台主要功能
