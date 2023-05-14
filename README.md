@@ -1,6 +1,6 @@
 # 编程对战平台介绍
 
-[docker hub地址](https://hub.docker.com/repository/docker/zzq10/ai_game/general)
+[项目地址](https://github.com/ZzqForCoding/ai_game)
 
 
 ## 平台主要功能
@@ -110,11 +110,18 @@
 ### 部署代码：
 
 ```
-# 创建父级目录
-mkdir ai_game && cd ai_game
-
 # 拉取项目
 git clone git@gitee.com:Dev_ZzQ/ai_game.git  
+
+# 进入文件夹
+cd ai_game
+
+# 修改存储文件的写入权限
+sudo chmod 777 db_data
+sudo chmod 777 db_data/redis
+sudo chmod 777 db_data/sqlite
+sudo chmod 666 db_data/redis/dump.rdb
+sudo chmod 666 db_data/sqlite/db.sqlite3
 
 # 修改项目配置(nginx配置需要修改，redis配置可不修改)
 cd conf
@@ -127,7 +134,11 @@ cd ../
 ls
 
 # 可查看docker-compose文件，修改ports端口，并一定要在云服务器中开放端口，修改volumes中的路径(zzq为我的用户名，因此要修改成你的用户名)
-cat docker-compose.yml
+vim docker-compose.yml
+
+# 将阿里云密钥输出至文件secret.py中(可替换为自己的)
+echo "ACCESS_KEY_ID = ['LTAI5t66V5sPCZ9dzDpKy2tt', 'LTAI5t5pMJ7Vrdz43buDdbm1']
+ACCESS_KEY_SECRET = ['H2nOuIsMRK4yKShg314g420eHXSmwj', 'QJY68TaBy1iv2M8vvVImmOSxFVogjN']" > ai_game_backend_code/secret.py
 
 # 部署项目
 docker-compose up -d
@@ -137,17 +148,18 @@ docker ps -a
 ```
 
 
-**提示：** 此项目通过shell脚本实现了启动容器自启动项目，因此只要在上述命令查看到容器启动成功，则项目启动成功
-
+**提示：** 此项目通过shell脚本实现了启动容器自启动项目，因此只要在上述命令查看到容器启动成功，则项目启动成功，则可通过nginx.conf配置域名访问网站
 
 ### 常见问题
 
 若redis写日志出现报错：`Redis:Failed opening .rdb for saving: Permission denied`，执行以下命令可解决
 
 ```bash
-sudo chmod 777 /data
-sudo chmod 777 /data/dump.rdb
-•通过nginx.conf中配置的域名访问网站
+sudo chmod 777 db_data
+sudo chmod 777 db_data/redis
+sudo chmod 777 db_data/sqlite
+sudo chmod 666 db_data/redis/dump.rdb
+sudo chmod 666 db_data/sqlite/db.sqlite3
 ```
 
 ### 查看容器内服务运行或日志
