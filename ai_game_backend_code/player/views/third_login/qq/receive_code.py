@@ -2,6 +2,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from ai_game_platform import settings
 from player.models.player import Player
 from player.models.platform_data import PlatformData
 from random import randint
@@ -55,14 +56,14 @@ def receive_code(request):
                 port=5672, credentials=credentials))
             channel = connection.channel()
             body = {
-                'event': "account_notification",
+                'event': settings.NOTIFICATION_EVENT[0],
                 'target_user_id': player.user.id,
                 'data': {
                     'title': "[通知] 帐号异常",
                     'msg': '您的帐号再别的地方登陆，若不是您请修改密码',
                 },
             }
-            channel.basic_publish(exchange='', routing_key='notification_queue', body=json.dumps(body),
+            channel.basic_publish(exchange='', routing_key=settings.QUEUE, body=json.dumps(body),
                     properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
             connection.close()
 

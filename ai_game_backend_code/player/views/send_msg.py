@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.cache import cache
+from ai_game_platform import settings
 from utils.permissions.one_user_login import OneUserLogin
 from player.models.player import Player
 import pika
@@ -51,10 +52,11 @@ class SendMsgView(APIView):
             port=5672, credentials=self.credentials))
         channel = connection.channel()
         body = {
+            'event': settings.SEND_MSG_EVENT,
             'target_user_id': player.user.id,
             "phone": phone
         }
-        channel.basic_publish(exchange='', routing_key='send_msg_queue', body=json.dumps(body),
+        channel.basic_publish(exchange='', routing_key=settings.QUEUE, body=json.dumps(body),
                 properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
         connection.close()
         return Response({

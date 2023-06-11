@@ -217,3 +217,8 @@ ALIPAY_RETURN_URL = "https://aigame.zzqahm.top/myspace/%d/"
 SIMPLEUI_LOGO = "https://img.zzqahm.top/aigame_platform/avatar/icon1.png"
 
 SIMPLEUI_HOME_INFO = False
+
+# 消息队列
+QUEUE = "ai_game_queue"
+NOTIFICATION_EVENT = ["account_notification", "freshnews_notification"]
+SEND_MSG_EVENT = "send_msg"

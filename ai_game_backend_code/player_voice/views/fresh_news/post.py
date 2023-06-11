@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from ai_game_platform import settings
 from utils.permissions.one_user_login import OneUserLogin
 from player_voice.models.fresh_news import FreshNews
 import pika
@@ -39,7 +40,7 @@ class PostView(APIView):
             substr_msg = parent.content[:5]
             if len(substr_msg) == 5: substr_msg += '...'
             body = {
-                'event': "freshnews_notification",
+                'event': settings.NOTIFICATION_EVENT[1],
                 'target_user_id': parent.user.id,
                 'data': {
                     'userId': user.id,
@@ -49,7 +50,7 @@ class PostView(APIView):
                     'msg': substr_msg,
                 },
             }
-            channel.basic_publish(exchange='', routing_key='notification_queue', body=json.dumps(body),
+            channel.basic_publish(exchange='', routing_key=settings.QUEUE, body=json.dumps(body),
                     properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE))
             connection.close()
 

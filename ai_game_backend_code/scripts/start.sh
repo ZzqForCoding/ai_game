@@ -57,9 +57,9 @@ tmux select-pane -t 3
 tmux send-keys -t $TMUX_RUN_SESSION_NAME "cd match_system/src/" C-m
 tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 main.py" C-m
 tmux select-pane -t 4
-tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 rabbitmq-server/send_msg_consumer.py" C-m
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 rabbitmq-server/consumer.py" C-m
 tmux select-pane -t 5
-tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 rabbitmq-server/notification_consumer.py" C-m
+tmux send-keys -t $TMUX_RUN_SESSION_NAME "python3 rabbitmq-server/consumer.py" C-m
 
 tmux new-session -d -s $TMUX_DEV_SESSION_NAME
 tmux split-window -h
