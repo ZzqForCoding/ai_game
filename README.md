@@ -138,7 +138,7 @@ vim docker-compose.yml
 
 # 将阿里云密钥输出至文件secret.py中(可替换为自己的)
 echo "ACCESS_KEY_ID = ['LTAI5t66V5sPCZ9dzDpKy2tt', 'LTAI5t5pMJ7Vrdz43buDdbm1']
-ACCESS_KEY_SECRET = ['H2nOuIsMRK4yKShg314g420eHXSmwj', 'QJY68TaBy1iv2M8vvVImmOSxFVogjN']" > ai_game_backend_code/secret.py
+ACCESS_KEY_SECRET = ['**', '**']" > ai_game_backend_code/secret.py
 
 # 部署项目
 docker-compose up -d
